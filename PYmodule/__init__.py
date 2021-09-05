@@ -1,0 +1,251 @@
+import numpy as np
+from ctypes import * # c 类型库
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from astropy.io import ascii
+from astropy.table import Table, vstack
+import os
+from scipy.stats import *
+import time
+
+z4figpre = '../z4/figs/'
+z4datapre = '../z4/data/'
+z5figpre = '../z5/figs/'
+z5datapre = '../z5/data/'
+z6figpre = '../z6/figs/'
+z6datapre = '../z6/data/'
+datapre = '../data/'
+figpre = '../figs/'
+
+#os.system("g++ evol.cpp -L/usr/local/lib class_gas.o LE_iso.o read_aTree.o class_halo.o dyn.o thermo.o reaction.o Newton5.o my_linalg.o gsl_inverse.o RK4.o -lgsl -lgslcblas -lm -o cc.so -shared -fPIC")
+#libc = CDLL('cc.so') # 装入动态链接库 ## 居然必须放在这里
+
+global G, h0, H0, Omega_m0, Omega_L0, m_H, mu, Ms, pi, km, pc, Myr, alpha_T
+G, c, k_B, m_H = 6.67408e-8, 2.9979245e10, 1.38064852e-16, 1.66053904e-24
+pi = 3.141593
+mu = 1.2
+Ms = 2.e33
+pc = 3.e18
+Mpc = 1.e6*pc
+km = 1.e5
+yr = 365*24*3600
+Myr = 1.e6*(365*24*3600)
+Omega_m0 = 0.307
+Omega_L0 = 1 - Omega_m0
+h0 = .677
+H0 = h0*100*km/Mpc
+
+t_Edd = 1./(4*pi*G/.4/(0.1*c))
+
+n_base = [1.63,1.09e-01,4.02e-03,3.87e-05,1.07e-08]
+# n_base = [4.41e-01, 2.33e-02, 5.05e-04, 1.29e-06]
+# n_base = [4.02e-03,3.87e-05,1.07e-08]
+
+f_bsm = [1,0]
+f_seed = 1.
+W37 = 1e44
+
+alpha_T = 2.324e4
+
+Nbsm = 4
+
+fstick = 20
+fstxt = 20
+fslabel = 23
+fstitle = 20
+fslegend = 20
+
+my_cmap = plt.get_cmap("viridis")
+rescale = lambda y: (y - np.min(y)) / (np.max(y) - np.min(y))
+
+def MF(M,z=6):
+    alpha = -1.03
+    Phi_star = 1.23e-8
+    M_star = 2.24e9
+    if z==6:
+        return Phi_star*pow(M/M_star,alpha)*np.exp(-M/M_star)
+    if z==4:
+        M_star *= 10
+        return Phi_star*pow(M/M_star,alpha)*np.exp(-M/M_star)
+
+def L_M(M,Edd_ratio):
+    return 1.25e38*Edd_ratio*M
+
+def Mdot2M(Mdot):
+    eta = 1
+    beta = 2.775e-6*(1.5)**.5
+    Mdot1 = 0.04
+    Mdot2 = 0.1
+    if Mdot<Mdot1:
+        M = eta*Mdot/beta
+    elif Mdot>Mdot2:
+        M = (0.83*np.log10(Mdot)+2.48)*1.e5
+    else:
+        M1 = eta*Mdot1/beta
+        M2 = (0.83*np.log10(Mdot2)+2.48)*1.e5
+        t = (np.log(Mdot)-np.log(Mdot1))/(np.log(Mdot2)-np.log(Mdot1))
+        M = np.exp( t*np.log(M2) + (1-t)*np.log(M1) )
+    return M
+
+def LF(l): # dn/dlogL in Mpc^-3 dex^-1
+    Phi_M_star = 1.14e-8
+    M_star = -25.13
+    alpha  = -1.5; beta = -2.81
+    f_bol = 4.4
+    Phi_L_star = Phi_M_star * 2.5
+    L_star = pow(10,-.4*(M_star-34.1)) * 3e18/1450 *1e7 * f_bol
+    L_1 = pow(10,-.4*(-27.2-34.1)) * 3e18/1450 *1e7 * f_bol 
+    L_2 = pow(10,-.4*(-20.7-34.1)) * 3e18/1450 *1e7 * f_bol 
+    # print('break L',L_star/W37, 'Phi_L_star', Phi_L_star)
+    t = (np.log10(l) - np.log10(L_1)) / (np.log10(L_2) - np.log10(L_1))
+    return Phi_L_star/( pow(l/L_star,-(alpha+1)) + pow(l/L_star,-(beta+1)) ) * (2*(1-t)+3*t) 
+
+def LF_M1450(M,z=6): # dn/dmag in Mpc^-3 mag^-1
+    if z==6: 
+        # Willot 2010 CFHQS + SDSS
+        Phi_M_star = 1.14e-8
+        M_star = -25.13
+        alpha  = -1.5; beta = -2.81
+        # Matsuoka 2018
+        Phi_M_star = 1.09e-8
+        M_star = -24.9
+        alpha  = -1.23; beta = -2.73
+    elif z==5:
+        # McGreer 2018 data; 
+        Phi_M_star = pow(10., -8.97+0.47)
+        M_star = -27.47
+        alpha  = -1.97; beta = -4.
+        # refit by Matsuoka 2018 (beta & M_star); me: (alpha & Phi_M_star)
+        Phi_M_star = 3.8e-8
+        M_star = -25.6
+        alpha  = -1.23; beta = -3.
+    elif z==4: # Akiyama 2018
+        Phi_M_star = 2.66e-7
+        M_star = -25.36
+        alpha  = -1.3; beta = -3.11
+    else:
+        print("wrong redshift")
+    return Phi_M_star/( pow(10., 0.4*(alpha+1)*(M-M_star)) + pow(10., 0.4*(beta+1)*(M-M_star)) ) #* (2*(1-t)+3*t) 
+
+def M1450_Lbol(L):
+    f_bol = 4.4
+    return 34.1-2.5*np.log10(L/(f_bol*3e18/1450*1e7))
+
+def t_freefall(nH):
+    C = np.sqrt( 32*G*(mu*m_H)/ (3*pi) )
+    return 1./C/np.sqrt(nH)
+
+def t_from_z(z): # age of universe at redshift z: tH = 2/(3Hz)
+    return 2./(3*H0*np.sqrt(Omega_m0)) * pow(1+z, -1.5)
+
+def Tv(Mh,z):
+    return alpha_T * (Mh/1.e8)**(2./3.) *  (1+z)/11.
+
+def Mh_Tv(Tv,z):
+    return 1.e8*(Tv/alpha_T/(1+z)*11.)**1.5
+
+def Omega_mz(z):
+    return Omega_m0*(1+z)**3 /(Omega_m0*(1+z)**3 + Omega_L0)
+
+def Hz(z):
+    return H0*np.sqrt( Omega_m0*(1+z)**3 + Omega_L0 ) 
+ 
+def RHO_crit(z):
+    return 3*pow(H0,2)/(8*pi*G)*(1+z)**3*Omega_m0/Omega_mz(z) 
+
+class HALO:
+    def __init__(self,M,z0):
+        self.Mh = M
+        self.z = z0
+        self.c = 18*pow(self.Mh/(1.e11*Ms), -0.13)/(1+self.z) #concentration parameter c from Dekel & Birnboim 2006 Eq(22)
+        c, z = self.c, self.z
+        self.d = Omega_mz(z) - 1 
+        d = self.d
+        self.Delta_crit = 18.0*pi*pi + 82*d - 39*d*d  # Delta_crit ~ 200, overdensity
+        Delta_crit = self.Delta_crit
+
+        self.delta0 = self.Delta_crit/3.*pow(c,3)/(-c/(1+c) + np.log(1+c)) # characteristic overdensity parameter 
+        delta0 = self.delta0
+        self.rho_crit = RHO_crit(z)  # mean density of DM at z
+        self.rho_c = self.rho_crit * delta0 
+
+        self.Rvir = pow( self.Mh/(4./3*pi*Delta_crit*self.rho_crit),1./3. ) 
+        self.Rs = self.Rvir/self.c 
+        self.Vc = np.sqrt(G*self.Mh/self.Rvir) 
+
+        self.t_dyn = self.Rvir/self.Vc 
+        self.Tvir = G*self.Mh*(mu*m_H)/(2.*k_B*self.Rvir)
+        self.gc = 2*c/(np.log(1+c) - c/(1+c)) 
+        self.alpha = self.Tvir/self.Mh**(2./3)
+
+    def Rho_r(self, r):
+        rho_crit, delta0, Rvir = self.rho_crit, self.delta0, self.Rvir
+        c, x = self.c, r/Rvir
+        return rho_crit*delta0/( c*x * (1+c*x)**2 )
+
+    # x = r/Rvir  c = Rvir/Rs
+    def F_NFW(self,x):
+        c = self.c
+        return -c*x/(1+c*x) + np.log(1+c*x)
+        
+    def M_enc(self,r):
+        rho_crit, delta0, Rs, Rvir = self.rho_crit, self.delta0, self.Rs, self.Rvir
+        M_r = 4*pi*rho_crit*delta0*pow(Rs,3)*self.F_NFW(r/Rvir)
+        return M_r
+
+
+    def Phi(self, r):
+        # lim r -> 0
+        #return -4*pi*G*rho_crit*delta0*Rs*Rs 
+        rho_crit, delta0, Rs = self.rho_crit,  self.delta0, self.Rs
+        return -4*pi*G*rho_crit*delta0*(Rs**3)/r*np.log(1+r/Rs) 
+
+
+
+
+class iso_gas:
+    def __init__(self,z,T):
+        self.z = z; self.halo_T = T
+        self.Mh = 1.e8*Ms*pow(T/alpha_T*11/(1+z),1.5)
+        halo = HALO(self.Mh,self.z)
+        self.rs = halo.Rs; self.rvir = halo.Rvir; self.rhoc = halo.rho_c
+        print("z, Mh, rs, rvir, rhoc")
+        print(z,self.Mh/Ms, self.rs, self.rvir, self.rhoc)
+
+        self.Tg = 1.e4
+        beta = (4*np.pi*G*mu*m_H *self.rhoc)/(k_B*self.Tg)
+        self.R_EQ = 9/4*beta*self.rs**2
+
+    def a(self,R):
+        return (k_B*self.Tg/ (4*np.pi*G*mu*m_H*R*self.rhoc) )**.5
+    def Req(self,red=.1):#0.1 nice...
+        return self.R_EQ
+    def Mg(self,R,power_a):
+        self.rho_g0 = self.rhoc*R
+        Rmax = self.rvir
+    #------------------------------------------------------------------
+    # Rcore 由 R v.s. Req 决定; 之后都-2 profile
+        if R>self.Req(): # gas dominate, Rcore = a, Rout = rvir
+            Rcore = self.a(R)
+        else: # DM dominate, only a core within r1.
+            r1 = min(self.rvir, self.a(self.Req()))#外围最大积分到rvir
+            Rcore = r1
+        if power_a==3:
+            return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 + 4*np.pi* self.rho_g0* Rcore**3*np.log(Rmax/Rcore) )/Ms
+        else:
+            return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 + 4*np.pi* self.rho_g0 /(3-power_a)* Rcore**power_a* (Rmax**(3-power_a)-Rcore**(3-power_a)) )/Ms
+    #--------------------------------------------------------------------
+    # 不连续 Rcore 由 R v.s. Req 决定;
+    # 如果是 DM dominate, 只用一个core的质量
+        # if R>self.Req(): # gas dominate, Rcore = a, Rout = rvir
+        #     Rcore = self.a(R)
+        #     if power_a==3:
+        #         return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 + 4*np.pi* self.rho_g0* Rcore**3*np.log(Rmax/Rcore) )/Ms
+        #     else:
+        #         return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 + 4*np.pi* self.rho_g0 /(3-power_a)* Rcore**power_a* (Rmax**(3-power_a)-Rcore**(3-power_a)) )/Ms
+    
+        # else: # DM dominate, only a core within r1.
+        #     r1 = min(self.rvir, self.a(self.Req()))#外围最大积分到rvir
+        #     Rcore = r1
+        #     return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 )/Ms

@@ -1,0 +1,5 @@
+dist_grow.py:
+    z=6 由原始数据Mstar0 长到=6
+dist_growz*.py:
+    由z=6 长到z
+    
