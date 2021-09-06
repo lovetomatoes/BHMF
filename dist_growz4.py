@@ -3,7 +3,6 @@ from PYmodule import *
 log10Ms = [9,10,11,12]
 typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
 lfnames = {'4':'Akiyama_18','5':'McGreer_18','6':'Matsuoka_18'}
-pres = ['./data/1e9','./data/1e10','./data/1e11','./data/1e12','./data/1e13']
 
 
 print('z:45, t_Hubble: ', t_from_z(45)/Myr)

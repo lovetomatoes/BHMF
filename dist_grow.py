@@ -3,7 +3,7 @@ from PYmodule import *
 log10Ms = [9,10,11,12]
 typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
 lfnames = {'4':'Akiyama_18','5':'McGreer_18','6':'Matsuoka_18'}
-pres = ['./data/1e9','./data/1e10','./data/1e11','./data/1e12','./data/1e13']
+pres = [datapre+'1e9',datapre+'1e10',datapre+'1e11',datapre+'1e12',datapre+'1e13']
 figprefix = './figs/'
 
 print('z:45, t_Hubble: ', t_from_z(45)/Myr)
@@ -160,5 +160,5 @@ for f_duty in [0.5]:
         ax[1,1].grid(True)
         ax[1,1].legend(fontsize=fslegend,loc='best')
 
-        plt.savefig(z6figpre+'/f'+str(int(flambda*100))+'s'+str(int(sigma_fit*100))+'N'+str(int(np.log10(N_concatenate)))+'.png')
-        ascii.write(T_long, z6datapre+'LF_z'+str(int(z))+'N'+str(int(np.log10(N_concatenate)))+'bsm'+str(i_bsm),overwrite=True)
+        plt.savefig(z6figpre+'/f'+str(int(flambda*100))+'s'+str(int(sigma_fit*100))+'N'+str(int(np.log10(N_concatenate)))+'alpha1.png')
+        ascii.write(T_long, z6datapre+'LF_z'+str(int(z))+'N'+str(int(np.log10(N_concatenate)))+'bsm'+str(i_bsm)+'alpha1',overwrite=True)
