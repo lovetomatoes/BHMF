@@ -16,7 +16,6 @@ def read():
 # a = [ [[[] for i in range(4)] for j in range(2)] for k in range(5)]
 # a[1][0][2].append(1)
 # print(a)
-print(r'$\mathrm{\Chi^2}$')
 print((t_from_z(6)-t_from_z(4))/Myr)
 
 a = np.array([0,1,2])
@@ -79,8 +78,98 @@ def main():
 # T = ascii.read('*.txt',guess=False) #没读到空行
 # ascii.write(T,output='file1.txt',overwrite=True)
 
-# read()
-# main()
+k1 = pow(10., 45.48-43.97)
+print('k1 and k1_ueda', k1, K_AVE07(10**45.48),K_AVE20(10**45.48))
+k2 = pow(10., 46.2-44.61)
+print('k2 and k2_ueda', k2, K_AVE07(10**46.2),K_AVE20(10**46.2))
+
+
+print('Lbol=1e13Lsun, M1450=',M1450_Lbol(1e13*Lsun))
+
+# plt.figure(figsize=(10,8),dpi=400)
+# x = np.logspace(7,15)*Lsun
+# y07 = K_AVE07(x)
+# y20 = K_AVE20(x)
+# plt.plot(np.log10(x/Lsun),y07,label='y07')
+# plt.plot(np.log10(x/Lsun),y20,label='y20')
+# plt.xlim(7,15); plt.ylim(1,1000)
+# plt.yscale('log')
+# plt.legend(loc='best')
+# plt.grid(True)
+# plt.savefig('../Kx.png')
+
+def f_obsc_U03(logLx): # Ueda 03; N_H > 22 fraction; as a func of Lx
+    eta = 1.7
+    phimax = (1+eta)/(3+eta)
+    phi44 = .47
+    beta = .1
+    phi = min( phimax, max(phi44 - beta*(logLx-44), 0))
+    f_sum = phi
+    return f_sum
+
+def corr_U03(M1450): # Ueda 03 + Shankar 09
+    L_bol = Lbol_M1450(M1450)
+    f_bol = K_AVE07(L_bol)
+    Lx = L_bol/f_bol
+    eta = 1.7
+    phimax = (1+eta)/(3+eta)
+    phi44 = .47
+    beta = .1
+    phi = min( phimax, max(phi44 - beta*(np.log10(Lx)-44), 0))
+    f_obsc_sum = phi
+    return (1+eta/(1+eta)*phi)/(1-f_obsc_sum)
+
+M1 = -27.2
+print("correct facotr for for M1 = ",M1," 1/fobsc=",corr_U03(M1))
+M1 = -20.7
+print("correct facotr for for M1 = ",M1," 1/fobsc=",corr_U03(M1))
+
+plt.figure(figsize=(10,8),dpi=400)
+x = np.linspace(-20, -28)
+y = np.zeros(len(x))
+
+for i in range(len(x)):
+    y[i] = corr_U03(x[i])
+plt.plot(x,y,label='Ueda03')
+for i in range(len(x)):
+    y[i] = corr_U14(x[i])
+plt.plot(x,y,label='Ueda14')
+plt.xlim(-20, -28)
+plt.legend(loc='best')
+plt.grid(True)
+plt.savefig('../corr.png')
+
+plt.figure(figsize=(10,8),dpi=400)
+# # Ueda 03 
+# x = np.linspace(42,46) # log Lx
+# y = np.zeros(len(x))
+# for i in range(len(x)):
+#     y[i] = f_obsc_U03(x[i])
+# plt.plot(x,y,label='Ueda03')
+# plt.xlim(42,46); plt.ylim(.3,.8)
+# =========================
+
+# # Ueda 14 ===============
+x = np.linspace(41,47) # log Lx
+y = np.zeros(len(x))
+z = .5
+for i in range(len(x)):
+    y[i] = f_obsc_U14(x[i],z)
+plt.plot(x,y,label='Ueda14, z=.5')
+z = 2
+for i in range(len(x)):
+    y[i] = f_obsc_U14(x[i],z)
+plt.plot(x,y,label='Ueda14, z=2')
+z = 1.5
+for i in range(len(x)):
+    y[i] = f_obsc_U14(x[i],z)
+plt.plot(x,y,label='Ueda14, z=1.5')
+# =========================
+plt.xlim(41,47); plt.ylim(0,1.)
+plt.legend(loc='best')
+plt.grid(True)
+plt.savefig('../NH_gtr22.png')
+
 
 def lognorm_dist():
     a = np.zeros(5)

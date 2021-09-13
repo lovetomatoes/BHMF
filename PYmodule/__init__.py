@@ -26,6 +26,7 @@ G, c, k_B, m_H = 6.67408e-8, 2.9979245e10, 1.38064852e-16, 1.66053904e-24
 pi = 3.141593
 mu = 1.2
 Ms = 2.e33
+Lsun = 3.828e33
 pc = 3.e18
 Mpc = 1.e6*pc
 km = 1.e5
@@ -37,6 +38,7 @@ h0 = .677
 H0 = h0*100*km/Mpc
 
 t_Edd = 1./(4*pi*G/.4/(0.1*c))
+fbol_1450 = 4.4
 
 n_base = [1.63,1.09e-01,4.02e-03,3.87e-05,1.07e-08]
 # n_base = [4.41e-01, 2.33e-02, 5.05e-04, 1.29e-06]
@@ -92,11 +94,10 @@ def LF(l): # dn/dlogL in Mpc^-3 dex^-1
     Phi_M_star = 1.14e-8
     M_star = -25.13
     alpha  = -1.5; beta = -2.81
-    f_bol = 4.4
     Phi_L_star = Phi_M_star * 2.5
-    L_star = pow(10,-.4*(M_star-34.1)) * 3e18/1450 *1e7 * f_bol
-    L_1 = pow(10,-.4*(-27.2-34.1)) * 3e18/1450 *1e7 * f_bol 
-    L_2 = pow(10,-.4*(-20.7-34.1)) * 3e18/1450 *1e7 * f_bol 
+    L_star = pow(10,-.4*(M_star-34.1)) * 3e18/1450 *1e7 * fbol_1450
+    L_1 = pow(10,-.4*(-27.2-34.1)) * 3e18/1450 *1e7 * fbol_1450 
+    L_2 = pow(10,-.4*(-20.7-34.1)) * 3e18/1450 *1e7 * fbol_1450 
     # print('break L',L_star/W37, 'Phi_L_star', Phi_L_star)
     t = (np.log10(l) - np.log10(L_1)) / (np.log10(L_2) - np.log10(L_1))
     return Phi_L_star/( pow(l/L_star,-(alpha+1)) + pow(l/L_star,-(beta+1)) ) * (2*(1-t)+3*t) 
@@ -129,8 +130,63 @@ def LF_M1450(M,z=6): # dn/dmag in Mpc^-3 mag^-1
     return Phi_M_star/( pow(10., 0.4*(alpha+1)*(M-M_star)) + pow(10., 0.4*(beta+1)*(M-M_star)) ) #* (2*(1-t)+3*t) 
 
 def M1450_Lbol(L):
-    f_bol = 4.4
-    return 34.1-2.5*np.log10(L/(f_bol*3e18/1450*1e7))
+    return 34.1-2.5*np.log10(L/(fbol_1450*3e18/1450*1e7))
+def Lbol_M1450(M):
+    return pow(10., -0.4*(M-34.1)) * (fbol_1450*3e18/1450*1e7)
+
+# X-ray bolometric correction; Hopkins+07 & Duras+20
+def K_AVE07(Lbol):
+    return 10.83*pow(Lbol/(1e10*Lsun),0.28)+6.08*pow(Lbol/(1e10*Lsun),-0.02)
+def K_AVE20(Lbol):
+    a = 10.96
+    b = 11.93
+    c = 17.79
+    return a*( 1 + pow(np.log10(Lbol/Lsun)/b,c) )
+
+# obscured fraction = Type II AGN fraction
+def f_obsc_U14(logLx,z): # Ueda 14; 22< log NH < 24 fraction; as a func of Lx
+    eta = 1.7
+    a1 = .48
+    phi4375_0 = .43
+    phi4375_z = phi4375_0*(1+z)**a1
+    phimax = (1+eta)/(3+eta)
+    phimin = .2
+    beta = .24
+    phi = min( phimax, max(phi4375_z - beta*(logLx-43.75), phimin))
+    f_obsc_sum = phi # sum over 22< log NH < 24 range
+    return f_obsc_sum
+
+# correction factor including Compton thick AGNs; different fbol_Xray
+def corr_U14H07(M1450): # Ueda+14 & Shankar+09
+    L_bol = Lbol_M1450(M1450)
+    f_bol = K_AVE07(L_bol)
+    Lx = L_bol/f_bol
+    eta = 1.7
+    a1 = .48
+    phi4375_0 = .43
+    phi4375_z = phi4375_0*(1+2.)**a1
+    phimax = (1+eta)/(3+eta)
+    phimin = .2
+    beta = .24
+    phi = min( phimax, max(phi4375_z - beta*(np.log10(Lx)-43.75), phimin))
+    f_obsc_sum = phi # sum over 22< log NH < 24 range
+    f_CTK = phi
+    return (1+f_CTK)/(1-f_obsc_sum)
+def corr_U14D20(M1450): # Ueda 14
+    L_bol = Lbol_M1450(M1450)
+    f_bol = K_AVE20(L_bol)
+    Lx = L_bol/f_bol
+    eta = 1.7
+    a1 = .48
+    phi4375_0 = .43
+    phi4375_z = phi4375_0*(1+2.)**a1
+    phimax = (1+eta)/(3+eta)
+    phimin = .2
+    beta = .24
+    phi = min( phimax, max(phi4375_z - beta*(np.log10(Lx)-43.75), phimin))
+    f_obsc_sum = phi # sum over 22< log NH < 24 range
+    f_CTK = phi
+    return (1+f_CTK)/(1-f_obsc_sum)
 
 def t_freefall(nH):
     C = np.sqrt( 32*G*(mu*m_H)/ (3*pi) )
@@ -194,58 +250,8 @@ class HALO:
         M_r = 4*pi*rho_crit*delta0*pow(Rs,3)*self.F_NFW(r/Rvir)
         return M_r
 
-
     def Phi(self, r):
         # lim r -> 0
         #return -4*pi*G*rho_crit*delta0*Rs*Rs 
         rho_crit, delta0, Rs = self.rho_crit,  self.delta0, self.Rs
         return -4*pi*G*rho_crit*delta0*(Rs**3)/r*np.log(1+r/Rs) 
-
-
-
-
-class iso_gas:
-    def __init__(self,z,T):
-        self.z = z; self.halo_T = T
-        self.Mh = 1.e8*Ms*pow(T/alpha_T*11/(1+z),1.5)
-        halo = HALO(self.Mh,self.z)
-        self.rs = halo.Rs; self.rvir = halo.Rvir; self.rhoc = halo.rho_c
-        print("z, Mh, rs, rvir, rhoc")
-        print(z,self.Mh/Ms, self.rs, self.rvir, self.rhoc)
-
-        self.Tg = 1.e4
-        beta = (4*np.pi*G*mu*m_H *self.rhoc)/(k_B*self.Tg)
-        self.R_EQ = 9/4*beta*self.rs**2
-
-    def a(self,R):
-        return (k_B*self.Tg/ (4*np.pi*G*mu*m_H*R*self.rhoc) )**.5
-    def Req(self,red=.1):#0.1 nice...
-        return self.R_EQ
-    def Mg(self,R,power_a):
-        self.rho_g0 = self.rhoc*R
-        Rmax = self.rvir
-    #------------------------------------------------------------------
-    # Rcore 由 R v.s. Req 决定; 之后都-2 profile
-        if R>self.Req(): # gas dominate, Rcore = a, Rout = rvir
-            Rcore = self.a(R)
-        else: # DM dominate, only a core within r1.
-            r1 = min(self.rvir, self.a(self.Req()))#外围最大积分到rvir
-            Rcore = r1
-        if power_a==3:
-            return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 + 4*np.pi* self.rho_g0* Rcore**3*np.log(Rmax/Rcore) )/Ms
-        else:
-            return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 + 4*np.pi* self.rho_g0 /(3-power_a)* Rcore**power_a* (Rmax**(3-power_a)-Rcore**(3-power_a)) )/Ms
-    #--------------------------------------------------------------------
-    # 不连续 Rcore 由 R v.s. Req 决定;
-    # 如果是 DM dominate, 只用一个core的质量
-        # if R>self.Req(): # gas dominate, Rcore = a, Rout = rvir
-        #     Rcore = self.a(R)
-        #     if power_a==3:
-        #         return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 + 4*np.pi* self.rho_g0* Rcore**3*np.log(Rmax/Rcore) )/Ms
-        #     else:
-        #         return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 + 4*np.pi* self.rho_g0 /(3-power_a)* Rcore**power_a* (Rmax**(3-power_a)-Rcore**(3-power_a)) )/Ms
-    
-        # else: # DM dominate, only a core within r1.
-        #     r1 = min(self.rvir, self.a(self.Req()))#外围最大积分到rvir
-        #     Rcore = r1
-        #     return ( 4*np.pi/3 *self.rho_g0 *Rcore**3 )/Ms
