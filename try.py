@@ -12,7 +12,9 @@ def read():
         T = ascii.read(name, guess=False)
 
 
-# a = np.array([True,False,True])
+a = np.array([True,False,True])
+print(isinstance(a, float))
+
 # a = [ [[[] for i in range(4)] for j in range(2)] for k in range(5)]
 # a[1][0][2].append(1)
 # print(a)
@@ -132,7 +134,7 @@ for i in range(len(x)):
     y[i] = corr_U03(x[i])
 plt.plot(x,y,label='Ueda03')
 for i in range(len(x)):
-    y[i] = corr_U14(x[i])
+    y[i] = corr_U14H07(x[i])
 plt.plot(x,y,label='Ueda14')
 plt.xlim(-20, -28)
 plt.legend(loc='best')

@@ -44,7 +44,7 @@ n_base = [1.63,1.09e-01,4.02e-03,3.87e-05,1.07e-08]
 # n_base = [4.41e-01, 2.33e-02, 5.05e-04, 1.29e-06]
 # n_base = [4.02e-03,3.87e-05,1.07e-08]
 
-f_bsm = [1,0]
+f_bsm = [.6,.4]
 f_seed = 1.
 W37 = 1e44
 
@@ -156,6 +156,9 @@ def f_obsc_U14(logLx,z): # Ueda 14; 22< log NH < 24 fraction; as a func of Lx
     f_obsc_sum = phi # sum over 22< log NH < 24 range
     return f_obsc_sum
 
+# constant obscured fraction; motivated by Vito+ 2018
+f_obsc_const = .8
+
 # correction factor including Compton thick AGNs; different fbol_Xray
 def corr_U14H07(M1450): # Ueda+14 & Shankar+09
     L_bol = Lbol_M1450(M1450)
@@ -183,7 +186,12 @@ def corr_U14D20(M1450): # Ueda 14
     phimax = (1+eta)/(3+eta)
     phimin = .2
     beta = .24
-    phi = min( phimax, max(phi4375_z - beta*(np.log10(Lx)-43.75), phimin))
+    if isinstance(M1450,float):
+        phi = min( phimax, max(phi4375_z - beta*(np.log10(Lx)-43.75), phimin))
+    else:
+        phi = np.zeros(len(M1450))
+        for i in range(len(M1450)):
+            phi[i] = min( phimax, max(phi4375_z - beta*(np.log10(Lx[i])-43.75), phimin))
     f_obsc_sum = phi # sum over 22< log NH < 24 range
     f_CTK = phi
     return (1+f_CTK)/(1-f_obsc_sum)
