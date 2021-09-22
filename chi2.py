@@ -13,16 +13,17 @@ eta = 0.3
 Chi2_min = 1e10
 
 # 读取z=4 的M1450 分布 （文件名带着参数信息） 对于任意参数组合 返回chi2 (我的定义 sum( pow( (Phi-Phi_obs)/sigma, 2)
-z = int(4)
-Nsite = int(1e7)
+z = int(6)
 
-for flambda in [.19]:
-    for sigma in [.12]: # .12, .15, .18
-        f_duty = .5
-        fname = z6datapre+'Phi_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma*100))+'bsm01alpha1N2'
-        T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
-    #   Nsite = len(T)
-        print('T name',fname,'Nsite=',Nsite)
+flambda = .19
+f_duty = .5
+for f_duty in [.5,.6]:
+    for sigma in [.1, .12, .14]: # .12, .15, .18
+        fname = z6datapre+'Phi_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma*100))+'bsm01alpha1N4'
+        if os.path.isfile(fname):
+            T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
+        else:
+            continue
         
     # --------------------    CUT    -----------------------
     #    need to do in dist_grow ? wli
@@ -47,7 +48,6 @@ for flambda in [.19]:
             if Phi_lf[i] != 0:
                 # Chi2 += pow( (np.log(Phi_lf[i]) - np.log(Phi_obs[i]))*Phi_obs[i]/Phi_err[i], 2)
                 Chi2 += pow( (np.log(Phi_lf[i]) - np.log(Phi_obs[i]))/np.log(Phi_err[i]), 2)
-            # Chi2 += pow( (Phi_lf[i] - Phi_obs[i])/Phi_err[i], 2)
         print('flambda',flambda, 'sigma',sigma, Chi2)
 
         if Chi2 < Chi2_min:
@@ -69,4 +69,4 @@ for flambda in [.19]:
         plt.title(r'$\mathrm{\chi^2}=\sum_i \frac{(\log{E_i}-\log{O_i})^2}{(\sigma_i/O_i)^2}=$'+str(int(Chi2)),fontsize=fstitle)
         plt.savefig(z6figpre+'matsu_z'+str(z)+'fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma*100))+'.png')
 
-print('f_min:',f_min, 's_min',s_min, 'chi2_min:',Chi2_min)
+        print('f_min:',f_min, 's_min',s_min, 'chi2_min:',Chi2_min)
