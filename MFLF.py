@@ -18,9 +18,6 @@ def LF_M1450_DO_ana(M): # dn/dmag in Mpc^-3 mag^-1
     M_star = -24.9
     alpha  = -1.76; beta = -2.73
     return Phi_M_star/( pow(10., 0.4*(alpha+1)*(M-M_star)) + pow(10., 0.4*(beta+1)*(M-M_star)) ) / (1-f_obsc_const)
-def LF_M1450_CO(M): # dn/dmag in Mpc^-3 mag^-1
-    # Matsuoka 2018
-    return LF_M1450(M)/(1-f_obsc_const)
 
 x = np.linspace(-30,-22,num=40)
 z = 6

@@ -17,7 +17,7 @@ z = int(6)
 
 flambda = .19
 f_duty = .5
-for f_duty in [.5,.6]:
+for f_duty in [.4,.5,.6]:
     for sigma in [.1, .12, .14]: # .12, .15, .18
         fname = z6datapre+'Phi_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma*100))+'bsm01alpha1N4'
         if os.path.isfile(fname):
@@ -39,8 +39,15 @@ for f_duty in [.5,.6]:
         Phi_obs = np.array([16.2, 23., 10.9, 8.3, 6.6, 7., 4.6, 1.33, .9, .58, .242, .0079])
         # print(Phi_obs)
         Phi_obs = Phi_obs[::-1]
+        Phi_obs_CO = Phi_obs/(1-f_obsc_const)
+        Phi_obs_DO = Phi_obs*corr_U14D20(bin_cen)
         Phi_err = np.array([16.2, 8.1, 3.6, 2.6, 2., 1.7, 1.2, .6, .32, .17, .061, .0079])
         Phi_err = Phi_err[::-1]
+        Phi_err_CO = Phi_err/(1-f_obsc_const)
+        Phi_err_DO = Phi_err*corr_U14D20(bin_cen)
+
+        Phi_obs = Phi_obs_CO
+        Phi_err = Phi_err_CO
 
         Chi2 = 0
         err = 1
@@ -59,14 +66,14 @@ for f_duty in [.5,.6]:
         plt.figure(figsize=(10,10),dpi=200)
 
         plt.errorbar(bin_cen, Phi_obs, yerr=Phi_err, fmt="o", c='C0')
-        plt.plot(bin_cen, LF_M1450(bin_cen,z)*1e9, label=lfnames[z], c='C0')
+        plt.plot(bin_cen, LF_M1450_CO(bin_cen,z)*1e9, label=lfnames[z], c='C0')
         plt.scatter(bin_cen, Phi_lf, c='C1', label='histogram')
-        plt.text(-26,1e3,r'$f\mu=$'+str(flambda)+'; '+r'$\sigma=$'+str(sigma),fontsize = fstxt)
+        plt.text(-26,1e3,r'$f\mu=$'+str(flambda)+';\nf='+str(f_duty)+'\n'+r'$\sigma=$'+str(sigma),fontsize = fstxt)
         plt.xlim(bin_cen[-1]+bin_wid[-1]/2.,bin_cen[0]-bin_wid[0]/2.); plt.ylim(5e-3,1e4)
         plt.yscale('log')
         plt.grid(True)
         plt.legend(loc='lower left',fontsize=fslabel)
-        plt.title(r'$\mathrm{\chi^2}=\sum_i \frac{(\log{E_i}-\log{O_i})^2}{(\sigma_i/O_i)^2}=$'+str(int(Chi2)),fontsize=fstitle)
-        plt.savefig(z6figpre+'matsu_z'+str(z)+'fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma*100))+'.png')
+        plt.title(r'$\mathrm{\chi^2}=\sum_i \frac{(\log{E_i}-\log{O_i})^2}{\log{\sigma_i}^2}=$'+'%6.1f'%Chi2,fontsize=fstitle)
+        plt.savefig(z6figpre+'COmatsu_z'+str(z)+'fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma*100))+'.png')
 
         print('f_min:',f_min, 's_min',s_min, 'chi2_min:',Chi2_min)

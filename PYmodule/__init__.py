@@ -196,6 +196,14 @@ def corr_U14D20(M1450): # Ueda 14
     f_CTK = phi
     return (1+f_CTK)/(1-f_obsc_sum)
 
+def LF_M1450_CO(M,z): # dn/dmag in Mpc^-3 mag^-1
+    # Matsuoka 2018
+    return LF_M1450(M,z)/(1-f_obsc_const)
+
+def LF_M1450_DO(M,z): # dn/dmag in Mpc^-3 mag^-1
+    # Matsuoka 2018
+    return LF_M1450(M,z)*corr_U14D20(M)
+
 def t_freefall(nH):
     C = np.sqrt( 32*G*(mu*m_H)/ (3*pi) )
     return 1./C/np.sqrt(nH)
