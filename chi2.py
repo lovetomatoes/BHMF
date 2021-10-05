@@ -15,7 +15,7 @@ Chi2_min = 1e10
 # 读取z=4 的M1450 分布 （文件名带着参数信息） 对于任意参数组合 返回chi2 (我的定义 sum( pow( (Phi-Phi_obs)/sigma, 2)
 z = int(6)
 
-flambda = .19
+flambda = .18
 f_duty = .5
 for f_duty in [.4,.5,.6]:
     for sigma in [.1, .12, .14]: # .12, .15, .18
@@ -33,7 +33,7 @@ for f_duty in [.4,.5,.6]:
         # LF
         bin_cen = T['bin_cen']
         Phi_lf = T['Phi']
-        bin_wid = [2, 1, .5, .5, .5, .5, .5, .5, .5, .5, .5, 1]
+        bin_wid = np.array([2, 1, .5, .5, .5, .5, .5, .5, .5, .5, .5, 1])
 
     # -----------------     obs data w/ error      --------------------
         Phi_obs = np.array([16.2, 23., 10.9, 8.3, 6.6, 7., 4.6, 1.33, .9, .58, .242, .0079])
@@ -46,8 +46,16 @@ for f_duty in [.4,.5,.6]:
         Phi_err_CO = Phi_err/(1-f_obsc_const)
         Phi_err_DO = Phi_err*corr_U14D20(bin_cen)
 
-        Phi_obs = Phi_obs_CO
-        Phi_err = Phi_err_CO
+        Phi_obs = Phi_obs_DO
+        Phi_err = Phi_err_DO
+
+        index = np.where(bin_cen<-24)
+        index = np.logical_and(bin_cen<-24,bin_cen>-28)
+        Phi_obs = Phi_obs[index]
+        Phi_err = Phi_err[index]
+        bin_cen = bin_cen[index]
+        Phi_lf = Phi_lf[index]
+        bin_wid = bin_wid[index]
 
         Chi2 = 0
         err = 1
@@ -66,7 +74,7 @@ for f_duty in [.4,.5,.6]:
         plt.figure(figsize=(10,10),dpi=200)
 
         plt.errorbar(bin_cen, Phi_obs, yerr=Phi_err, fmt="o", c='C0')
-        plt.plot(bin_cen, LF_M1450_CO(bin_cen,z)*1e9, label=lfnames[z], c='C0')
+        plt.plot(bin_cen, LF_M1450_DO(bin_cen,z)*1e9, label=lfnames[z], c='C0')
         plt.scatter(bin_cen, Phi_lf, c='C1', label='histogram')
         plt.text(-26,1e3,r'$f\mu=$'+str(flambda)+';\nf='+str(f_duty)+'\n'+r'$\sigma=$'+str(sigma),fontsize = fstxt)
         plt.xlim(bin_cen[-1]+bin_wid[-1]/2.,bin_cen[0]-bin_wid[0]/2.); plt.ylim(5e-3,1e4)
@@ -74,6 +82,6 @@ for f_duty in [.4,.5,.6]:
         plt.grid(True)
         plt.legend(loc='lower left',fontsize=fslabel)
         plt.title(r'$\mathrm{\chi^2}=\sum_i \frac{(\log{E_i}-\log{O_i})^2}{\log{\sigma_i}^2}=$'+'%6.1f'%Chi2,fontsize=fstitle)
-        plt.savefig(z6figpre+'COmatsu_z'+str(z)+'fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma*100))+'.png')
+        plt.savefig(z6figpre+'DOmatsu_z'+str(z)+'fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma*100))+'.png')
 
         print('f_min:',f_min, 's_min',s_min, 'chi2_min:',Chi2_min)

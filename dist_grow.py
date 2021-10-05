@@ -50,7 +50,7 @@ wid_mf = abin_mf[1:]-abin_mf[:-1]
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print(dlog10M)
 flambda = .19 # .18 .20
 print('flambda= ', flambda)
-N_concatenate = int(1e2)
+N_concatenate = int(1e0)
 z = 6
 
 #for f_duty in np.linspace(0.4,0.7,num=2):
@@ -65,7 +65,6 @@ for f_duty in [0.5]: # .6 .4
 
         h0_lf = np.zeros(len(abin_lf)-1); h1_lf = np.zeros(len(abin_lf)-1); h2_lf = np.zeros(len(abin_lf)-1)
         h0_mf = np.zeros(len(abin_mf)-1); h1_mf = np.zeros(len(abin_mf)-1); h2_mf = np.zeros(len(abin_mf)-1)
-        print(time.ctime())
 
         Phi = np.zeros(len(bin_obs)-1)
 
@@ -73,6 +72,7 @@ for f_duty in [0.5]: # .6 .4
             # print(i_concatenate)
             # T = T[T['z_col']>z]
             for i_bsm in range(2):
+                t1 = time.time()
                 T = Ts[i_bsm]
                 T['Edd_ratio'] = lognorm.rvs(sigma_fit*np.log(10), scale=mu_fit, size=len(T)) # scatter=0.1dex; center=scale
                 #T['Edd_ratio'] = np.ones(len(T))*.38
@@ -98,6 +98,9 @@ for f_duty in [0.5]: # .6 .4
                 T_isofail = T[np.logical_and(T['Tg_max']>T_tell, T['iso_col']==0)]
                 T_isoOK =  T[np.logical_and(T['Tg_max']>T_tell, T['iso_col']==1)]
             
+                t2 = time.time()
+                print("t2-t1=",(t2-t1)/3600, "hrs")
+
             # LF
                 hist0_lf, bin_edges = np.histogram(T_H2['M1450_z'],bins=abin_lf,density=False)
                 hist1_lf, bin_edges = np.histogram(T_isofail['M1450_z'],bins=abin_lf,density=False)
@@ -116,8 +119,10 @@ for f_duty in [0.5]: # .6 .4
                 hist_Phi, bin_edges = np.histogram(T['M1450_z'],bins=bin_obs,density=False)
                 Phi += hist_Phi*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M*f_duty*1e9
 
-        print("Nconcatenate",N_concatenate,"time",time.ctime())
+                t3 = time.time()
+                print("t3-t2=",(t3-t2)/3600, "hrs")
 
+        # print("Nconcatenate",N_concatenate,"time",t2)
         fig, ax = plt.subplots(2,2,figsize=(20,24),dpi=400)
         ax[0,0].bar(bin_cen, Phi,width=bin_wid,color='grey',alpha=0.5,label='Model')
         ax[0,0].plot(abin_lf, LF_M1450(abin_lf,z)*1e9,label=lfnames[str(int(z))])
