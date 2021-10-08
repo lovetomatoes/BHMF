@@ -37,7 +37,7 @@ dmag = abin_lf[1]-abin_lf[0] # print(dmag)
 
 # luminosity bin same as Matsuoka18 setting
 bin_cen = [-29,-27.5,-26.75,-26.25,-25.75,-25.25,-24.75,-24.25,-23.75,-23.25,-22.75,-22]
-bin_wid = [2, 1, .5, .5, .5, .5, .5, .5, .5, .5, .5, 1]
+bin_wid = np.array([2, 1, .5, .5, .5, .5, .5, .5, .5, .5, .5, 1])
 bin_obs = np.zeros(len(bin_cen)+1)
 for i in range(len(bin_cen)):
     bin_obs[i] = bin_cen[i] - bin_wid[i]/2.
@@ -58,10 +58,10 @@ for f_duty in [0.5]: # .6 .4
     for sigma_fit in [.12]: # .10  .14
         mu_fit = flambda/f_duty
         
-        T_long = Table(
-            [[], [], [], [], [], []],
-            names=('flambda','M1450_z','Mstar_z','type','z_col','Mstar0')
-        )
+        # T_long = Table(
+        #     [[], [], [], [], [], []],
+        #     names=('flambda','M1450_z','Mstar_z','type','z_col','Mstar0')
+        # )
 
         h0_lf = np.zeros(len(abin_lf)-1); h1_lf = np.zeros(len(abin_lf)-1); h2_lf = np.zeros(len(abin_lf)-1)
         h0_mf = np.zeros(len(abin_mf)-1); h1_mf = np.zeros(len(abin_mf)-1); h2_mf = np.zeros(len(abin_mf)-1)
@@ -89,7 +89,6 @@ for f_duty in [0.5]: # .6 .4
                     else:
                         T['type'][i] = 3
                 # T_long = vstack( [T_long,Table([ np.ones(len(T))*flambda,T['M1450_z'],T['Mstar_z'],T['type'],T['z_col'],T['Mstar0']],names=('flambda','M1450_z','Mstar_z','type','z_col','Mstar0')) ])
-                # print(T_long)
                 # print(np.argmax(T['Edd_ratio'])," max Eddingratio:", np.max(T['Edd_ratio']), "corresponding Mstar",T['Mstar_z'][np.argmax(T['Edd_ratio'])],"t_grow Myr",(t_from_z(6)-t_from_z(T['z_col'][np.argmax(T['Edd_ratio'])]))/Myr)
                 # print(np.argmax(T['Mstar_z'])," max Mstar:", np.max(T['Mstar_z']), "corresponding Edding_ratio",T['Edd_ratio'][np.argmax(T['Mstar_z'])], "t_grow Myr",(t_from_z(6)-t_from_z(T['z_col'][np.argmax(T['Mstar_z'])]))/Myr)
                 # print(np.max(T['Lbol_z']))
@@ -115,9 +114,9 @@ for f_duty in [0.5]: # .6 .4
                 h0_mf += hist0_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M*f_duty
                 h1_mf += hist1_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M*f_duty
                 h2_mf += hist2_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M*f_duty
-            # hist Phi compared w/ LF
+            # hist Phi compared w/ LF *** wli: bin_wid as dM1450
                 hist_Phi, bin_edges = np.histogram(T['M1450_z'],bins=bin_obs,density=False)
-                Phi += hist_Phi*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M*f_duty*1e9
+                Phi += hist_Phi*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/bin_wid*f_duty*1e9
 
                 t3 = time.time()
                 print("t3-t2=",(t3-t2)/3600, "hrs")
@@ -188,4 +187,8 @@ for f_duty in [0.5]: # .6 .4
             names=('bin_cen','Phi')
         )
         ascii.write(T, z6datapre+'Phi_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_cen':'%6.2f','Phi':'4.2e'},overwrite=True)
-        # ascii.write(T_long, z6datapre+'LF_z'+str(int(z))+'N'+str(int(np.log10(N_concatenate)))+'bsm'+str(i_bsm)+'alpha1',overwrite=True)
+        T = Table(
+            [np.sqrt(abin_mf[1:]*abin_mf[:-1]), h0_mf+h1_mf+h2_mf],
+            names=('bin_cen','Phi')
+        )
+        ascii.write(T, z6datapre+'MF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_cen':'%6.2f','Phi':'4.2e'},overwrite=True)

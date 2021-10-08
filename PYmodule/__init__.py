@@ -8,6 +8,7 @@ from astropy.table import Table, vstack
 import os
 from scipy.stats import *
 import time
+import math
 
 z4figpre = '../z4/figs/'
 z4datapre = '../z4/data/'
@@ -60,6 +61,14 @@ fslegend = 20
 
 my_cmap = plt.get_cmap("viridis")
 rescale = lambda y: (y - np.min(y)) / (np.max(y) - np.min(y))
+
+def kernel_MBH(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
+    lbd = np.log(Mgrow_ratio)/(dt/t_Edd * f_duty)
+    return np.log(lbd/mu) / (sigma_dex*np.log(10)*math.sqrt(2.))
+
+def kernel_M1450(M1450, MBH, mu, sigma_dex):
+    lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
+    return np.log(lbd/mu) / (sigma_dex*np.log(10)*math.sqrt(2.))
 
 def MF(M,z=6):
     alpha = -1.03
