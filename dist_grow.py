@@ -35,7 +35,7 @@ abin_mf =  np.logspace(2,12,num=100) # default endpoint=True
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 flambda = .19 # .18 .20
 
-N_concatenate = int(1e0)
+N_concatenate = int(1e2)
 z = 6
 
 for f_duty in [0.5]: # .6 .4 

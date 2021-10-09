@@ -40,6 +40,7 @@ Nbin = len(abin_mf)-1
 
 flambda = .19 # .18 .20
 z = 6
+N = 100
 
 for f_duty in [0.5]: # .6 .4 
     for sigma_fit in [.12]: # .10  .14
@@ -50,15 +51,21 @@ for f_duty in [0.5]: # .6 .4
         for ibin in range(Nbin): # Nbin
             for i_bsm in range(2): # 2
                 T = Ts[i_bsm]
-                for i in range(len(T)):  
+                for i in range(N):  
                     x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'][i],t_from_z(z)-t_from_z(T['z_col'][i]),f_duty, mu_fit, sigma_fit)
                     x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'][i],t_from_z(z)-t_from_z(T['z_col'][i]),f_duty, mu_fit, sigma_fit)
                     dP_MBH = .5*(math.erfc(x0) - math.erfc(x1))
 
-                    dP[ibin] += dP_MBH/1e4
+                    dP[ibin] += dP_MBH/N
                 Phi[ibin] += dP[ibin]*n_base[iM]*f_bsm[i_bsm]/dlog10M
         T = Table(
             [abin_mf[:-1], Phi],
             names=('bin_left','Phi')
         )
-        ascii.write(T, z6datapre+'anaMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1',formats={'bin_left':'6.2e','Phi':'4.2e'},overwrite=True)
+        ascii.write(T, z6datapre+'allmassMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1',formats={'bin_left':'6.2e','Phi':'4.2e'},overwrite=True)
+
+# T = ascii.read('../z6/data/MF_fl19f5s12bsm01alpha1N2',guess=False,delimiter=' ')
+# Tana = ascii.read('../z6/data/anaMF_fl19f5s12bsm01alpha1',guess=False,delimiter=' ')
+# plt.plot(T['bin_left'],Tana['Phi']/T['Phi'])
+# plt.xscale('log')
+# plt.savefig('../ratio.png')
