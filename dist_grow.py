@@ -45,9 +45,9 @@ bin_obs[-1] =  bin_cen[i] + bin_wid[i]/2.
 # print(bin_obs)
 
 # MF
-abin_mf =  np.logspace(2,12,num=40) # default endpoint=True
+abin_mf =  np.logspace(2,12,num=100) # default endpoint=True
 wid_mf = abin_mf[1:]-abin_mf[:-1]
-dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print(dlog10M)
+dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 flambda = .19 # .18 .20
 print('flambda= ', flambda)
 N_concatenate = int(1e0)
@@ -111,9 +111,10 @@ for f_duty in [0.5]: # .6 .4
                 hist0_mf, bin_edges = np.histogram(T_H2['Mstar_z'],bins=abin_mf,density=False)
                 hist1_mf, bin_edges = np.histogram(T_isofail['Mstar_z'],bins=abin_mf,density=False)
                 hist2_mf, bin_edges = np.histogram(T_isoOK['Mstar_z'],bins=abin_mf,density=False)
-                h0_mf += hist0_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M*f_duty
-                h1_mf += hist1_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M*f_duty
-                h2_mf += hist2_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M*f_duty
+                h0_mf += hist0_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M
+                h1_mf += hist1_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M
+                h2_mf += hist2_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M
+
             # hist Phi compared w/ LF *** wli: bin_wid as dM1450
                 hist_Phi, bin_edges = np.histogram(T['M1450_z'],bins=bin_obs,density=False)
                 Phi += hist_Phi*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/bin_wid*f_duty*1e9
@@ -188,7 +189,7 @@ for f_duty in [0.5]: # .6 .4
         )
         ascii.write(T, z6datapre+'Phi_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_cen':'%6.2f','Phi':'4.2e'},overwrite=True)
         T = Table(
-            [np.sqrt(abin_mf[1:]*abin_mf[:-1]), h0_mf+h1_mf+h2_mf],
-            names=('bin_cen','Phi')
+            [abin_mf[:-1], h0_mf+h1_mf+h2_mf],
+            names=('bin_left','Phi')
         )
-        ascii.write(T, z6datapre+'MF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_cen':'%6.2f','Phi':'4.2e'},overwrite=True)
+        ascii.write(T, z6datapre+'MF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_left':'%6.2f','Phi':'4.2e'},overwrite=True)

@@ -64,8 +64,7 @@ for f_duty in [0.5]: # .6 .4
 
                     dP[ibin] += dP_MBH/1e4
                     # print('dP[ibin]=%5.3e'%dP[ibin])
-                # hist Phi compared w/ LF
-                Phi[ibin] += dP[ibin]*n_base[iM]*f_bsm[i_bsm]*f_duty/dlog10M
+                Phi[ibin] += dP[ibin]*n_base[iM]*f_bsm[i_bsm]/dlog10M
             print('Phi[%3d]'%ibin+'=%5.3e /Mpc^3'%Phi[ibin])
             # t3 = time.time()
             # print("t3-t2=",(t3-t2)/3600, "hrs")
@@ -77,10 +76,10 @@ for f_duty in [0.5]: # .6 .4
         plt.savefig('../mf.png')
 
         T = Table(
-            [abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0]), Phi],
-            names=('bin_cen','Phi')
+            [abin_mf[:-1], Phi],
+            names=('bin_left','Phi')
         )
-        ascii.write(T, z6datapre+'anaMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1',formats={'bin_cen':'6.2e','Phi':'4.2e'},overwrite=True)
+        ascii.write(T, z6datapre+'anaMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1',formats={'bin_left':'6.2e','Phi':'4.2e'},overwrite=True)
         exit(0)
         fig, ax = plt.subplots(2,2,figsize=(20,24),dpi=400)
         ax[0,0].bar(bin_cen, Phi,width=bin_wid,color='grey',alpha=0.5,label='Model')
