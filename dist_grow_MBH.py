@@ -32,10 +32,12 @@ for i_bsm in range(2):
     T['Edd_ratio'] = np.ones(len(T))
     Ts.append(T)
 
-# LF
+# MF
 abin_mf = np.logspace(7,10,num=7)
-bin_cen = np.sqrt(abin_mf[1:]*abin_mf[:-1])
-Nbin = len(bin_cen)
+abin_mf =  np.logspace(2,12,num=100) # default endpoint=True
+dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
+
+Nbin = len(abin_mf)-1
 # print(abin_mf)
 
 flambda = .19 # .18 .20
@@ -45,38 +47,40 @@ z = 6
 for f_duty in [0.5]: # .6 .4 
     for sigma_fit in [.12]: # .10  .14
         mu_fit = flambda/f_duty
-        dP_0 = 1e-9*np.ones(Nbin)
         dP = np.zeros(Nbin)
         Phi = np.zeros(Nbin)
 
         for ibin in range(Nbin): # Nbin
-            dP_0[ibin] = dP[ibin]
             for i_bsm in range(2): # 2
                 T = Ts[i_bsm]
                 for i in range(len(T)): # len(T):
-                    M_BH = T['Mstar0'][i]*np.exp((t_from_z(z)-t_from_z(T['z_col'][i]))/t_Edd*f_duty*mu_fit)
-                    print('M_fit grown to z = %5.1e'%M_BH)
-                    print('z_col = %3.1f'%(T['z_col'][i]), 'Mseed =%3.2e'%(T['Mstar0'][i]))
+                    # M_BH = T['Mstar0'][i]*np.exp((t_from_z(z)-t_from_z(T['z_col'][i]))/t_Edd*f_duty*mu_fit)
+                    # print('M_fit grown to z = %5.1e'%M_BH)
+                    # print('z_col = %3.1f'%(T['z_col'][i]), 'Mseed =%3.2e'%(T['Mstar0'][i]))
         
                     x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'][i],t_from_z(z)-t_from_z(T['z_col'][i]),f_duty, mu_fit, sigma_fit)
                     x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'][i],t_from_z(z)-t_from_z(T['z_col'][i]),f_duty, mu_fit, sigma_fit)
                     dP_MBH = .5*(math.erfc(x0) - math.erfc(x1))
 
-                    dP[ibin] += dP_MBH
-                    print('dP[ibin]=%5.3e'%dP[ibin])
-                    # print('%5.1e'%x0,'%5.1e'%x1,'%5.1e'%dP_M1450)
-                    print('M_BH=%5.1e'%M_BH)
+                    dP[ibin] += dP_MBH/1e4
+                    # print('dP[ibin]=%5.3e'%dP[ibin])
                 # hist Phi compared w/ LF
-                Phi[ibin] += dP[ibin]*n_base[iM]*f_bsm[i_bsm]/1e4*f_duty
-                print('Phi[ibin]=%5.3e /Mpc^3'%Phi[ibin])
-                # t3 = time.time()
-                # print("t3-t2=",(t3-t2)/3600, "hrs")
+                Phi[ibin] += dP[ibin]*n_base[iM]*f_bsm[i_bsm]*f_duty/dlog10M
+            print('Phi[%3d]'%ibin+'=%5.3e /Mpc^3'%Phi[ibin])
+            # t3 = time.time()
+            # print("t3-t2=",(t3-t2)/3600, "hrs")
         plt.figure(figsize=(10,8),dpi=400)
-        plt.plot(np.log10(bin_cen),Phi, linewidth=3)
+        plt.plot(np.log10(abin_mf[:-1]),Phi, linewidth=3)
         plt.yscale('log')
         plt.xlim(7,10)
         plt.ylim(1e-8,1e-4)
         plt.savefig('../mf.png')
+
+        T = Table(
+            [abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0]), Phi],
+            names=('bin_cen','Phi')
+        )
+        ascii.write(T, z6datapre+'anaMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1',formats={'bin_cen':'6.2e','Phi':'4.2e'},overwrite=True)
         exit(0)
         fig, ax = plt.subplots(2,2,figsize=(20,24),dpi=400)
         ax[0,0].bar(bin_cen, Phi,width=bin_wid,color='grey',alpha=0.5,label='Model')
@@ -138,9 +142,3 @@ for f_duty in [0.5]: # .6 .4
         ax[1,1].legend(fontsize=fslegend,loc='best')
 
         plt.savefig(z6figpre+'/anafl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1.png')
-        T = Table(
-            [bin_cen, Phi],
-            names=('bin_cen','Phi')
-        )
-        ascii.write(T, z6datapre+'anaPhi_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1',formats={'bin_cen':'%6.2f','Phi':'4.2e'},overwrite=True)
-        # ascii.write(T_long, z6datapre+'LF_z'+str(int(z))+'N'+str(int(np.log10(N_concatenate)))+'bsm'+str(i_bsm)+'alpha1',overwrite=True)
