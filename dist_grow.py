@@ -45,9 +45,9 @@ for f_duty in [0.5]: # .6 .4
         for i_concatenate in range(N_concatenate):
             for i_bsm in range(2):
                 T = Ts[i_bsm]
-                T['Edd_ratio'] = lognorm.rvs(sigma_fit*np.log(10), scale=mu_fit, size=len(T)) # scatter=0.1dex; center=scale
-                for i in range(len(T)):
-                    T['Mstar_z'][i] = T['Mstar0'][i] * np.exp( (t_from_z(z)-t_from_z(T['z_col'][i])) / t_Edd * f_duty* T['Edd_ratio'][i] )
+                kernel = norm.rvs(size=len(T))
+                T['Edd_ratio'] = mu_fit * np.exp(kernel*sigma_fit*np.log(10))
+                T['Mstar_z'] = T['Mstar0']* np.exp( (t_from_z(z)-t_from_z(T['z_col'])) / t_Edd * f_duty* T['Edd_ratio'])
                 # MF
                 hist_mf, bin_edges = np.histogram(T['Mstar_z'],bins=abin_mf,density=False)
                 Phi += hist_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M
@@ -55,4 +55,4 @@ for f_duty in [0.5]: # .6 .4
             [abin_mf[:-1], Phi],
             names=('bin_left','Phi')
         )
-        ascii.write(T, z6datapre+'MF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_left':'%6.2f','Phi':'4.2e'},overwrite=True)
+        ascii.write(T, z6datapre+'normMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_left':'%6.2f','Phi':'4.2e'},overwrite=True)

@@ -40,7 +40,7 @@ Nbin = len(abin_mf)-1
 
 flambda = .19 # .18 .20
 z = 6
-N = 100
+N = 1000
 
 for f_duty in [0.5]: # .6 .4 
     for sigma_fit in [.12]: # .10  .14
@@ -62,7 +62,7 @@ for f_duty in [0.5]: # .6 .4
             [abin_mf[:-1], Phi],
             names=('bin_left','Phi')
         )
-        ascii.write(T, z6datapre+'allmassMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1',formats={'bin_left':'6.2e','Phi':'4.2e'},overwrite=True)
+        ascii.write(T, z6datapre+'anaMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm01alpha1',formats={'bin_left':'6.2e','Phi':'4.2e'},overwrite=True)
 
 # T = ascii.read('../z6/data/MF_fl19f5s12bsm01alpha1N2',guess=False,delimiter=' ')
 # Tana = ascii.read('../z6/data/anaMF_fl19f5s12bsm01alpha1',guess=False,delimiter=' ')
