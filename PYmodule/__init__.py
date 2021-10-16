@@ -46,12 +46,11 @@ n_base = [1.63,1.09e-01,4.02e-03,3.87e-05,1.07e-08]
 # n_base = [4.02e-03,3.87e-05,1.07e-08]
 
 f_bsm = [.6,.4]
+Nbsm = 1 # control bsm case to use
 f_seed = 1.
 W37 = 1e44
 
 alpha_T = 2.324e4
-
-Nbsm = 4
 
 fstick = 20
 fstxt = 20
