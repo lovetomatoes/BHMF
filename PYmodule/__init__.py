@@ -19,8 +19,8 @@ z6datapre = '../z6/data/'
 datapre = '../data/'
 figpre = '../figs/'
 
-#os.system("g++ evol.cpp -L/usr/local/lib class_gas.o LE_iso.o read_aTree.o class_halo.o dyn.o thermo.o reaction.o Newton5.o my_linalg.o gsl_inverse.o RK4.o -lgsl -lgslcblas -lm -o cc.so -shared -fPIC")
-#libc = CDLL('cc.so') # 装入动态链接库 ## 居然必须放在这里
+typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
+lfnames = {'4':'Akiyama_18','5':'McGreer_18','6':'Matsuoka_18'}
 
 global G, h0, H0, Omega_m0, Omega_L0, m_H, mu, Ms, pi, km, pc, Myr, alpha_T
 G, c, k_B, m_H = 6.67408e-8, 2.9979245e10, 1.38064852e-16, 1.66053904e-24
@@ -41,13 +41,14 @@ H0 = h0*100*km/Mpc
 t_Edd = 1./(4*pi*G/.4/(0.1*c))
 fbol_1450 = 4.4
 
-n_base = [1.63,1.09e-01,4.02e-03,3.87e-05,1.07e-08]
-# n_base = [4.41e-01, 2.33e-02, 5.05e-04, 1.29e-06]
-# n_base = [4.02e-03,3.87e-05,1.07e-08]
+log10Ms = [11,12,13]
+# n_base = [1.63,1.09e-01,4.02e-03,3.87e-05,1.07e-08]
+n_base = [4.02e-03,3.87e-05,1.07e-08]
+Mhpres = [datapre+'1e11',datapre+'1e12',datapre+'1e13']
 
 f_bsm = [.6,.4]
-Nbsm = 1 # control bsm case to use
-f_seed = 1.
+Nbsm = 2 # control bsm case to use
+
 W37 = 1e44
 
 alpha_T = 2.324e4

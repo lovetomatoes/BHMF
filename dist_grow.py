@@ -1,24 +1,18 @@
 from PYmodule import *
 
-log10Ms = [9,10,11,12]
-typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
-lfnames = {'4':'Akiyama_18','5':'McGreer_18','6':'Matsuoka_18'}
-pres = [datapre+'1e9',datapre+'1e10',datapre+'1e11',datapre+'1e12',datapre+'1e13']
-figprefix = './figs/'
-
 print('z:45, t_Hubble: ', t_from_z(45)/Myr)
 print('z:30, t_Hubble: ', t_from_z(30)/Myr)
 print('z:10, t_Hubble: ', t_from_z(10)/Myr)
 print('z:5,  t_Hubble: ', t_from_z(5)/Myr)
 
-iM = 2
+iM = 0
 
 T_tell = 8000
 eta = 0.3
 
 Ts = [] # bsm=0,1 two files
 for i_bsm in range(2):
-    T=ascii.read(pres[iM]+'Jcol_'+str(i_bsm)+'.txt', guess=False,delimiter=' ') #  None has np.where(T['z_col']==-1)
+    T=ascii.read(Mhpres[iM]+'Jcol_'+str(i_bsm)+'.txt', guess=False,delimiter=' ') #  None has np.where(T['z_col']==-1)
     T['Mdot'] = (k_B*T['Tg_loi']*T['f_loi']/(mu*m_H))**1.5/G/(Ms/yr)
     T['Mstar0'] = np.zeros(len(T))
     T['Mstar_z'] = np.zeros(len(T))
@@ -55,4 +49,5 @@ for f_duty in [0.5]: # .6 .4
             [abin_mf[:-1], Phi],
             names=('bin_left','Phi')
         )
-        ascii.write(T, z6datapre+'normMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm'+str(Nbsm-1)+'alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_left':'%6.2f','Phi':'4.2e'},overwrite=True)
+        # ascii.write(T, z6datapre+'normMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm'+str(Nbsm-1)+'alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_left':'%6.2f','Phi':'4.2e'},overwrite=True)
+        ascii.write(T, z6datapre+'norm',formats={'bin_left':'%6.2f','Phi':'4.2e'},overwrite=True)

@@ -1,6 +1,12 @@
 dist_grow.py:
-    z=6 由原始数据Mstar0 长到=6
+    由原始数据T['Mstar0'] Nconcatenate次重复generate lambda log-normal dist. 长到z=6
 dist_growz*.py:
     由z=6 长到z
 
-now data/1e11Jcol_1.txt 是 1e11Jcol_1alpha1.txt 复制过来的
+now data/1e1*Jcol_1.txt 是 1e1*Jcol_1alpha1.txt 复制过来的
+
+dist_grow_Mhs.py:
+    z=6
+    Mh = 1e11, 1e12, 1e13Msun
+    bsm = 1, 2
+    得到ana的 BHMF(flambda,sigma)
