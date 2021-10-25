@@ -46,8 +46,8 @@ for f_duty in [0.5]: # .6 .4
                 hist_mf, bin_edges = np.histogram(T['Mstar_z'],bins=abin_mf,density=False)
                 Phi += hist_mf*n_base[iM]*f_bsm[i_bsm]/(1e4*N_concatenate)/dlog10M
         T = Table(
-            [abin_mf[:-1], Phi],
-            names=('bin_left','Phi')
+            [abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0]), Phi],
+            names=('bin_cen','Phi')
         )
         # ascii.write(T, z6datapre+'normMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm'+str(Nbsm-1)+'alpha1'+'N'+str(int(np.log10(N_concatenate))),formats={'bin_left':'%6.2f','Phi':'4.2e'},overwrite=True)
-        ascii.write(T, z6datapre+'histMF',formats={'bin_left':'%6.2f','Phi':'4.2e'},overwrite=True)
+        ascii.write(T, z6datapre+'histMF',formats={'bin_cen':'6.2f','Phi':'4.2e'},overwrite=True)

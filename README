@@ -10,3 +10,12 @@ dist_grow_Mhs.py:
     Mh = 1e11, 1e12, 1e13Msun
     bsm = 1, 2
     得到ana的 BHMF(flambda,sigma)
+
+LFz6_hist.py, LFz6_histlf.py:
+    calibrating LFz6.py
+MFz6_hist.py:
+    calibrating MFz6.py
+MFz6.py:
+    intermediate step of LFz6.py
+dist_grow_ana:
+    未用

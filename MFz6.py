@@ -30,14 +30,14 @@ for iM in range(NM):
     Ts.append(TM)
 
 # MF
-abin_mf =  np.logspace(2,12,num=100) # default endpoint=True
+abin_mf =  np.logspace(6,12,num=100) # default endpoint=True
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 
 Nbin = len(abin_mf)-1
 
 flambda = .19 # .18 .20
 z = 6
-N = 1000
+N = 10000
 
 for f_duty in [0.5]: # .6 .4 
     for sigma_fit in [.12]: # .10  .14
@@ -56,8 +56,8 @@ for f_duty in [0.5]: # .6 .4
                         dP += dP_MBH/N
                     Phi[ibin] += dP*n_base[iM]*f_bsm[i_bsm]/dlog10M
         T = Table(
-            [abin_mf[:-1], Phi],
-            names=('bin_left','Phi')
+            [abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0]), Phi],
+            names=('bin_cen','Phi')
         )
         # ascii.write(T, z6datapre+'allmassMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm'+str(Nbsm-1)+'alpha1'+'NM'+str(NM),formats={'bin_left':'6.2e','Phi':'4.2e'},overwrite=True)
-        ascii.write(T, z6datapre+'anaall',formats={'bin_left':'6.2e','Phi':'4.2e'},overwrite=True)
+        ascii.write(T, z6datapre+'MF',formats={'bin_cen':'6.2e','Phi':'4.2e'},overwrite=True)

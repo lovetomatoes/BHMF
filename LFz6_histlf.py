@@ -1,4 +1,5 @@
 from PYmodule import *
+# calibrating LFz6.py
 
 print('z:45, t_Hubble: %3.2f Myr', t_from_z(45)/Myr)
 print('z:30, t_Hubble: %3.2f Myr', t_from_z(30)/Myr)
@@ -12,9 +13,12 @@ NM = 3
 T_tell = 8000
 eta = 0.3
 
+# for num in np.linspace(1,100):
+#     print(num,math.erfc(num))
+# exit(0)
 
 T = ascii.read('../z6/data/MF')
-T  = T[np.logical_and(T['bin_cen']>1e6,T['bin_cen']<1e11)]
+# T  = T[np.logical_and(T['bin_cen']>1e6,T['bin_cen']<1e12)]
 dlog10M = np.log10(T['bin_cen'][1]/T['bin_cen'][0])
 
 # LF test bins
@@ -29,27 +33,27 @@ for M1450 in [-29., -22.]:
 flambda = .19 # .18 .20
 z = 6
 
+# for i in np.linspace(1,50):
+#     print('i',i,' ',math.erfc(i))
+# exit(0)
+
 f_duty = .5
 sigma_fit = .12
 mu_fit = flambda/f_duty
 Phi = np.zeros(Nbin)
-
-for ibin in range(Nbin): # Nbin
-    for i in range(len(T)): # loop over each M_BH at z 
-        M_BH = T['bin_cen'][i]
-        dn_MBH = T['Phi'][i]*dlog10M
-        kernel = kernel_M1450(bin_obs[ibin], M_BH, mu_fit, sigma_fit)
-
-        if -10.<kernel<10.:
-            x0 = kernel_M1450(bin_obs[ibin+1], M_BH, mu_fit, sigma_fit)
-            x1 = kernel_M1450(bin_obs[ibin], M_BH, mu_fit, sigma_fit)
-            dP_M1450 = .5*(math.erfc(x0) - math.erfc(x1))
-            dP = dn_MBH*dP_M1450
-            Phi[ibin] += dP/bin_wid[ibin]*f_duty
+Nsamp = 1000
+for i in range(len(T)):
+    M_BH = T['bin_cen'][i]
+    dn_MBH = T['Phi'][i]*dlog10M
+    Edd_ratio_now = lognorm.rvs(sigma_fit*np.log(10), scale=mu_fit, size=Nsamp) # 使用rvs随机生成lbd 未用本身的Edd_ratio
+    Lbol_z = L_M(M_BH, Edd_ratio_now)
+    M1450_z = M1450_Lbol(Lbol_z)
+    hist_lf, bin_edges = np.histogram(M1450_z,bins=bin_obs,density=False)
+    Phi += hist_lf/Nsamp/bin_wid*dn_MBH*f_duty
 
 T = Table(
-    [bin_cen, Phi, LF_M1450_DO(bin_cen,z)],
-    names=('bin_cen','Phi','Phi_DO')
+    [bin_cen, Phi],
+    names=('bin_cen','Phi')
 )
 # ascii.write(T, z6datapre+'allmassMF_fl'+str(int(flambda*100))+'f'+str(int(f_duty*10))+'s'+str(int(sigma_fit*100))+'bsm'+str(Nbsm-1)+'alpha1'+'NM'+str(NM),formats={'bin_left':'6.2e','Phi':'4.2e'},overwrite=True)
-ascii.write(T, z6datapre+'LF11',formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_DO':'4.2e'},overwrite=True)
+ascii.write(T, z6datapre+'LF_histlf',formats={'bin_cen':'6.2e','Phi':'4.2e'},overwrite=True)

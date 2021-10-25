@@ -80,8 +80,10 @@ def MF(M,z=6):
         M_star *= 10
         return Phi_star*pow(M/M_star,alpha)*np.exp(-M/M_star)
 
-def L_M(M,Edd_ratio):
+def L_M(M,Edd_ratio): # L_bol from M_BH in Msun
     return 1.25e38*Edd_ratio*M
+def M_L(L,Edd_ratio): # M_BH in Msun from L_bol
+    return L/(1.25e38*Edd_ratio)
 
 def Mdot2M(Mdot):
     eta = 1
