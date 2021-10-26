@@ -8,7 +8,7 @@ print('z:32 to 6     : %3.2f Myr', (t_from_z(6)-t_from_z(32))/Myr)
 print('t_Edd         : %3.2f Myr', t_Edd/Myr)
 
 N_Mh = 1 # 3 base halos: 1e11, 1e12, 1e13
-Ntr = 1000
+Ntr = 10000
 eta = 0.3
 z = 6
 
@@ -55,7 +55,7 @@ for flambda in [.19]: # .18 .20
             for ibin in range(N_mf): # N_mf
                 for iM in range(N_Mh):
                     for i_bsm in range(Nbsm):
-                        T = Ts[iM][i_bsm][:Ntr]
+                        T = Ts[iM][i_bsm]
                         dP = 0
                         x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'],t_from_z(z)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
                         x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'],t_from_z(z)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
