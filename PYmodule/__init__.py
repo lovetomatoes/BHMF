@@ -9,6 +9,8 @@ import os
 from scipy.stats import *
 import time
 import math
+import numpy.ma as ma
+from scipy import special
 
 z4figpre = '../z4/figs/'
 z4datapre = '../z4/data/'

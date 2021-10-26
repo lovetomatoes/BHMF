@@ -15,6 +15,14 @@ def read():
 a = np.array([True,False,True])
 print(isinstance(a, float))
 
+a = np.linspace(-10,10,num=21)
+import numpy.ma as ma
+
+a = ma.masked_outside(a, -5,5)
+b=a+np.linspace(-10,10,num=21)
+print(b,np.sum(b+1))
+exit(0)
+
 # a = [ [[[] for i in range(4)] for j in range(2)] for k in range(5)]
 # a[1][0][2].append(1)
 # print(a)

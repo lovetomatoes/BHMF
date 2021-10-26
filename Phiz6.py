@@ -55,13 +55,13 @@ for flambda in [.19]: # .18 .20
             for ibin in range(N_mf): # N_mf
                 for iM in range(N_Mh):
                     for i_bsm in range(Nbsm):
-                        T = Ts[iM][i_bsm]
+                        T = Ts[iM][i_bsm][:Ntr]
                         dP = 0
-                        for i in range(Ntr):  
-                            x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'][i],t_from_z(z)-t_from_z(T['z_col'][i]),f_duty, mu_fit, sigma_fit)
-                            x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'][i],t_from_z(z)-t_from_z(T['z_col'][i]),f_duty, mu_fit, sigma_fit)
-                            dP_MBH = .5*(math.erfc(x0) - math.erfc(x1))
-                            dP += dP_MBH/Ntr
+                        x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'],t_from_z(z)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
+                        x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'],t_from_z(z)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
+                        x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) 
+                        dP_MBH = .5*(special.erfc(x0) - special.erfc(x1))
+                        dP = np.sum(dP_MBH)/Ntr
                         dn_MBH[ibin] += dP*n_base[iM]*f_bsm[i_bsm]
             T = Table(
                 [abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0]), dn_MBH],
@@ -72,15 +72,14 @@ for flambda in [.19]: # .18 .20
             
             Phi = np.zeros(N_lf)
             for ibin in range(N_lf): # N_lf
-                for i in range(len(T)): # loop over each M_BH at z 
-                    M_BH = T['M_BH'][i]
-                    kernel = kernel_M1450(bin_obs[ibin], M_BH, mu_fit, sigma_fit)
-                    if -10.<kernel<10.:
-                        x0 = kernel_M1450(bin_obs[ibin+1], M_BH, mu_fit, sigma_fit)
-                        x1 = kernel_M1450(bin_obs[ibin], M_BH, mu_fit, sigma_fit)
-                        dP_M1450 = .5*(math.erfc(x0) - math.erfc(x1))
-                        dP = T['dn_MBH'][i]*dP_M1450
-                        Phi[ibin] += dP/bin_wid[ibin]*f_duty
+                M_BH = T['M_BH']
+                kernel = kernel_M1450(bin_obs[ibin], M_BH, mu_fit, sigma_fit)
+                kernel = ma.masked_outside(kernel, -10., 10.)
+                x0 = kernel_M1450(bin_obs[ibin+1], M_BH, mu_fit, sigma_fit)
+                x1 = kernel_M1450(bin_obs[ibin], M_BH, mu_fit, sigma_fit)
+                dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))
+                dPhi = np.sum(T['dn_MBH']*dP_M1450)
+                Phi[ibin] += dPhi/bin_wid[ibin]*f_duty
 
             T = Table(
                 [bin_cen, Phi, LF_M1450_CO(bin_cen,z), LF_M1450_DO(bin_cen,z)],
