@@ -15,12 +15,14 @@ def read():
 a = np.array([True,False,True])
 print(isinstance(a, float))
 
-a = np.linspace(-10,10,num=21)
+a = np.linspace(-1,1,num=3) # a = [-1, 0, 1]
 import numpy.ma as ma
 
-a = ma.masked_outside(a, -5,5)
-b=a+np.linspace(-10,10,num=21)
+b = np.ones(len(a))
+b = ma.masked_where(a<0,b)
 print(b,np.sum(b+1))
+############### nanmin: ignore nan in array #############
+print(np.nanmin(np.array([np.nan, 1, 3])))
 exit(0)
 
 # a = [ [[[] for i in range(4)] for j in range(2)] for k in range(5)]

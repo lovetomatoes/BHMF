@@ -64,6 +64,14 @@ fslegend = 20
 my_cmap = plt.get_cmap("viridis")
 rescale = lambda y: (y - np.min(y)) / (np.max(y) - np.min(y))
 
+# -----------------  '6': z=6 Matsuoka 2018; Table 4     ---------------------
+# -----------------  '4': z=4 Akiyama 2018;     ---------------------    
+bin_cen = {'6':np.array([-29,-27.5,-26.75,-26.25,-25.75,-25.25,-24.75,-24.25,-23.75,-23.25,-22.75,-22])}
+bin_wid = {'6':np.array([2, 1, .5, .5, .5, .5, .5, .5, .5, .5, .5, 1])}
+bin_edg = {'6':np.append(bin_cen['6'] - bin_wid['6']/2., bin_cen['6'][-1]+bin_wid['6'][-1]/2.)}
+Phi_obs = {'6':np.array([.0079, .242, .58, .9, 1.33, 4.6, 7.,  6.6, 8.3, 10.9, 23., 16.2])}
+Phi_err = {'6':np.array([.0079, .061, .17, .32, .6, 1.2, 1.7, 2., 2.6, 3.6, 8.1, 16.2])}
+
 def kernel_MBH(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
     lbd = np.log(Mgrow_ratio)/(dt/t_Edd * f_duty)
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
