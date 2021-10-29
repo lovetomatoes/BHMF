@@ -41,8 +41,8 @@ bin_wid = bin_wid[str(z)]
 bin_cen = bin_cen[str(z)]
 N_lf = len(bin_cen)
 
-for M1450 in [-29., -22.]:
-    print('M1450',M1450,'Mbh = %3.2e'%M_L(Lbol_M1450(M1450),1.))
+for M1450 in bin_cen:
+    print('M1450',M1450,'Eddington accretion Mbh = %3.2e'%M_L(Lbol_M1450(M1450),1.))
 
 
 
