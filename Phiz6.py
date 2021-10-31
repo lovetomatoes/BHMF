@@ -42,14 +42,16 @@ bin_cen = bin_cen[str(z)]
 N_lf = len(bin_cen)
 
 for M1450 in bin_cen:
-    print('M1450',M1450,'Eddington accretion Mbh = %3.2e'%M_L(Lbol_M1450(M1450),1.))
+    print('M1450',M1450,'Eddington accretion Mbh = %3.2e'%M_L(Lbol_M1450(M1450),.1))
 
 
 
 for f_duty in np.arange(.2, 1., .1): # .6 .4 
-    for mu_fit in np.arange(.01, 1., .1): # f*mu .18, .19, .20
-        for sigma_fit in np.arange(.08, 0.2, .01): # .10  .14
-
+    for mu_fit in np.arange(.1, .5, .01): # f*mu .18, .19, .20
+        for sigma_fit in np.arange(.01, 0.2, .01): # .10  .14
+# for f_duty in [.5]: 
+#     for mu_fit in [.38]: # f*mu .18, .19, .20
+#         for sigma_fit in [.12]: # .10  .14
             dn_MBH = np.zeros(N_mf)
             for ibin in range(N_mf): # N_mf
                 for iM in range(N_Mh):

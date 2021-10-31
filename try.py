@@ -23,6 +23,17 @@ b = ma.masked_where(a<0,b)
 print(b,np.sum(b+1))
 ############### nanmin: ignore nan in array #############
 print(np.nanmin(np.array([np.nan, 1, 3])))
+print(np.nanmin([1e10,np.nan]))
+
+# 我要的 6080个
+f_duty = np.arange(.2, 1., .1) # .5
+mu_fit = np.arange(.1, .5, .01) # .38
+sigma_fit = np.arange(.01, 0.2, .01) # .12
+# 暂时try 180 个
+# f_duty = np.arange(.2, 1., 1) # .5
+# mu_fit = np.arange(.1, .5, .02) # .38
+# sigma_fit = np.arange(.01, 0.1, .01) # .12
+print('len',len(f_duty)*len(mu_fit)*len(sigma_fit))
 exit(0)
 
 # a = [ [[[] for i in range(4)] for j in range(2)] for k in range(5)]
