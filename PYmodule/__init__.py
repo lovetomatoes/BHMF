@@ -164,13 +164,18 @@ def K_AVE20(Lbol):
     c = 17.79
     return a*( 1 + pow(np.log10(Lbol/Lsun)/b,c) )
 
+def KX_AVE20(Lx):
+    a = 15.33
+    b = 11.48
+    c = 16.2
+    return a*( 1 + pow(np.log10(Lx/Lsun)/b,c) )
+
 # obscured fraction = Type II AGN fraction
 def f_obsc_U14(logLx,z): # Ueda 14; 22< log NH < 24 fraction; as a func of Lx
-    eta = 1.7
     a1 = .48
     phi4375_0 = .43
-    phi4375_z = phi4375_0*(1+z)**a1
-    phimax = (1+eta)/(3+eta)
+    phi4375_z = phi4375_0*(1+z)**a1 if z<=2. else phi4375_0*(1+2.)**a1
+    phimax = .84
     phimin = .2
     beta = .24
     phi = min( phimax, max(phi4375_z - beta*(logLx-43.75), phimin))
@@ -189,13 +194,13 @@ def corr_U14H07(M1450): # Ueda+14 & Shankar+09
     a1 = .48
     phi4375_0 = .43
     phi4375_z = phi4375_0*(1+2.)**a1
-    phimax = (1+eta)/(3+eta)
+    phimax = .84
     phimin = .2
     beta = .24
     phi = min( phimax, max(phi4375_z - beta*(np.log10(Lx)-43.75), phimin))
     f_obsc_sum = phi # sum over 22< log NH < 24 range
-    f_CTK = phi
-    return (1+f_CTK)/(1-f_obsc_sum)
+    f_CTK = phi/2.
+    return 1./(1-f_obsc_sum)
 def corr_U14D20(M1450): # Ueda 14
     L_bol = Lbol_M1450(M1450)
     f_bol = K_AVE20(L_bol)
@@ -204,7 +209,7 @@ def corr_U14D20(M1450): # Ueda 14
     a1 = .48
     phi4375_0 = .43
     phi4375_z = phi4375_0*(1+2.)**a1
-    phimax = (1+eta)/(3+eta)
+    phimax = .84 #(1+eta)/(3+eta)
     phimin = .2
     beta = .24
     if isinstance(M1450,float):
@@ -214,8 +219,8 @@ def corr_U14D20(M1450): # Ueda 14
         for i in range(len(M1450)):
             phi[i] = min( phimax, max(phi4375_z - beta*(np.log10(Lx[i])-43.75), phimin))
     f_obsc_sum = phi # sum over 22< log NH < 24 range
-    f_CTK = phi
-    return (1+f_CTK)/(1-f_obsc_sum)
+    f_CTK = phi/2.
+    return 1./(1-f_obsc_sum)
 
 def LF_M1450_CO(M,z): # dn/dmag in Mpc^-3 mag^-1
     # Matsuoka 2018

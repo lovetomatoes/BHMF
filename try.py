@@ -25,6 +25,12 @@ print(b,np.sum(b+1))
 print(np.nanmin(np.array([np.nan, 1, 3])))
 print(np.nanmin([1e10,np.nan]))
 
+a = np.linspace(0,5,6)
+b = np.ones(len(a))
+print(a,np.logical_or(a<=1., a>=4.))
+c = ma.masked_where(np.logical_or(a<1, a>4), b)
+print('ma.masked_where:', c)
+
 # 我要的 6080个
 f_duty = np.arange(.2, 1., .1) # .5
 mu_fit = np.arange(.1, .5, .01) # .38
@@ -34,7 +40,6 @@ sigma_fit = np.arange(.01, 0.2, .01) # .12
 # mu_fit = np.arange(.1, .5, .02) # .38
 # sigma_fit = np.arange(.01, 0.1, .01) # .12
 print('len',len(f_duty)*len(mu_fit)*len(sigma_fit))
-exit(0)
 
 # a = [ [[[] for i in range(4)] for j in range(2)] for k in range(5)]
 # a[1][0][2].append(1)
@@ -140,6 +145,7 @@ def corr_U03(M1450): # Ueda 03 + Shankar 09
     beta = .1
     phi = min( phimax, max(phi44 - beta*(np.log10(Lx)-44), 0))
     f_obsc_sum = phi
+    return 1./(1-f_obsc_sum)
     return (1+eta/(1+eta)*phi)/(1-f_obsc_sum)
 
 M1 = -27.2
@@ -148,21 +154,37 @@ M1 = -20.7
 print("correct facotr for for M1 = ",M1," 1/fobsc=",corr_U03(M1))
 
 plt.figure(figsize=(10,8),dpi=400)
-x = np.linspace(-20, -28)
+x = np.linspace(-19, -28)
 y = np.zeros(len(x))
 
 for i in range(len(x)):
     y[i] = corr_U03(x[i])
 plt.plot(x,y,label='Ueda03')
 for i in range(len(x)):
-    y[i] = corr_U14H07(x[i])
+    y[i] = corr_U14D20(x[i])
 plt.plot(x,y,label='Ueda14')
-plt.xlim(-20, -28)
+plt.xlim(-19, -28)
+plt.xlabel("M1450",fontsize=fstick)
+plt.ylabel("corr factor",fontsize=fstick)
+plt.savefig('../NH_gtr22.png')
 plt.legend(loc='best')
 plt.grid(True)
 plt.savefig('../corr.png')
 
-plt.figure(figsize=(10,8),dpi=400)
+def tick_function(x):
+    print(10.**x)
+    f_bol = KX_AVE20(10.**x)
+    M1450 = M1450_Lbol(10.**x*f_bol)
+    print('f_bol',f_bol,'M1450',M1450)
+    return ["%.1f" % M for M in M1450] # M1450
+
+Lx = 1e41 # erg/s
+print('KX_AVE20(Lx)',KX_AVE20(Lx))
+print('M1450 from Lx = 1e41',M1450_Lbol(Lx*KX_AVE20(Lx)))
+
+fig = plt.figure(figsize=(10,8),dpi=400)
+ax1 = fig.add_subplot(111)
+ax2 = ax1.twiny()
 # # Ueda 03 
 # x = np.linspace(42,46) # log Lx
 # y = np.zeros(len(x))
@@ -178,19 +200,30 @@ y = np.zeros(len(x))
 z = .5
 for i in range(len(x)):
     y[i] = f_obsc_U14(x[i],z)
-plt.plot(x,y,label='Ueda14, z=.5')
+ax1.plot(x,y,label='Ueda14, z=.5')
 z = 2
 for i in range(len(x)):
     y[i] = f_obsc_U14(x[i],z)
-plt.plot(x,y,label='Ueda14, z=2')
+ax1.plot(x,y,label='Ueda14, z=2')
 z = 1.5
 for i in range(len(x)):
     y[i] = f_obsc_U14(x[i],z)
-plt.plot(x,y,label='Ueda14, z=1.5')
+
+print(y)
+new_tick_locations = np.array([41,42,43,44,45,46,47])
+ax2.set_xlim(ax1.get_xlim())
+ax2.set_xticks(new_tick_locations)
+ax2.set_xticklabels(tick_function(new_tick_locations))
+
+ax1.plot(x,y,label='Ueda14, z=1.5')
 # =========================
-plt.xlim(41,47); plt.ylim(0,1.)
-plt.legend(loc='best')
-plt.grid(True)
+ax1.set_xlim(41,47); ax1.set_ylim(0,1.)
+ax1.legend(loc='best')
+ax1.grid(True)
+
+ax1.set_xlabel(r"log10(Lx)",fontsize=fstick)
+ax2.set_xlabel(r"M1450",fontsize=fstick)
+ax1.set_ylabel("obscured fraction",fontsize=fstick)
 plt.savefig('../NH_gtr22.png')
 
 

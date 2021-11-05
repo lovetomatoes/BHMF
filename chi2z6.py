@@ -9,7 +9,7 @@ bin_cen = bin_cen[str(z)]
 bin_wid = bin_wid[str(z)]
 bin_edg = bin_edg[str(z)]
 # ------------------- select magnitude range
-Phi_obs = ma.masked_where(bin_cen>-23,Phi_obs[str(z)])
+Phi_obs = ma.masked_where(np.logical_or(bin_cen>-23,bin_cen<-30),Phi_obs[str(z)])
 Phi_err = Phi_err[str(z)]
 # print('bin_cen',bin_cen,'Phi_obs',Phi_obs,'Phi_err',Phi_err)
 
@@ -20,10 +20,10 @@ Phi_err = Phi_err[str(z)]
 # Phi_err_DO = Phi_err*corr_U14D20(bin_cen)
 
 find_min = False
-for f_duty in np.arange(.2, 1., .1): # .6 .4 
-    for mu_fit in np.arange(.1, .5, .01): # f*mu .18, .19, .20
-        for sigma_fit in np.arange(.01, 0.2, .01): # .10  .14
-            fname = z6datapre+'LF11_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'alpha1'
+for f_duty in np.arange(.2, 1., .1):
+    for mu_fit in np.arange(.01, .5, .01):
+        for sigma_fit in np.arange(.01, 0.2, .01):
+            fname = z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'alpha1'
             if os.path.isfile(fname):
                 T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
             else:
@@ -54,7 +54,7 @@ plt.yscale('log')
 plt.grid(True)
 plt.legend(loc='lower left',fontsize=fslabel)
 plt.title(r'$\mathrm{\chi^2}=\sum_i \frac{(\log{E_i}-\log{O_i})^2}{\log{\sigma_i}^2}=$'+'%.2e'%Chi2,fontsize=fstitle)
-plt.savefig(z6figpre+'chi2z'+str(z)+'MBH11'+
+plt.savefig(z6figpre+'chi2_no_z'+str(z)+'MBH2e10'+
                 'f%3.2f'%f_duty+
                 'm%3.2f'%mu_fit+
                 's%3.2f'%sigma_fit+

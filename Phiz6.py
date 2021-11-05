@@ -47,7 +47,7 @@ for M1450 in bin_cen:
 
 
 for f_duty in np.arange(.2, 1., .1): # .6 .4 
-    for mu_fit in np.arange(.1, .5, .01): # f*mu .18, .19, .20
+    for mu_fit in np.arange(.01, .5, .01): # f*mu .18, .19, .20
         for sigma_fit in np.arange(.01, 0.2, .01): # .10  .14
 # for f_duty in [.5]: 
 #     for mu_fit in [.38]: # f*mu .18, .19, .20
@@ -69,7 +69,7 @@ for f_duty in np.arange(.2, 1., .1): # .6 .4
                 names=('M_BH','dn_MBH')
             )
 
-            T  = T[np.logical_and(T['M_BH']>1e6,T['M_BH']<1e11)] # select M_BH range
+            T  = T[np.logical_and(T['M_BH']>1e6,T['M_BH']<2e10)] # select M_BH range
             
             Phi = np.zeros(N_lf)
             for ibin in range(N_lf): # N_lf
@@ -83,15 +83,14 @@ for f_duty in np.arange(.2, 1., .1): # .6 .4
                 Phi[ibin] += dPhi/bin_wid[ibin]*f_duty
 
             T = Table(
-                [bin_cen, Phi*1e9, LF_M1450_CO(bin_cen,z)*1e9, LF_M1450_DO(bin_cen,z)*1e9],
+                [bin_cen, Phi*1e9, Phi*1e9*(1.-f_obsc_const), Phi*1e9/corr_U14D20(bin_cen)],
                 names=('bin_cen','Phi','Phi_CO','Phi_DO')
             )
             ascii.write(T, z6datapre+
-                           'LF11_'+
+                           'LF2e10_'+
                            'f%3.2f'%f_duty+
                            'm%3.2f'%mu_fit+
                            's%3.2f'%sigma_fit+
                            'alpha1',
                         formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e'},
                         overwrite=True)
-            exit(0)
