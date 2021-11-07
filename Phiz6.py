@@ -45,7 +45,7 @@ for M1450 in bin_cen:
     print('M1450',M1450,'Eddington accretion Mbh = %3.2e'%M_L(Lbol_M1450(M1450),.1))
 
 
-
+alpha = .1
 for f_duty in np.arange(.2, 1., .1): # .6 .4 
     for mu_fit in np.arange(.01, .5, .01): # f*mu .18, .19, .20
         for sigma_fit in np.arange(.01, 0.2, .01): # .10  .14
@@ -91,6 +91,6 @@ for f_duty in np.arange(.2, 1., .1): # .6 .4
                            'f%3.2f'%f_duty+
                            'm%3.2f'%mu_fit+
                            's%3.2f'%sigma_fit+
-                           'alpha1',
+                           'alpha%.1f'%alpha,
                         formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e'},
                         overwrite=True)
