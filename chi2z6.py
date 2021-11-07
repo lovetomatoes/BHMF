@@ -42,7 +42,7 @@ if find_min:
     print('f_min:',f_min,'m_min',m_min, 's_min',s_min, 'chi2_min:',Chi2_min)
 
 f_duty = f_min; mu_fit = m_min; sigma_fit = s_min
-fname = z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'alpha1'
+fname = z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'alpha%.1f'%alpha
 T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
 Chi2 = np.sum(pow( (np.log(T['Phi_DO']) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
 print(T['Phi_DO'])
