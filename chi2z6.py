@@ -20,7 +20,7 @@ Phi_err = Phi_err[str(z)]
 # Phi_err_CO = Phi_err/(1-f_obsc_const)
 # Phi_err_DO = Phi_err*corr_U14D20(bin_cen)
 
-alpha = .1
+alpha = 1.
 find_min = False
 for f_duty in np.arange(.2, 1., .1):
     for mu_fit in np.arange(.01, .5, .01):
