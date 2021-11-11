@@ -70,46 +70,11 @@ T = Table(
 
 T  = T[np.logical_and(T['bin_left']>=1e6,T['bin_right']<2e10)] # select M_BH range
 
-'''
-M1 = M_L(Lbol_M1450(-23.75),1.)
-M2 = M_L(Lbol_M1450(-26.875),1.)
-ratio = M2/M1
-flambda = np.log(ratio) / ((t_from_z(z)-t_from_z(6.))/t_Edd)
-print('ratio=',ratio, '\nflambda=',flambda)
-
-sigma_fit = 0.00001
-f_duty = 1.
-mu_fit = 1.
-x0 = kernel_MBH(np.e/1.02, t_Edd, f_duty, mu_fit, sigma_fit)
-x1 = kernel_MBH(np.e*1.02, t_Edd, f_duty, mu_fit, sigma_fit)
-print(x0,x1); print(.5*(special.erfc(x0) - special.erfc(x1)))
-
-dn_MBH = np.zeros(N_mf)
-for ibin in range(N_mf):
-    x0 = kernel_MBH(M_BH[ibin]/T['bin_right'],t_Edd,f_duty, mu_fit, sigma_fit)
-    x1 = kernel_MBH(M_BH[ibin]/T['bin_left'],t_Edd,f_duty, mu_fit, sigma_fit)
-    x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) 
-    # print(x0,x1)
-    dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) * T['dn_MBH']
-    dn_MBH[ibin] = np.nansum(dP_MBH)
-
-Tz = Table(
-    [M_BH, dn_MBH, T['dn_MBH']],
-    names=('M_BH','dn_MBH', 'T_dn_MBH')
-)
-ascii.write(Tz, '../dn_MBH',
-            formats={'M_BH':'4.2e','dn_MBH':'4.2e','T_dn_MBH':'4.2e'},
-            overwrite=True)
-# exit(0)
-'''
 
 ## --------------------------   z=z   ----------------------------
 for f_duty in np.arange(.2, 1., .1): # .6 .4 
     for mu_fit in np.arange(.01, .5, .01): # f*mu .18, .19, .20
         for sigma_fit in np.arange(.01, 0.2, .01): # .10  .14
-# for f_duty in [.21]:
-#     for mu_fit in [1.]: # f*mu .18, .19, .20
-#         for sigma_fit in [.000001]: # .10  .14
             dn_MBH = np.zeros(N_mf)
             for ibin in range(N_mf):
                 x0 = kernel_MBH(M_BH[ibin]/T['bin_right'],t_from_z(z)-t_from_z(6.),f_duty, mu_fit, sigma_fit)
@@ -122,12 +87,10 @@ for f_duty in np.arange(.2, 1., .1): # .6 .4
                 [M_BH, dn_MBH],
                 names=('M_BH','dn_MBH')
             )
-            # ascii.write(Tz, '../dn_MBH_spread',
-            #         formats={'M_BH':'4.2e','dn_MBH':'4.2e'},
-            #         overwrite=True)
 
-            # Tz  = Tz[np.logical_and(Tz['M_BH']>1e6,Tz['M_BH']<2e10)] # select M_BH range
-            
+            # Tz  = Tz[np.logical_and(Tz['M_BH']>1e6,Tz['M_BH']<1e12)] # select M_BH range
+            Tz = ma.masked_where(np.logical_or(Tz['M_BH']<1e6,Tz['M_BH']>1e12), Tz)
+
             Phi = np.zeros(N_lf)
             for ibin in range(N_lf): # N_lf
                 M_BH = Tz['M_BH']
@@ -144,7 +107,7 @@ for f_duty in np.arange(.2, 1., .1): # .6 .4
                 names=('bin_cen','Phi','Phi_CO','Phi_DO')
             )
             ascii.write(Tlf, z4datapre+
-                           'LF13_'+'z%d'%z+
+                           'LF12_'+'z%d'%z+
                            'f%3.2f'%f_duty+
                            'm%3.2f'%mu_fit+
                            's%3.2f'%sigma_fit+
