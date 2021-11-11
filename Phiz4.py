@@ -48,6 +48,7 @@ f_duty = .7; mu_fit = .21; sigma_fit = .15
 abin_mf =  np.logspace(6,13,num=100) # default endpoint=True
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 N_mf = len(abin_mf)-1
+M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
 
 ## --------------------------   z=6   ----------------------------
 dn_MBH = np.zeros(N_mf)
@@ -63,54 +64,90 @@ for ibin in range(N_mf): # N_mf
             dP = np.sum(dP_MBH)/Ntr
             dn_MBH[ibin] += dP*n_base[iM]*f_bsm[i_bsm]
 T = Table(
-    [abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0]), dn_MBH],
-    names=('M_BH','dn_MBH')
+    [abin_mf[:-1], abin_mf[1:] , M_BH, dn_MBH],
+    names=('bin_left','bin_right','M_BH','dn_MBH')
 )
 
-T  = T[np.logical_and(T['M_BH']>1e6,T['M_BH']<2e10)] # select M_BH range
+T  = T[np.logical_and(T['bin_left']>=1e6,T['bin_right']<2e10)] # select M_BH range
 
+'''
+M1 = M_L(Lbol_M1450(-23.75),1.)
+M2 = M_L(Lbol_M1450(-26.875),1.)
+ratio = M2/M1
+flambda = np.log(ratio) / ((t_from_z(z)-t_from_z(6.))/t_Edd)
+print('ratio=',ratio, '\nflambda=',flambda)
+
+sigma_fit = 0.00001
+f_duty = 1.
+mu_fit = 1.
+x0 = kernel_MBH(np.e/1.02, t_Edd, f_duty, mu_fit, sigma_fit)
+x1 = kernel_MBH(np.e*1.02, t_Edd, f_duty, mu_fit, sigma_fit)
+print(x0,x1); print(.5*(special.erfc(x0) - special.erfc(x1)))
+
+dn_MBH = np.zeros(N_mf)
+for ibin in range(N_mf):
+    x0 = kernel_MBH(M_BH[ibin]/T['bin_right'],t_Edd,f_duty, mu_fit, sigma_fit)
+    x1 = kernel_MBH(M_BH[ibin]/T['bin_left'],t_Edd,f_duty, mu_fit, sigma_fit)
+    x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) 
+    # print(x0,x1)
+    dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) * T['dn_MBH']
+    dn_MBH[ibin] = np.nansum(dP_MBH)
+
+Tz = Table(
+    [M_BH, dn_MBH, T['dn_MBH']],
+    names=('M_BH','dn_MBH', 'T_dn_MBH')
+)
+ascii.write(Tz, '../dn_MBH',
+            formats={'M_BH':'4.2e','dn_MBH':'4.2e','T_dn_MBH':'4.2e'},
+            overwrite=True)
+# exit(0)
+'''
 
 ## --------------------------   z=z   ----------------------------
 for f_duty in np.arange(.2, 1., .1): # .6 .4 
     for mu_fit in np.arange(.01, .5, .01): # f*mu .18, .19, .20
         for sigma_fit in np.arange(.01, 0.2, .01): # .10  .14
-
+# for f_duty in [.21]:
+#     for mu_fit in [1.]: # f*mu .18, .19, .20
+#         for sigma_fit in [.000001]: # .10  .14
             dn_MBH = np.zeros(N_mf)
-            for ibin in [10]:#range(N_mf):
-                x0 = kernel_MBH(abin_mf[ibin]/T['M_BH'],t_from_z(z)-t_from_z(6.),f_duty, mu_fit, sigma_fit)
-                x1 = kernel_MBH(abin_mf[ibin+1]/T['M_BH'],t_from_z(z)-t_from_z(6.),f_duty, mu_fit, sigma_fit)
+            for ibin in range(N_mf):
+                x0 = kernel_MBH(M_BH[ibin]/T['bin_right'],t_from_z(z)-t_from_z(6.),f_duty, mu_fit, sigma_fit)
+                x1 = kernel_MBH(M_BH[ibin]/T['bin_left'],t_from_z(z)-t_from_z(6.),f_duty, mu_fit, sigma_fit)
                 x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) 
                 dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) * T['dn_MBH']
                 dn_MBH[ibin] = np.nansum(dP_MBH)
 
-            T = Table(
-                [abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0]), dn_MBH],
+            Tz = Table(
+                [M_BH, dn_MBH],
                 names=('M_BH','dn_MBH')
             )
+            # ascii.write(Tz, '../dn_MBH_spread',
+            #         formats={'M_BH':'4.2e','dn_MBH':'4.2e'},
+            #         overwrite=True)
 
-            T  = T[np.logical_and(T['M_BH']>1e6,T['M_BH']<2e10)] # select M_BH range
+            # Tz  = Tz[np.logical_and(Tz['M_BH']>1e6,Tz['M_BH']<2e10)] # select M_BH range
             
             Phi = np.zeros(N_lf)
             for ibin in range(N_lf): # N_lf
-                M_BH = T['M_BH']
+                M_BH = Tz['M_BH']
                 kernel = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
                 kernel = ma.masked_outside(kernel, -10., 10.)
                 x0 = kernel_M1450(bin_edg[ibin+1], M_BH, mu_fit, sigma_fit)
                 x1 = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
                 dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))
-                dPhi = np.sum(T['dn_MBH']*dP_M1450)
+                dPhi = np.nansum(Tz['dn_MBH']*dP_M1450)
                 Phi[ibin] += dPhi/bin_wid[ibin]*f_duty
 
-            T = Table(
+            Tlf = Table(
                 [bin_cen, Phi*1e9, Phi*1e9*(1.-f_obsc_const), Phi*1e9/corr_U14D20(bin_cen)],
                 names=('bin_cen','Phi','Phi_CO','Phi_DO')
             )
-            ascii.write(T, z4datapre+
-                           'LF2e10_'+'z%d'%z+
+            ascii.write(Tlf, z4datapre+
+                           'LF13_'+'z%d'%z+
                            'f%3.2f'%f_duty+
                            'm%3.2f'%mu_fit+
                            's%3.2f'%sigma_fit+
                            'alpha%.1f'%alpha,
                         formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e'},
                         overwrite=True)
-            exit(0)
