@@ -180,7 +180,11 @@ def tick_function(x):
 
 Lx = 1e41 # erg/s
 print('KX_AVE20(Lx)',KX_AVE20(Lx))
-print('M1450 from Lx = 1e41',M1450_Lbol(Lx*KX_AVE20(Lx)))
+Lx = 1e43 # erg/s
+print('M1450 from Lx = 1e43',M1450_Lbol(Lx*KX_AVE20(Lx)))
+Lx = 3e45 # erg/s
+print('M1450 from Lx = 3e45',M1450_Lbol(Lx*KX_AVE20(Lx)))
+exit(0)
 
 fig = plt.figure(figsize=(10,8),dpi=400)
 ax1 = fig.add_subplot(111)
