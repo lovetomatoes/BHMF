@@ -22,10 +22,16 @@ Phi_err = Phi_err[str(z)]
 
 alpha = 1.
 find_min = False
-for f_duty in np.arange(.2, 1., .1):
-    for mu_fit in np.arange(.01, .5, .01):
-        for sigma_fit in np.arange(.01, 0.2, .01):
-            fname = z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'alpha%.1f'%alpha
+eta8 = .2
+delta_fit = 0.1
+# for f_duty in np.arange(.2, 1., .1): # .6 .4 
+#     for mu_fit in np.arange(.01, .5, .01): # f*mu .18, .19, .20
+#         for sigma_fit in np.arange(.01, 0.2, .01): # .10  .14
+f_duty = .7; mu_fit = .21
+for eta8 in [.05,.1,.2,]: 
+    for delta_fit in [.1,.2,.3,.4,.5]: # f*mu .18, .19, .20
+        for sigma_fit in [.15]: # .10  .14
+            fname = z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.2f'%delta_fit+'alpha%.1f'%alpha
             if os.path.isfile(fname):
                 T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
             else:
@@ -37,12 +43,14 @@ for f_duty in np.arange(.2, 1., .1):
                 f_min = f_duty
                 m_min = mu_fit
                 s_min = sigma_fit
+                e_min = eta8
+                d_min = delta_fit
 
 if find_min:
-    print('f_min:',f_min,'m_min',m_min, 's_min',s_min, 'chi2_min:',Chi2_min)
+    print('f_min%3.2f'%f_min+'m_min%3.2f'%m_min,'s_min%3.2f'%s_min+'e_min%.3f'%e_min+'d_min%.2f'%d_min)
 
-f_duty = f_min; mu_fit = m_min; sigma_fit = s_min
-fname = z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'alpha%.1f'%alpha
+f_duty = f_min; mu_fit = m_min; sigma_fit = s_min; eta8 = e_min; delta_fit = d_min
+fname = z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.2f'%delta_fit+'alpha%.1f'%alpha
 T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
 Chi2 = np.sum(pow( (np.log(T['Phi_DO']) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
 print(T['Phi_DO'])
@@ -60,4 +68,7 @@ plt.savefig(z6figpre+'chi2_Phi_DO_'+'M1450min%.0f'%M1450_min+'max%.1fz'%M1450_ma
                 'f%3.2f'%f_duty+
                 'm%3.2f'%mu_fit+
                 's%3.2f'%sigma_fit+
+                'e%.3f'%eta8+
+                'd%.2f'%delta_fit+
                 'alpha%.1f'%alpha+'.png')
+print('chi2_Phi_DO_'+'M1450min%.0f'%M1450_min+'max%.1fz'%M1450_max+str(z)+'MBH2e10'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.2f'%delta_fit+'alpha%.1f'%alpha+'.png')

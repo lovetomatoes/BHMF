@@ -46,6 +46,8 @@ for M1450 in bin_cen:
 
 
 alpha = 1.
+eta8 = .1
+delta_fit = 0.01
 for f_duty in np.arange(.2, 1., .1): # .6 .4 
     for mu_fit in np.arange(.01, .5, .01): # f*mu .18, .19, .20
         for sigma_fit in np.arange(.01, 0.2, .01): # .10  .14
@@ -58,8 +60,9 @@ for f_duty in np.arange(.2, 1., .1): # .6 .4
                     for i_bsm in range(Nbsm):
                         T = Ts[iM][i_bsm]
                         dP = 0
-                        x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'],t_from_z(z)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
-                        x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'],t_from_z(z)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
+                        dt = t_from_z(z)-t_from_z(T['z_col'])
+                        x0 = kernel_MBH2(abin_mf[ibin],T['Mstar0'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
+                        x1 = kernel_MBH2(abin_mf[ibin+1],T['Mstar0'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
                         x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) 
                         dP_MBH = .5*(special.erfc(x0) - special.erfc(x1))
                         dP = np.sum(dP_MBH)/Ntr
@@ -91,6 +94,8 @@ for f_duty in np.arange(.2, 1., .1): # .6 .4
                            'f%3.2f'%f_duty+
                            'm%3.2f'%mu_fit+
                            's%3.2f'%sigma_fit+
+                           'e%.3f'%eta8+
+                           'd%.2f'%delta_fit+
                            'alpha%.1f'%alpha,
                         formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e'},
                         overwrite=True)

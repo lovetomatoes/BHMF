@@ -184,6 +184,17 @@ Lx = 1e43 # erg/s
 print('M1450 from Lx = 1e43',M1450_Lbol(Lx*KX_AVE20(Lx)))
 Lx = 3e45 # erg/s
 print('M1450 from Lx = 3e45',M1450_Lbol(Lx*KX_AVE20(Lx)))
+
+ratio = np.exp( (t_from_z(4.)-t_from_z(15.))*.3/t_Edd )
+print('ratio',ratio)
+print(ratio**.42)
+
+# def kernel_MBH(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
+k1 = kernel_MBH1(1.001, 1e6, .1, .1, .1)
+# def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
+k2 = kernel_MBH2(1e8,1e8/1.001,1e6,.1,.1,.1,.1,.32)
+print('k1',k1,'k2',k2)
+print('6-15',(t_from_z(6)-t_from_z(15))/Myr, '4-6',(t_from_z(4)-t_from_z(6))/Myr)
 exit(0)
 
 fig = plt.figure(figsize=(10,8),dpi=400)

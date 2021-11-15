@@ -96,8 +96,11 @@ Phi_err = {'6':np.array([.0079, .061, .17, .32, .6, 1.2, 1.7, 2., 2.6, 3.6, 8.1,
            }     
 
 
+def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
+    lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*10.*t_Edd)
+    return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
-def kernel_MBH(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
+def kernel_MBH1(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
     lbd = np.log(Mgrow_ratio)/(dt/t_Edd * f_duty)
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
