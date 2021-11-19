@@ -172,11 +172,14 @@ plt.grid(True)
 plt.savefig('../corr.png')
 
 def tick_function(x):
-    print(10.**x)
     f_bol = KX_AVE20(10.**x)
     M1450 = M1450_Lbol(10.**x*f_bol)
     print('f_bol',f_bol,'M1450',M1450)
     return ["%.1f" % M for M in M1450] # M1450
+
+def tick_M1450_MBH(x):
+    M1450s = M1450_Lbol(L_M(x,.1))
+    return ["%.1f" % M for M in M1450s]
 
 Lx = 1e41 # erg/s
 print('KX_AVE20(Lx)',KX_AVE20(Lx))
@@ -188,13 +191,49 @@ print('M1450 from Lx = 3e45',M1450_Lbol(Lx*KX_AVE20(Lx)))
 ratio = np.exp( (t_from_z(4.)-t_from_z(15.))*.3/t_Edd )
 print('ratio',ratio)
 print(ratio**.42)
-
+for i in range(10):
+    if i<5:
+        continue
+    else:
+        print(i)
+    print(i)
+print('1e9, 0.1 Eddington ratio: L_bol=%.1e'%L_M(1e9,.1))
+print('1e9, 0.1 Eddington ratio: M1450=%.1f'%M1450_Lbol(L_M(1e9,.1)))
+print('M1450=-22, edd=0.1, mass:%.1e'%M_L(Lbol_M1450(-22.),.1))
+print('M1450=-30, edd=0.1, mass:%.1e'%M_L(Lbol_M1450(-30.),.1))
 # def kernel_MBH(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
 k1 = kernel_MBH1(1.001, 1e6, .1, .1, .1)
 # def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
 k2 = kernel_MBH2(1e8,1e8/1.001,1e6,.1,.1,.1,.1,.32)
 print('k1',k1,'k2',k2)
 print('6-15',(t_from_z(6)-t_from_z(15))/Myr, '4-6',(t_from_z(4)-t_from_z(6))/Myr)
+
+fig = plt.figure(figsize=(10,8),dpi=400)
+ax1 = fig.add_subplot(111)
+ax2 = ax1.twiny()
+
+pre = '/Users/wli/plots/MF2e10_f0.70m0.21s0.15'
+for a in ['e0.100d0.008alpha1.0','e0.100d0.020alpha1.0']:
+    fname = pre+a
+    T = ascii.read(fname, guess=False, delimiter=' ')
+    x = T['M_BH']; y = T['dn_MBH']
+    ax1.plot(x,y,label=a)
+new_tick_locations = np.logspace(6,12,num=20)
+# ax2.set_xlim(ax1.get_xlim())
+ax2.set_xticks(new_tick_locations)
+ax2.set_xticklabels(tick_M1450_MBH(new_tick_locations))
+print(new_tick_locations,tick_M1450_MBH(new_tick_locations))
+
+# ax1.set_xlim(41,47); ax1.set_ylim(0,1.)
+ax1.legend(loc='best')
+ax1.grid(True)
+ax1.set_xscale('log')
+ax1.set_yscale('log')
+# ax2.set_xscale('log')
+ax1.set_xlabel(r"$M_{BH}$",fontsize=fstick)
+ax2.set_xlabel(r"M1450",fontsize=fstick)
+ax1.set_ylabel("dn_MBH",fontsize=fstick)
+plt.savefig('../mf.png')
 exit(0)
 
 fig = plt.figure(figsize=(10,8),dpi=400)
