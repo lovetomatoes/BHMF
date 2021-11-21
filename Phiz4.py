@@ -35,6 +35,8 @@ for iM in range(N_Mh):
 bin_edg = bin_edg[str(z)]
 bin_wid = bin_wid[str(z)]
 bin_cen = bin_cen[str(z)]
+Phi_obs = Phi_obs[str(z)]
+Phi_err = Phi_err[str(z)]
 N_lf = len(bin_cen)
 
 # for M1450 in bin_cen:
@@ -43,6 +45,7 @@ N_lf = len(bin_cen)
 
 M1450_min = -30; M1450_max = -23.5
 f_duty = .7; mu_fit = .21; sigma_fit = .15
+eta8 = .1; delta_fit = .001
 
 # MF
 abin_mf =  np.logspace(6,13,num=100) # default endpoint=True
@@ -57,8 +60,11 @@ for ibin in range(N_mf): # N_mf
         for i_bsm in range(Nbsm):
             T = Ts[iM][i_bsm]
             dP = 0
-            x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'],t_from_z(6.)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
-            x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'],t_from_z(6.)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
+            dt = t_from_z(6.)-t_from_z(T['z_col'])
+            x0 = kernel_MBH2(abin_mf[ibin],T['Mstar0'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
+            x1 = kernel_MBH2(abin_mf[ibin+1],T['Mstar0'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
+            # x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'],t_from_z(6.)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
+            # x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'],t_from_z(6.)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
             x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) 
             dP_MBH = .5*(special.erfc(x0) - special.erfc(x1))
             dP = np.sum(dP_MBH)/Ntr
@@ -71,46 +77,81 @@ T = Table(
 T  = T[np.logical_and(T['bin_left']>=1e6,T['bin_right']<2e10)] # select M_BH range
 
 
+i = 0
 ## --------------------------   z=z   ----------------------------
-for f_duty in np.arange(.2, 1., .1): # .6 .4 
-    for mu_fit in np.arange(.01, .5, .01): # f*mu .18, .19, .20
-        for sigma_fit in np.arange(.01, 0.2, .01): # .10  .14
-            dn_MBH = np.zeros(N_mf)
-            for ibin in range(N_mf):
-                x0 = kernel_MBH(M_BH[ibin]/T['bin_right'],t_from_z(z)-t_from_z(6.),f_duty, mu_fit, sigma_fit)
-                x1 = kernel_MBH(M_BH[ibin]/T['bin_left'],t_from_z(z)-t_from_z(6.),f_duty, mu_fit, sigma_fit)
-                x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) 
-                dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) * T['dn_MBH']
-                dn_MBH[ibin] = np.nansum(dP_MBH)
+for delta_fit in [0., 28, .29, .3, .31, .32]: # 0.3 among [0., .05, .1, .15, .2, .25, .3, .35, .4]
+    for eta8 in [0., .08, .1, .12]:# .1
+        if (eta8 == 0. and delta_fit == 0.):
+            pass
+        elif eta8*delta_fit == 0.:
+            continue
 
-            Tz = Table(
-                [M_BH, dn_MBH],
-                names=('M_BH','dn_MBH')
-            )
+        for f_duty in np.arange(.2, 1., .1): # .4
+            for mu_fit in np.arange(.2, .6, .1): # .4
+                for sigma_fit in np.arange(.01, 0.25, .01): # .1
+                    i = i+1
+                    # check if file exists
+                    fname = z4datapre+'LF_'+'z%d'%z+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
+                    if os.path.isfile(fname):
+                        continue
+                    dn_MBH = np.zeros(N_mf)
+                    for ibin in range(N_mf):
+                        dt = t_from_z(z)-t_from_z(6.)
+                        if (eta8 == 0. and delta_fit == 0.):
+                            x0 = kernel_MBH1(M_BH[ibin]/T['bin_right'],dt,f_duty, mu_fit, sigma_fit)
+                            x1 = kernel_MBH1(M_BH[ibin]/T['bin_left'],dt,f_duty, mu_fit, sigma_fit)
+                        else :
+                            x0 = kernel_MBH2(M_BH[ibin],T['bin_right'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
+                            x1 = kernel_MBH2(M_BH[ibin],T['bin_left'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
+                        x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) 
+                        dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) * T['dn_MBH']
+                        dn_MBH[ibin] = np.nansum(dP_MBH)
 
-            # Tz  = Tz[np.logical_and(Tz['M_BH']>1e6,Tz['M_BH']<1e12)] # select M_BH range
-            Tz = ma.masked_where(np.logical_or(Tz['M_BH']<1e6,Tz['M_BH']>1e12), Tz)
+                    Tz = Table(
+                        [M_BH, dn_MBH],
+                        names=('M_BH','dn_MBH')
+                    )
 
-            Phi = np.zeros(N_lf)
-            for ibin in range(N_lf): # N_lf
-                M_BH = Tz['M_BH']
-                kernel = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
-                kernel = ma.masked_outside(kernel, -10., 10.)
-                x0 = kernel_M1450(bin_edg[ibin+1], M_BH, mu_fit, sigma_fit)
-                x1 = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
-                dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))
-                dPhi = np.nansum(Tz['dn_MBH']*dP_M1450)
-                Phi[ibin] += dPhi/bin_wid[ibin]*f_duty
+                    # ascii.write(Tz, z4datapre+
+                    #                'MF2e10_'+
+                    #                'z%d'%z+
+                    #                'f%3.2f'%f_duty+
+                    #                'm%3.2f'%mu_fit+
+                    #                's%3.2f'%sigma_fit+
+                    #                'e%.3f'%eta8+
+                    #                'd%.3f'%delta_fit+
+                    #                'alpha%.1f'%alpha,
+                    #                formats={'M_BH':'4.2e','dn_MBH':'4.2e'},
+                    #                overwrite=True)                    
 
-            Tlf = Table(
-                [bin_cen, Phi*1e9, Phi*1e9*(1.-f_obsc_const), Phi*1e9/corr_U14D20(bin_cen)],
-                names=('bin_cen','Phi','Phi_CO','Phi_DO')
-            )
-            ascii.write(Tlf, z4datapre+
-                           'LF12_'+'z%d'%z+
-                           'f%3.2f'%f_duty+
-                           'm%3.2f'%mu_fit+
-                           's%3.2f'%sigma_fit+
-                           'alpha%.1f'%alpha,
-                        formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e'},
-                        overwrite=True)
+                    # Tz = ma.masked_where(np.logical_or(Tz['M_BH']<1e6,Tz['M_BH']>1e12), Tz)
+
+                    Phi = np.zeros(N_lf)
+                    for ibin in range(N_lf): # N_lf
+                        M_BH = Tz['M_BH']
+                        kernel = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
+                        kernel = ma.masked_outside(kernel, -10., 10.)
+                        x0 = kernel_M1450(bin_edg[ibin+1], M_BH, mu_fit, sigma_fit)
+                        x1 = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
+                        dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))
+                        dPhi = np.nansum(Tz['dn_MBH']*dP_M1450)
+                        Phi[ibin] += dPhi/bin_wid[ibin]*f_duty
+
+                    Tlf = Table(
+                        [bin_cen, Phi*1e9, Phi*1e9*(1.-f_obsc_const), Phi*1e9/corr_U14D20(bin_cen), Phi_obs],
+                        names=('bin_cen','Phi','Phi_CO','Phi_DO','Phi_obs')
+                    )
+                    ascii.write(Tlf, z4datapre+
+                                    'LF_'+
+                                    'z%d'%z+
+                                    'f%3.2f'%f_duty+
+                                    'm%3.2f'%mu_fit+
+                                    's%3.2f'%sigma_fit+
+                                    'e%.3f'%eta8+
+                                    'd%.3f'%delta_fit+
+                                    'alpha%.1f'%alpha,
+                                    formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e','Phi_obs':'4.2e'},
+                                    overwrite=True)
+                    # if i==2:
+                    #     exit(0)
+print(i)
