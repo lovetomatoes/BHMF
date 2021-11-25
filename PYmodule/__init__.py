@@ -64,16 +64,17 @@ fslegend = 20
 my_cmap = plt.get_cmap("viridis")
 rescale = lambda y: (y - np.min(y)) / (np.max(y) - np.min(y))
 
+# -----------------  binned data in Gpc^-3 mag^-1     ---------------------
 # -----------------  '6': z=6 Matsuoka 2018; Table 4     ---------------------
-# -----------------  '5': z=5 Niida 2020; Table 3     ---------------------
+# -----------------  '5': z=5 Niida 2020; Table 3 excluding m_i<23.1    ---------------------
 # -----------------  '4': z=4 Akiyama 2018;     ---------------------    
 bin_cen = {'6':np.array([-29,-27.5,-26.75,-26.25,-25.75,-25.25,-24.75,-24.25,-23.75,-23.25,-22.75,-22]),
-           '5':np.append(np.arange(-28.63,-26.,.25),np.arange(-27.07,-22.5,.5)),
+           '5':np.append(np.arange(-28.63,-26.,.25),np.arange(-27.07,-23.5,.5)),
            '4':np.arange(-28.875, -21.625, .25)
            }
 bin_wid = {'6':np.array([2, 1, .5, .5, .5, .5, .5, .5, .5, .5, .5, 1]),
            '5':np.append(0.25*np.ones(len(np.arange(-28.63,-26.,.25))),
-                         0.5*np.ones(len(np.arange(-27.07,-22.5,.5)))),
+                         0.5*np.ones(len(np.arange(-27.07,-23.5,.5)))),
            '4':.25*np.ones(len(bin_cen['4']))
            }
 bin_edg = {'6':np.append(bin_cen['6'] - bin_wid['6']/2., bin_cen['6'][-1]+bin_wid['6'][-1]/2.),
@@ -82,14 +83,14 @@ bin_edg = {'6':np.append(bin_cen['6'] - bin_wid['6']/2., bin_cen['6'][-1]+bin_wi
            }
 Phi_obs = {'6':np.array([.0079, .242, .58, .9, 1.33, 4.6, 7.,  6.6, 8.3, 10.9, 23., 16.2]),
            '5':10.*np.array([.018,.018,.0092,.055,.083,.212,.277,.499,.628,.772,.639,
-                             1.2,.6,1.8,2.98,7.78,5.39,10.7,12.5,23.1,68.9]),
+                             1.2,.6,1.8,2.98,7.78,5.39,10.7,12.5]),
            '4':10**np.array([-9.710,-9.534,-9.710,-9.057,-8.781,-8.534,-8.192,-7.966,-7.853,-7.642,
                              -7.552,-7.387,-7.077,-7.189,-6.899,-6.756,-6.745,-6.577,-6.487,-6.493,
                              -6.405,-6.341,-6.369,-6.297,-6.382,-6.298,-6.219,-6.088,-6.253]) * 1e9
            }
 Phi_err = {'6':np.array([.0079, .061, .17, .32, .6, 1.2, 1.7, 2., 2.6, 3.6, 8.1, 16.2]),
            '5':10.*np.array([.013,.013,.0092,.023,.028,.044,.051,.068,.076,.087,.171,
-                             1.58,1.39,1.75,2.01,2.81,2.46,3.2,3.4,4.4,6.9]),
+                             1.58,1.39,1.75,2.01,2.81,2.46,3.2,3.4]),
            '4':np.array([0.138,0.169,0.138,0.292,0.402,0.534,0.791,1.026,1.169,1.490,1.657,2.545,
                          29.581,17.287,23.032,27.088,27.422,33.384,37.385,37.343,42.783,47.960,47.366,
                          51.538,46.855,52.208,59.367,71.892,80.733])
@@ -99,6 +100,15 @@ Phi_err = {'6':np.array([.0079, .061, .17, .32, .6, 1.2, 1.7, 2., 2.6, 3.6, 8.1,
 def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
     lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*10.*t_Edd)
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
+
+def M1M0(M0):
+    dt = t_from_z(4.)-t_from_z(6.)
+    delta_fit = .3
+    eta8 = .1
+    mu_fit = .5
+    f_duty = .3
+    M1 = 1e8*pow(mu_fit*f_duty*delta_fit*dt/(eta8*10.*t_Edd)+pow(M0/1e8,delta_fit),1./delta_fit)
+    return M1
 
 def kernel_MBH1(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
     lbd = np.log(Mgrow_ratio)/(dt/t_Edd * f_duty)
@@ -162,7 +172,7 @@ def LF_M1450(M,z=6): # dn/dmag in Mpc^-3 mag^-1
         M_star = -24.9
         alpha  = -1.23; beta = -2.73
     elif z==5:
-        # McGreer 2018 data; 
+        # McGreer 2018 DPL; 
         Phi_M_star = pow(10., -8.97+0.47)
         M_star = -27.47
         alpha  = -1.97; beta = -4.
@@ -170,6 +180,10 @@ def LF_M1450(M,z=6): # dn/dmag in Mpc^-3 mag^-1
         Phi_M_star = 3.8e-8
         M_star = -25.6
         alpha  = -1.23; beta = -3.
+        # Niida 2020 Table 4
+        Phi_M_star = 1.01e-7
+        M_star = -25.05
+        alpha  = -1.22; beta = -2.9
     elif z==4: # Akiyama 2018
         Phi_M_star = 2.66e-7
         M_star = -25.36

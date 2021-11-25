@@ -11,6 +11,25 @@ def read():
         print("reading")
         T = ascii.read(name, guess=False)
 
+'''
+print(t_from_z(6)/Myr-t_from_z(5)/Myr,t_from_z(5)/Myr-t_from_z(4)/Myr)
+a = np.logspace(4,10,num=7)
+print(a, M1M0(a))
+a = np.array([np.nan, np.inf, 1])
+print(a,np.nan_to_num(a))
+print(special.erfc(100))
+plt.figure(figsize=(10,8),dpi=400)
+for istr in ['5']:
+    plt.errorbar(bin_cen[istr], Phi_obs[istr]*1e-9, yerr=Phi_err[istr]*1e-9, fmt="o", c='C'+istr)
+    plt.scatter(bin_cen[istr],Phi_obs[istr]*1e-9,c='C'+istr,label=istr)
+    x = np.linspace(-22,-29)
+    plt.plot(x, LF_M1450(x,int(istr)), label=lfnames[istr], c='C'+istr)
+plt.xlim(-22,-29); plt.ylim(1e-11,1e-5)
+plt.yscale('log')
+plt.grid(True)
+plt.savefig('../LF5.png')
+exit(0)
+'''
 
 a = np.array([True,False,True])
 print(isinstance(a, float))
