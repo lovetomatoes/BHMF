@@ -43,19 +43,19 @@ N_lf = len(bin_cen)
 #     print('M1450',M1450,'Eddington accretion Mbh = %3.2e'%M_L(Lbol_M1450(M1450),.1))
 # print('M1450 of 1e6Msun: 10Edd',M1450_Lbol(L_M(1e6,10)))
 
-M1450_min = -30; M1450_max = -23.5
-f_duty = .7; mu_fit = .21; sigma_fit = .15
-eta8 = .1; delta_fit = .001
-
 # MF
 abin_mf =  np.logspace(2,13,num=200) # default endpoint=True
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
-N_mf = len(abin_mf)-1
+# M_BH: mass bin center; dn_MBH: # density in mass bins
 M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
+N_mf = len(M_BH)
+dn_MBH = np.zeros(N_mf)
 
 ## --------------------------   z=6   ----------------------------
-dn_MBH = np.zeros(N_mf)
-for ibin in range(N_mf): # N_mf
+# best fit from z=6 LF (M1450_min = -30; M1450_max = -23.5)
+f_duty = .7; mu_fit = .21; sigma_fit = .15
+eta8 = .1; delta_fit = .001
+for ibin in range(N_mf):
     for iM in range(N_Mh):
         for i_bsm in range(Nbsm):
             T = Ts[iM][i_bsm]
@@ -63,24 +63,24 @@ for ibin in range(N_mf): # N_mf
             dt = t_from_z(6.)-t_from_z(T['z_col'])
             x0 = kernel_MBH2(abin_mf[ibin],T['Mstar0'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
             x1 = kernel_MBH2(abin_mf[ibin+1],T['Mstar0'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
-            # x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'],t_from_z(6.)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
-            # x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'],t_from_z(6.)-t_from_z(T['z_col']),f_duty, mu_fit, sigma_fit)
+            # x0 = kernel_MBH(abin_mf[ibin]/T['Mstar0'],dt,f_duty, mu_fit, sigma_fit)
+            # x1 = kernel_MBH(abin_mf[ibin+1]/T['Mstar0'],dt,f_duty, mu_fit, sigma_fit)
             x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) 
             dP_MBH = .5*(special.erfc(x0) - special.erfc(x1))
-            dP = np.sum(dP_MBH)/Ntr
+            dP = np.nansum(dP_MBH)/Ntr
             dn_MBH[ibin] += dP*n_base[iM]*f_bsm[i_bsm]
 T = Table(
     [abin_mf[:-1], abin_mf[1:] , M_BH, dn_MBH],
     names=('bin_left','bin_right','M_BH','dn_MBH')
 )
 
-# T = ma.masked_where(T['bin_right']>2e10, T) # select z=6 M_BH range
-T = ma.masked_where(np.logical_or(T['bin_left']<1e6,T['bin_right']>2e10), T) # select z=6 M_BH range
+T = ma.masked_where(T['bin_right']>2e10, T) # select z=6 M_BH range
+# T = ma.masked_where(np.logical_or(T['bin_left']<1e6,T['bin_right']>2e10), T)
 
 N_bin_ini = N_mf-sum(T['M_BH'].mask)
 # print(N_bin_ini)
 # exit(0)
-print('z6: total n=%.1e'%np.nansum(T['dn_MBH']))
+print('z6: total n=%.3e'%np.nansum(T['dn_MBH']))
 
 i = 0
 ## --------------------------   z=z   ----------------------------
@@ -107,26 +107,24 @@ for delta_fit in [.3]: # [0., .28, .29, .3, .31, .32]: # 0.3 among [0., .05, .1,
                             x0 = kernel_MBH1(M_BH[ibin]/T['bin_right'],dt,f_duty, mu_fit, sigma_fit)
                             x1 = kernel_MBH1(M_BH[ibin]/T['bin_left'],dt,f_duty, mu_fit, sigma_fit)
                         else :
+                            # M_BHz: mass bin center at z
                             # M_BH = M1M0(T['M_BH'],dt,f_duty,mu_fit,eta8,delta_fit)
                             M_BHz = M1M0(M_BH); i = 1
-                            M_BHz = M_BH; i = 0
+                            # M_BHz = M_BH; i = 0
                             x0 = kernel_MBH2(M_BHz[ibin],T['bin_right'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
                             x1 = kernel_MBH2(M_BHz[ibin],T['bin_left'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit) 
                         # x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) # no use
-                        dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) #* T['dn_MBH']
+                        dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) * T['dn_MBH']
                         dn_MBH[ibin] = np.nansum(dP_MBH)
 
                     Tz = Table(
                         [M_BHz, dn_MBH],
                         names=('M_BH','dn_MBH')
                     )
-                    # Tz = ma.masked_where(np.logical_or(Tz['M_BH']<1e6,Tz['M_BH']>1e12), Tz)
-
                     print('i=%d'%i,'z0=%.1f:'%z0,'percent of bins',np.nansum(dn_MBH)/N_bin_ini)
-                    print('i=%d'%i,'z0=%.1f:'%z0,np.nansum(dn_MBH))
-                    # print('min M_BHz @ z0=%.1e:'%np.nanmin(M_BHz))
-                    # print('max M_BHz @ z0=%.1e:'%np.nanmax(M_BHz))
-                    ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10M], names=['M_BH','dn_dlog10M']),
+                    print('min M_BHz @ z0=%.1e:'%np.nanmin(M_BHz),'max M_BHz @ z0=%.1e:'%np.nanmax(M_BHz))
+                    dlog10Mz = np.log10(M1M0(abin_mf[1:])/M1M0(abin_mf[:-1]))
+                    ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz], names=['M_BH','dn_dlog10M']),
                                    z4datapre+str(i)+
                                    'MF_'+
                                    'z%d'%z+'z6_2e10'
@@ -143,7 +141,7 @@ for delta_fit in [.3]: # [0., .28, .29, .3, .31, .32]: # 0.3 among [0., .05, .1,
                     Phi = np.zeros(N_lf)
                     for ibin in range(N_lf): # N_lf
                         kernel = kernel_M1450(bin_edg[ibin], M_BHz, mu_fit, sigma_fit)
-                        kernel = ma.masked_outside(kernel, -10., 10.)
+                        # kernel = ma.masked_outside(kernel, -10., 10.)
                         x0 = kernel_M1450(bin_edg[ibin+1], M_BHz, mu_fit, sigma_fit)
                         x1 = kernel_M1450(bin_edg[ibin], M_BHz, mu_fit, sigma_fit)
                         dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))

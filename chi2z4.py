@@ -13,12 +13,6 @@ Phi_obs = ma.masked_where(np.logical_or(bin_cen>M1450_max,bin_cen<M1450_min),Phi
 Phi_err = Phi_err[str(z)]
 # print('bin_cen',bin_cen,'Phi_obs',Phi_obs,'Phi_err',Phi_err)
 
-# # -----------------     obs data w/ error      --------------------
-# Phi_obs_CO = Phi_obs/(1-f_obsc_const)
-# Phi_obs_DO = Phi_obs*corr_U14D20(bin_cen)
-# Phi_err_CO = Phi_err/(1-f_obsc_const)
-# Phi_err_DO = Phi_err*corr_U14D20(bin_cen)
-
 alpha = 1.
 find_min = False
 i = 0
