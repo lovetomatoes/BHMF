@@ -78,64 +78,66 @@ T = ma.masked_where(T['bin_right']>2e10, T) # select z=6 M_BH range
 # T = ma.masked_where(np.logical_or(T['bin_left']<1e6,T['bin_right']>2e10), T)
 
 N_bin_ini = N_mf-sum(T['M_BH'].mask)
-# print(N_bin_ini)
-# exit(0)
 print('z6: total n=%.3e'%np.nansum(T['dn_MBH']))
 
 i = 0
 ## --------------------------   z=z   ----------------------------
-for delta_fit in [.3]: # [0., .28, .29, .3, .31, .32]: # 0.3 among [0., .05, .1, .15, .2, .25, .3, .35, .4]
-    for eta8 in [0, .1]: #[0., .08, .1, .12]:# .1
+for delta_fit in np.arange(.15, .25, .01): # 0.2 in [0., .05, .1, .15, .2, .25, .3, .35, .4]
+    for eta8 in np.arange(.05, .1, .01): # .08 in [0., .08, .1, .12]
         if (eta8 == 0. and delta_fit == 0.):
             pass
         elif eta8*delta_fit == 0.:
             continue
 
-        for f_duty in [.3]: # np.arange(.2, 1., .1): # .4
-            for mu_fit in [.5]: #np.arange(.2, .6, .1): # .4
-                for sigma_fit in [.22]: #np.arange(.01, 0.25, .01): # .1
-                    # i = i+1
-                    # check if file exists
+        for f_duty in np.arange(.2, 1., .1): # .4 in np.arange(.2, 1., .1)
+            for mu_fit in np.arange(.1, .5, .05): # .2 in np.arange(.2, .6, .1)
+                for sigma_fit in np.arange(.2, 0.27, .01): # .24 in np.arange(.01, 0.25, .01)
+                    i = i+1
+                    # continue
                     fname = z4datapre+'LF_'+'z%d'%z+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
+                    # check if file exists
                     # if os.path.isfile(fname):
                     #     continue
                     dn_MBH = np.zeros(N_mf)
                     for ibin in range(N_mf):
-                        z0 = 4. # z=5. converge check timestep
-                        dt = t_from_z(z0)-t_from_z(6.)
+                        # z=5. converge check timestep
+                        dt = t_from_z(z)-t_from_z(6.)
                         if (eta8 == 0. and delta_fit == 0.):
+                            M_BHz = M_BH
                             x0 = kernel_MBH1(M_BH[ibin]/T['bin_right'],dt,f_duty, mu_fit, sigma_fit)
                             x1 = kernel_MBH1(M_BH[ibin]/T['bin_left'],dt,f_duty, mu_fit, sigma_fit)
                         else :
                             # M_BHz: mass bin center at z
-                            # M_BH = M1M0(T['M_BH'],dt,f_duty,mu_fit,eta8,delta_fit)
-                            M_BHz = M1M0(M_BH); i = 1
-                            # M_BHz = M_BH; i = 0
+                            M_BHz = M1M0(M_BH,dt,f_duty,mu_fit,eta8,delta_fit)
+                            # M_BHz = M_BH
                             x0 = kernel_MBH2(M_BHz[ibin],T['bin_right'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
                             x1 = kernel_MBH2(M_BHz[ibin],T['bin_left'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit) 
                         # x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) # no use
                         dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) * T['dn_MBH']
                         dn_MBH[ibin] = np.nansum(dP_MBH)
+                    # print('i=%d'%i,'z=%.1f:'%z,'percent of bins',np.nansum(dn_MBH)/N_bin_ini)
+                    # print('min M_BHz @ z=%.1e:'%np.nanmin(M_BHz),'max M_BHz @ z=%.1e:'%np.nanmax(M_BHz))
 
                     Tz = Table(
                         [M_BHz, dn_MBH],
                         names=('M_BH','dn_MBH')
                     )
-                    print('i=%d'%i,'z0=%.1f:'%z0,'percent of bins',np.nansum(dn_MBH)/N_bin_ini)
-                    print('min M_BHz @ z0=%.1e:'%np.nanmin(M_BHz),'max M_BHz @ z0=%.1e:'%np.nanmax(M_BHz))
-                    dlog10Mz = np.log10(M1M0(abin_mf[1:])/M1M0(abin_mf[:-1]))
-                    ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz], names=['M_BH','dn_dlog10M']),
-                                   z4datapre+str(i)+
-                                   'MF_'+
-                                   'z%d'%z+'z6_2e10'
-                                   'f%3.2f'%f_duty+
-                                   'm%3.2f'%mu_fit+
-                                   's%3.2f'%sigma_fit+
-                                   'e%.3f'%eta8+
-                                   'd%.3f'%delta_fit+
-                                   'alpha%.1f'%alpha,
-                                   formats={'M_BH':'4.2e','dn_dlog10M':'4.2e'},
-                                   overwrite=True)                    
+                    # if (eta8 == 0. and delta_fit == 0.):
+                    #     dlog10Mz = dlog10M
+                    # else:
+                    #     dlog10Mz = np.log10(M1M0(abin_mf[1:],dt,f_duty,mu_fit,eta8,delta_fit)/M1M0(abin_mf[:-1],dt,f_duty,mu_fit,eta8,delta_fit))
+                    # ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz], names=['M_BH','dn_dlog10M']),
+                    #                z4datapre+str(i)+
+                    #                'MF_'+
+                    #                'z%d'%z+'z6_2e10'
+                    #                'f%3.2f'%f_duty+
+                    #                'm%3.2f'%mu_fit+
+                    #                's%3.2f'%sigma_fit+
+                    #                'e%.3f'%eta8+
+                    #                'd%.3f'%delta_fit+
+                    #                'alpha%.1f'%alpha,
+                    #                formats={'M_BH':'4.2e','dn_dlog10M':'4.2e'},
+                    #                overwrite=True)                    
                     # exit(0)
 
                     Phi = np.zeros(N_lf)
@@ -152,7 +154,7 @@ for delta_fit in [.3]: # [0., .28, .29, .3, .31, .32]: # 0.3 among [0., .05, .1,
                         [bin_cen, Phi*1e9, Phi*1e9*(1.-f_obsc_const), Phi*1e9/corr_U14D20(bin_cen), Phi_obs],
                         names=('bin_cen','Phi','Phi_CO','Phi_DO','Phi_obs')
                     )
-                    ascii.write(Tlf, z4datapre+str(i)+
+                    ascii.write(Tlf, z4datapre+
                                     'LF_'+
                                     'z%d'%z+
                                     'f%3.2f'%f_duty+

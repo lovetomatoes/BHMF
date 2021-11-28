@@ -16,16 +16,16 @@ Phi_err = Phi_err[str(z)]
 alpha = 1.
 find_min = False
 i = 0
-for delta_fit in [0., 28, .29, .3, .31, .32]: # 0.3 among [0., .05, .1, .15, .2, .25, .3, .35, .4]
-    for eta8 in [0., .08, .1, .12]:# .1
+for delta_fit in np.arange(.15, .25, .01): # 0.2 in [0., .05, .1, .15, .2, .25, .3, .35, .4]
+    for eta8 in np.arange(.05, .1, .01): # .08 in [0., .08, .1, .12]
         if (eta8 == 0. and delta_fit == 0.):
             pass
         elif eta8*delta_fit == 0.:
             continue
 
-        for f_duty in np.arange(.2, 1., .1): # .4
-            for mu_fit in np.arange(.2, .6, .1): # .4
-                for sigma_fit in np.arange(.01, 0.25, .01): # .1
+        for f_duty in np.arange(.2, 1., .1): # .4 in np.arange(.2, 1., .1)
+            for mu_fit in np.arange(.1, .5, .05): # .2 in np.arange(.2, .6, .1)
+                for sigma_fit in np.arange(.2, 0.27, .01): # .24 in np.arange(.01, 0.25, .01)
                     i += 1
                     fname = z4datapre+'LF_'+'z%d'%z+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
                     if os.path.isfile(fname):

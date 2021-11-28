@@ -101,14 +101,8 @@ def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
     lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*10.*t_Edd)
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
-def M1M0(M0):
-    dt = t_from_z(4.)-t_from_z(6.)
-    delta_fit = .3
-    eta8 = .1
-    mu_fit = .5
-    f_duty = .3
-    M1 = 1e8*pow(mu_fit*f_duty*delta_fit*dt/(eta8*10.*t_Edd)+pow(M0/1e8,delta_fit),1./delta_fit)
-    return M1
+def M1M0(M0,dt,f_duty,mu_fit,eta8,delta_fit):
+    return 1e8*pow(mu_fit*f_duty*delta_fit*dt/(eta8*10.*t_Edd)+pow(M0/1e8,delta_fit),1./delta_fit)
 
 def kernel_MBH1(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
     lbd = np.log(Mgrow_ratio)/(dt/t_Edd * f_duty)
