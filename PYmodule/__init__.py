@@ -22,7 +22,7 @@ datapre = '../data/'
 figpre = '../figs/'
 
 typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
-lfnames = {'4':'Akiyama_18','5':'McGreer_18','6':'Matsuoka_18'}
+lfnames = {'4':'Akiyama_18','5':'Niida_20','6':'Matsuoka_18'}
 
 global G, h0, H0, Omega_m0, Omega_L0, m_H, mu, Ms, pi, km, pc, Myr, alpha_T
 G, c, k_B, m_H = 6.67408e-8, 2.9979245e10, 1.38064852e-16, 1.66053904e-24
