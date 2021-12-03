@@ -55,16 +55,16 @@ N_lf = len(bin_cen)
 alpha = 1.
 
 i = 0
-for delta_fit in [0., .001, .01, .1]: # .001
-    for eta8 in [0., .05, .1, .15, .2]:# .1
+for delta_fit in [.001]: # .001 in [0., .001, .01, .1]
+    for eta8 in [0.1]:# .1 in [0., .05, .1, .15, .2]:
         if (eta8 == 0. and delta_fit == 0.):
             pass
         elif eta8*delta_fit == 0.:
             continue
-        for f_duty in np.arange(.5, 1., .1): # .7; 3 lines below can hide
-            for mu_fit in np.arange(.2, .5, .01): # .21
-                for sigma_fit in np.arange(.01, 0.2, .01): # .15
-                    # i = i+1
+        for f_duty in [.7]: # .7 in np.arange(.5, 1., .1):
+            for mu_fit in [.21]: # .21 in np.arange(.2, .5, .01):
+                for sigma_fit in [.15]: # .15 in np.arange(.01, 0.2, .01):
+                    i = i+1
                     # continue
                     dn_MBH = np.zeros(N_mf)
                     for ibin in range(N_mf): # N_mf
@@ -88,17 +88,19 @@ for delta_fit in [0., .001, .01, .1]: # .001
                         names=('M_BH','dn_MBH')
                     )
 
+                    ascii.write( Table([T['M_BH'], T['dn_MBH']/dlog10M], names=['M_BH','dn_dlog10M']),
+                                   z6datapre+
+                                   'MF2e10_'+
+                                   'f%3.2f'%f_duty+
+                                   'm%3.2f'%mu_fit+
+                                   's%3.2f'%sigma_fit+
+                                   'e%.3f'%eta8+
+                                   'd%.3f'%delta_fit+
+                                   'alpha%.1f'%alpha,
+                                formats={'M_BH':'4.2e','dn_dlog10M':'4.2e'},
+                                overwrite=True)
+                    exit(0)
                     T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
-                    # ascii.write(T, z6datapre+
-                    #                'MF2e10_'+
-                    #                'f%3.2f'%f_duty+
-                    #                'm%3.2f'%mu_fit+
-                    #                's%3.2f'%sigma_fit+
-                    #                'e%.3f'%eta8+
-                    #                'd%.3f'%delta_fit+
-                    #                'alpha%.1f'%alpha,
-                    #             formats={'M_BH':'4.2e','dn_MBH':'4.2e'},
-                    #             overwrite=True)
 
                     Phi = np.zeros(N_lf)
                     for ibin in range(N_lf): # N_lf

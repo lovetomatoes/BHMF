@@ -82,16 +82,16 @@ print('z6: total n=%.3e'%np.nansum(T['dn_MBH']))
 
 i = 0
 ## --------------------------   z=z   ----------------------------
-for delta_fit in np.arange(.15, .25, .01): # 0.2 in [0., .05, .1, .15, .2, .25, .3, .35, .4]
-    for eta8 in np.arange(.05, .1, .01): # .08 in [0., .08, .1, .12]
+for delta_fit in [.25]: # .25 in np.arange(.1, .4, .05)
+    for eta8 in [.07]: # .07 in np.arange(.05, .13, .01)
         if (eta8 == 0. and delta_fit == 0.):
             pass
         elif eta8*delta_fit == 0.:
             continue
 
-        for f_duty in np.arange(.2, 1., .1): # .4 in np.arange(.2, 1., .1)
-            for mu_fit in np.arange(.1, .5, .05): # .2 in np.arange(.2, .6, .1)
-                for sigma_fit in np.arange(.2, 0.27, .01): # .24 in np.arange(.01, 0.25, .01)
+        for f_duty in [.6]: # .6 in np.arange(.2, 1., .1)
+            for mu_fit in [.1]: # .1 in np.logspace(-2, 0, num=5)
+                for sigma_fit in [.29]: # .29 in np.arange(.2, 0.3, .01)
                     i = i+1
                     # continue
                     fname = z4datapre+'LF_'+'z%d'%z+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
@@ -122,23 +122,23 @@ for delta_fit in np.arange(.15, .25, .01): # 0.2 in [0., .05, .1, .15, .2, .25, 
                         [M_BHz, dn_MBH],
                         names=('M_BH','dn_MBH')
                     )
-                    # if (eta8 == 0. and delta_fit == 0.):
-                    #     dlog10Mz = dlog10M
-                    # else:
-                    #     dlog10Mz = np.log10(M1M0(abin_mf[1:],dt,f_duty,mu_fit,eta8,delta_fit)/M1M0(abin_mf[:-1],dt,f_duty,mu_fit,eta8,delta_fit))
-                    # ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz], names=['M_BH','dn_dlog10M']),
-                    #                z4datapre+str(i)+
-                    #                'MF_'+
-                    #                'z%d'%z+'z6_2e10'
-                    #                'f%3.2f'%f_duty+
-                    #                'm%3.2f'%mu_fit+
-                    #                's%3.2f'%sigma_fit+
-                    #                'e%.3f'%eta8+
-                    #                'd%.3f'%delta_fit+
-                    #                'alpha%.1f'%alpha,
-                    #                formats={'M_BH':'4.2e','dn_dlog10M':'4.2e'},
-                    #                overwrite=True)                    
-                    # exit(0)
+                    if (eta8 == 0. and delta_fit == 0.):
+                        dlog10Mz = dlog10M
+                    else:
+                        dlog10Mz = np.log10(M1M0(abin_mf[1:],dt,f_duty,mu_fit,eta8,delta_fit)/M1M0(abin_mf[:-1],dt,f_duty,mu_fit,eta8,delta_fit))
+                    ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz], names=['M_BH','dn_dlog10M']),
+                                   z4datapre+
+                                   'MF_'+
+                                   'z%d'%z+'z6_2e10'
+                                   'f%3.2f'%f_duty+
+                                   'm%3.2f'%mu_fit+
+                                   's%3.2f'%sigma_fit+
+                                   'e%.3f'%eta8+
+                                   'd%.3f'%delta_fit+
+                                   'alpha%.1f'%alpha,
+                                   formats={'M_BH':'4.2e','dn_dlog10M':'4.2e'},
+                                   overwrite=True)                    
+                    exit(0)
 
                     Phi = np.zeros(N_lf)
                     for ibin in range(N_lf): # N_lf
