@@ -111,6 +111,8 @@ def M1M0(M0,dt,f_duty,mu_fit,eta8,delta):
     ## if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
     eta = ma.masked_greater(eta, e_max)
     M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(e_max*10.*t_Edd))
+    # i = ma.argmax(eta)
+    # M1[eta.mask] = M0[eta.mask]/M0[i]*M1[i]
     eta[eta.mask] = e_max
 
     ## if eta < minimum -> use Eddington accretion -- M(t) \propto M0*exp(...)
@@ -133,13 +135,12 @@ def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
     eta = eta8*pow(M0/1e8,delta)
     # if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
     eta = ma.masked_greater(eta, e_max)
-
     # M1[eta.mask] = M0[eta.mask]*np.exp(mu*f_duty*dt/(e_max*10.*t_Edd))
     i = ma.argmax(eta)
     lbd[eta.mask] = lbd[i] * np.log(M1/M0[eta.mask]) / np.log(M1/M0[i])
     # lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(e_max*10.*t_Edd))
-
     eta[eta.mask] = e_max
+
     # if eta < minimum -> use Eddington accretion -- M(t) \propto M0
     eta = ma.masked_less(eta, e_min)
     i = ma.argmin(eta)

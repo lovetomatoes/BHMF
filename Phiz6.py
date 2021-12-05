@@ -11,6 +11,7 @@ N_Mh = 3 # 3 base halos: 1e11, 1e12, 1e13
 Ntr = 10000
 eta = 0.3
 z = int(6)
+alpha = 1.
 
 
 Ts = [] # bsm=0,1 two files
@@ -52,18 +53,28 @@ N_lf = len(bin_cen)
 #     print('M1450',M1450,'Eddington accretion Mbh = %3.2e'%M_L(Lbol_M1450(M1450),.1))
 
 
-alpha = 1.
+d_range = [0., .001, .01, .1]
+e_range = [0., .05, .1, .15, .2]
+f_range = np.arange(.5, 1., .1)
+m_range = np.arange(.2, .5, .01)
+s_range = np.arange(.01, 0.2, .01)
+
+d_range = [.001]
+e_range = [.1]
+f_range = [.7]
+m_range = [.21]
+s_range = [.15]
 
 i = 0
-for delta_fit in [.001]: # .001 in [0., .001, .01, .1]
-    for eta8 in [0.1]:# .1 in [0., .05, .1, .15, .2]:
+for delta_fit in d_range: # .001 in [0., .001, .01, .1]
+    for eta8 in e_range:# .1 in [0., .05, .1, .15, .2]:
         if (eta8 == 0. and delta_fit == 0.):
             pass
         elif eta8*delta_fit == 0.:
             continue
-        for f_duty in [.7]: # .7 in np.arange(.5, 1., .1):
-            for mu_fit in [.21]: # .21 in np.arange(.2, .5, .01):
-                for sigma_fit in [.15]: # .15 in np.arange(.01, 0.2, .01):
+        for f_duty in f_range: # .7 in np.arange(.5, 1., .1):
+            for mu_fit in m_range: # .21 in np.arange(.2, .5, .01):
+                for sigma_fit in s_range: # .15 in np.arange(.01, 0.2, .01):
                     i = i+1
                     # continue
                     dn_MBH = np.zeros(N_mf)
@@ -90,7 +101,7 @@ for delta_fit in [.001]: # .001 in [0., .001, .01, .1]
 
                     ascii.write( Table([T['M_BH'], T['dn_MBH']/dlog10M], names=['M_BH','dn_dlog10M']),
                                    z6datapre+
-                                   'MF2e10_'+
+                                   'MF'+
                                    'f%3.2f'%f_duty+
                                    'm%3.2f'%mu_fit+
                                    's%3.2f'%sigma_fit+

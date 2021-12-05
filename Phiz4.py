@@ -126,10 +126,11 @@ for delta_fit in [.25]: # .25 in np.arange(.1, .4, .05)
                         dlog10Mz = dlog10M
                     else:
                         dlog10Mz = np.log10(M1M0(abin_mf[1:],dt,f_duty,mu_fit,eta8,delta_fit)/M1M0(abin_mf[:-1],dt,f_duty,mu_fit,eta8,delta_fit))
-                    ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz], names=['M_BH','dn_dlog10M']),
+                    #!!!!!!!!!!!!! dlog10Mz[0] instead of dlog10Mz to make MF@z4 smooth...
+                    ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz[0]], names=['M_BH','dn_dlog10M']),
                                    z4datapre+
                                    'MF_'+
-                                   'z%d'%z+'z6_2e10'
+                                   'z%d'%z+#'z6_2e10'
                                    'f%3.2f'%f_duty+
                                    'm%3.2f'%mu_fit+
                                    's%3.2f'%sigma_fit+
