@@ -11,6 +11,64 @@ def read():
         print("reading")
         T = ascii.read(name, guess=False)
 
+def kernel_MBH4(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
+    lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*10.*t_Edd)
+    return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
+
+x = np.logspace(4,15,num=200)
+dt = .01*t_Edd
+f = 1.; m = .1; s = .1; 
+e8 = .1; d = .3;
+M1 = 1e12
+y = kernel_MBH2(M1, x, dt, f, m, s, e8, d)
+# z = kernel_MBH3(M1, x, dt, f, m, s, e8, d)
+w = kernel_MBH4(M1, x, dt, f, m, s, e8, d)
+
+plt.figure(figsize=(10,10),dpi=400)
+plt.plot(x,y)
+# plt.plot(x,z)
+plt.plot(x,w)
+plt.xscale('log'); # plt.yscale('log')
+plt.xlim(1e4,1e15); plt.ylim(bottom=0)
+plt.savefig('../lbd.png')
+
+
+def M2M0(M0,dt,f_duty,mu_fit,eta8,delta):
+    # eta from empirical formula: eta = eta8*(M/M8)**delta
+    eta = eta8*pow(M0/1e8,delta)
+    # M1: mass after growth following t^(1/delta) power
+    M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*10.*t_Edd)+pow(M0/1e8,delta),1./delta)
+    return M1
+
+x = np.logspace(4,15,num=200)
+dt = t_Edd
+e8 = .1; d = .3; 
+y = M1M0(x,dt,1.,1.,e8,d)
+z = M2M0(x,dt,1.,1.,e8,d)
+e = e8*pow(x/1e8,d)
+e = ma.masked_greater(e, e_max)
+e[e.mask] = e_max
+e = ma.masked_less(e, e_min)
+i = ma.argmin(e)
+# print(e.mask, i)
+e[e.mask] = e_min
+
+plt.figure(figsize=(10,10),dpi=400)
+plt.plot(x,y)
+plt.plot(x,z)
+plt.plot(x,x)
+plt.xscale('log'); plt.yscale('log')
+plt.xlim(1e4,1e15)
+plt.savefig('../M1.png')
+plt.figure(figsize=(10,10),dpi=400)
+plt.plot(x,e)
+plt.scatter(x,e)
+plt.xscale('log');# plt.yscale('log')
+plt.xlim(1e4,1e15)
+plt.savefig('../e.png')
+
+exit(0)
+
 '''
 print(t_from_z(6)/Myr-t_from_z(5)/Myr,t_from_z(5)/Myr-t_from_z(4)/Myr)
 a = np.logspace(4,10,num=7)

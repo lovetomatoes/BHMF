@@ -73,7 +73,7 @@ for delta_fit in [.001]: # .001 in [0., .001, .01, .1]
                                 T = Ts[iM][i_bsm]
                                 dP = 0
                                 dt = t_from_z(z)-t_from_z(T['z_col'])
-                                if (eta8 == 0. and delta_fit == 0.):
+                                if (eta8 == 0. and delta_fit == 0.): # eta=0.1 constant; e,d not into fitting
                                     x0 = kernel_MBH1(abin_mf[ibin]/T['Mstar0'],dt,f_duty, mu_fit, sigma_fit)
                                     x1 = kernel_MBH1(abin_mf[ibin+1]/T['Mstar0'],dt,f_duty, mu_fit, sigma_fit)
                                 else :
