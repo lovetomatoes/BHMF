@@ -10,7 +10,7 @@ from PYmodule import *
 N_Mh = 3 # 3 base halos: 1e11, 1e12, 1e13
 Ntr = 10000
 eta = 0.3
-z = int(5)
+z = int(4)
 
 alpha = 1.
 Ts = [] # bsm=0,1 two files
@@ -80,33 +80,80 @@ T = ma.masked_where(T['bin_right']>2e10, T) # select z=6 M_BH range
 N_bin_ini = N_mf-sum(T['M_BH'].mask)
 print('z6: total n=%.3e'%np.nansum(T['dn_MBH']))
 
-d_range = [0., .05, .1, .15, .2] #, .25, .3, .35, .4
-e_range = [0., .08, .1, .12]
-f_range = np.arange(.2, 1., .1)
-m_range = np.arange(.2, .6, .1)
-s_range = np.arange(.1, 0.5, .1)
+## --------------------------   z=5   ----------------------------
+# best fit from z=5 LF (M1450_min = ?; M1450_max = ?)
+# currently first fitting best
+f_duty = .6;  mu_fit = .1; sigma_fit = .4
+eta8 = .05; delta_fit = .4
+
+z0 = 5.
+dt = t_from_z(z0)-t_from_z(6.)
+# M_BHz: mass bin center
+M_BHz = M1M0(M_BH,dt,f_duty,mu_fit,eta8,delta_fit)
+dn_MBH = np.zeros(N_mf)
+for ibin in range(N_mf):
+    x0 = kernel_MBH2(M_BHz[ibin],T['bin_right'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
+    x1 = kernel_MBH2(M_BHz[ibin],T['bin_left'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit) 
+    # x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) # no use
+    dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) * T['dn_MBH']
+    dn_MBH[ibin] = np.nansum(dP_MBH)
+print('z=%.1f,percent of bins'%z0, np.nansum(dn_MBH)/N_bin_ini)
+bin_left = M1M0(abin_mf[:-1],dt,f_duty,mu_fit,eta8,delta_fit)
+bin_right = M1M0(abin_mf[1:],dt,f_duty,mu_fit,eta8,delta_fit)
+T = Table([bin_left, bin_right, M_BHz, dn_MBH], names=('bin_left','bin_right','M_BH','dn_MBH'))   
+
+ascii.write(T, z5datapre+
+                'MF_best_5'+
+                'f%3.2f'%f_duty+
+                'm%3.2f'%mu_fit+
+                's%3.2f'%sigma_fit+
+                'e%.3f'%eta8+
+                'd%.3f'%delta_fit+
+                'alpha%.1f'%alpha,
+                formats={'bin_left':'6.2e','bin_right':'6.2e','M_BH':'6.2e','dn_MBH':'6.2e'},
+                overwrite=True)
+exit(0)
+
+# # ------------- following z=4
+# eta8 = .07; delta_fit = .25
+# f_duty = .6;  mu_fit = .1; sigma_fit = .29
+# for z0 in [4., 4.5, 5., 5.5]:
+#     dt = t_from_z(z0)-t_from_z(6.)
+#     # M_BHz: mass bin center
+#     M_BHz = M1M0(M_BH,dt,f_duty,mu_fit,eta8,delta_fit)
+#     dn_MBH = np.zeros(N_mf)
+#     for ibin in range(N_mf):
+#         x0 = kernel_MBH2(M_BHz[ibin],T['bin_right'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
+#         x1 = kernel_MBH2(M_BHz[ibin],T['bin_left'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit) 
+#         # x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) # no use
+#         dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) # * T['dn_MBH']
+#         dn_MBH[ibin] = np.nansum(dP_MBH)
+#     print('z=%.1f,percent of bins'%z0, np.nansum(dn_MBH)/N_bin_ini)
+
 
 i = 0
 ## --------------------------   z=z   ----------------------------
-for delta_fit in d_range: # (.2, .5, .01): # .35 in [0., .05, .1, .15, .2, .25, .3, .35, .4]
-    for eta8 in e_range: # np.arange(.06, .16, .02): # .08 in [0., .08, .1, .12]
-        # if (eta8 == 0. and delta_fit == 0.):
-        #     pass
-        # elif eta8*delta_fit == 0.:
-        #     continue
-        for f_duty in f_range: # np.arange(.2, 1., .1): # .3 in np.arange(.2, 1., .1)
-            for mu_fit in m_range: # np.logspace(-2, 0, num=5): # .2 in np.arange(.2, .6, .1)
-                for sigma_fit in s_range: # np.arange(.1, 0.5, .1): # .4 in np.arange(.1, 0.5, .1)
+for delta_fit in [.25]: # .25 in np.arange(.1, .4, .05)
+    for eta8 in [.07]: # .07 in np.arange(.05, .13, .01)
+        if (eta8 == 0. and delta_fit == 0.):
+            pass
+        elif eta8*delta_fit == 0.:
+            continue
+
+        for f_duty in [.6]: # .6 in np.arange(.2, 1., .1)
+            for mu_fit in [.1]: # .1 in np.logspace(-2, 0, num=5)
+                for sigma_fit in [.29]: # .29 in np.arange(.2, 0.3, .01)
                     i = i+1
                     # continue
-                    fname = z5datapre+'LF_'+'z%d'%z+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
-                    # # check if file exists
+                    fname = z4datapre+'LF_'+'z%d'%z+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
+                    # check if file exists
                     # if os.path.isfile(fname):
                     #     continue
                     dn_MBH = np.zeros(N_mf)
                     for ibin in range(N_mf):
                         # z=5. converge check timestep
-                        dt = t_from_z(z)-t_from_z(6.)
+                        dt = t_from_z(z)-t_from_z(5.)
+                        # dt = t_from_z(z)-t_from_z(6.)
                         if (eta8 == 0. and delta_fit == 0.):
                             M_BHz = M_BH
                             x0 = kernel_MBH1(M_BH[ibin]/T['bin_right'],dt,f_duty, mu_fit, sigma_fit)
@@ -127,23 +174,25 @@ for delta_fit in d_range: # (.2, .5, .01): # .35 in [0., .05, .1, .15, .2, .25, 
                         [M_BHz, dn_MBH],
                         names=('M_BH','dn_MBH')
                     )
-                    # if (eta8 == 0. and delta_fit == 0.):
-                    #     dlog10Mz = dlog10M
-                    # else:
-                    #     dlog10Mz = np.log10(M1M0(abin_mf[1:],dt,f_duty,mu_fit,eta8,delta_fit)/M1M0(abin_mf[:-1],dt,f_duty,mu_fit,eta8,delta_fit))
-                    # ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz], names=['M_BH','dn_dlog10M']),
-                    #                z5datapre+str(i)+
-                    #                'MF_'+
-                    #                'z%d'%z+'z6_2e10'
-                    #                'f%3.2f'%f_duty+
-                    #                'm%3.2f'%mu_fit+
-                    #                's%3.2f'%sigma_fit+
-                    #                'e%.3f'%eta8+
-                    #                'd%.3f'%delta_fit+
-                    #                'alpha%.1f'%alpha,
-                    #                formats={'M_BH':'4.2e','dn_dlog10M':'4.2e'},
-                    #                overwrite=True)                    
-                    # exit(0)
+                    if (eta8 == 0. and delta_fit == 0.):
+                        dlog10Mz = dlog10M
+                    else:
+                        dlog10Mz = np.log10(M1M0(abin_mf[1:],dt,f_duty,mu_fit,eta8,delta_fit)/M1M0(abin_mf[:-1],dt,f_duty,mu_fit,eta8,delta_fit))
+                    #!!!!!!!!!!!!! dlog10Mz[0] instead of dlog10Mz to make MF@z4 smooth...
+                    ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz[0]], names=['M_BH','dn_dlog10M']),
+                                   z4datapre+
+                                   'MF_'+
+                                   # 'piece'
+                                   'z%d'%z+#'z6_2e10'
+                                   'f%3.2f'%f_duty+
+                                   'm%3.2f'%mu_fit+
+                                   's%3.2f'%sigma_fit+
+                                   'e%.3f'%eta8+
+                                   'd%.3f'%delta_fit+
+                                   'alpha%.1f'%alpha,
+                                   formats={'M_BH':'4.2e','dn_dlog10M':'4.2e'},
+                                   overwrite=True)                    
+                    exit(0)
 
                     Phi = np.zeros(N_lf)
                     for ibin in range(N_lf): # N_lf
@@ -159,7 +208,7 @@ for delta_fit in d_range: # (.2, .5, .01): # .35 in [0., .05, .1, .15, .2, .25, 
                         [bin_cen, Phi*1e9, Phi*1e9*(1.-f_obsc_const), Phi*1e9/corr_U14D20(bin_cen), Phi_obs],
                         names=('bin_cen','Phi','Phi_CO','Phi_DO','Phi_obs')
                     )
-                    ascii.write(Tlf, z5datapre+
+                    ascii.write(Tlf, z4datapre+
                                     'LF_'+
                                     'z%d'%z+
                                     'f%3.2f'%f_duty+

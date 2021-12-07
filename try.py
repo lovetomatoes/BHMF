@@ -67,7 +67,7 @@ plt.xscale('log');# plt.yscale('log')
 plt.xlim(1e4,1e15)
 plt.savefig('../e.png')
 
-exit(0)
+# exit(0)
 
 '''
 print(t_from_z(6)/Myr-t_from_z(5)/Myr,t_from_z(5)/Myr-t_from_z(4)/Myr)
@@ -277,6 +277,7 @@ for i in range(10):
 print('1e9, 0.1 Eddington ratio: L_bol=%.1e'%L_M(1e9,.1))
 print('1e9, 0.1 Eddington ratio: M1450=%.1f'%M1450_Lbol(L_M(1e9,.1)))
 print('M1450=-22, edd=0.1, mass:%.1e'%M_L(Lbol_M1450(-22.),.1))
+print('M1450=-25, edd=0.1, mass:%.1e'%M_L(Lbol_M1450(-25.),.1))
 print('M1450=-30, edd=0.1, mass:%.1e'%M_L(Lbol_M1450(-30.),.1))
 # def kernel_MBH(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
 k1 = kernel_MBH1(1.001, 1e6, .1, .1, .1)

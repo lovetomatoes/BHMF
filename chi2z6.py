@@ -23,24 +23,35 @@ Phi_err = Phi_err[str(z)]
 alpha = 1.
 find_min = False
 
+d_range = [0., 0.001, .01, .1] # .001 in [0., .001, .01, .1]
+e_range = [0., .05, .1, .15, .2] # .1 in [0., .05, .1, .15, .2]
+f_range = np.arange(.5, 1., .1) # .7 in np.arange(.5, 1., .1)
+m_range = np.arange(.2, .5, .01) # .21 in np.arange(.2, .5, .01)
+s_range = np.arange(.01, 0.2, .01) # .15 in np.arange(.01, 0.2, .01)
+
+d_range = [0.001,.01,.1]
+e_range = [.1]
+f_range = np.arange(.3, 1., .1)
+m_range = np.logspace(-2, 0, num=5)
+s_range = np.arange(.1, 0.5, .1)
+
 i = 0
-for delta_fit in [0., .001, .01, .1]: # .001, .01, .1
-    for eta8 in [0., .05, .1, .15, .2]:#[0., .1, .105, .2]: 
+for delta_fit in d_range:
+    for eta8 in e_range:
         if (eta8 == 0. and delta_fit == 0.):
             pass
         elif eta8*delta_fit == 0.:
             continue
-        for f_duty in np.arange(.2, 1., .1): # 3 lines below can hide
-            for mu_fit in np.arange(.01, .5, .01):
-                for sigma_fit in np.arange(.01, 0.2, .01):
-                    i = i+1
-                    fname = z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
+        for f_duty in f_range:
+            for mu_fit in m_range:
+                for sigma_fit in s_range:
+                    # i += 1; continue
+                    fname = z6datapre+'LF_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
                     if os.path.isfile(fname):
+                        # i += 1; continue
                         T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
                     else:
-                        # print('nofile')
-                        # print(fname)
-                        # print(z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha)
+                        # print('nofile',fname)
                         continue
                     Chi2 = np.nansum(pow( (np.log(T['Phi_DO']) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
                     # print('chi2:',Chi2)
@@ -52,10 +63,11 @@ for delta_fit in [0., .001, .01, .1]: # .001, .01, .1
                         s_min = sigma_fit
                         e_min = eta8
                         d_min = delta_fit
-                    # exit(0)
+                    
+# print('i=',i); exit(0)
 
 if find_min:
-    print('f_min%3.2f'%f_min+'m_min%3.2f'%m_min,'s_min%3.2f'%s_min+'e_min%.3f'%e_min+'d_min%.2f'%d_min)
+    print('f_min%3.2f'%f_min+'m_min%3.2f'%m_min,'s_min%3.2f'%s_min+'e_min%.3f'%e_min+'d_min%.3f'%d_min)
 
 f_duty = f_min; mu_fit = m_min; sigma_fit = s_min; eta8 = e_min; delta_fit = d_min
 # f_duty = .7; mu_fit = .21
@@ -63,7 +75,7 @@ f_duty = f_min; mu_fit = m_min; sigma_fit = s_min; eta8 = e_min; delta_fit = d_m
 #     for delta_fit in [.01,.02,.03,.04,.05,.1,.2,.3,.4,.5]: # f*mu .18, .19, .20
 #         for sigma_fit in [.15]: # .10  .14
 
-fname = z6datapre+'LF2e10_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
+fname = z6datapre+'LF_'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
 T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
 Chi2 = np.sum(pow( (np.log(T['Phi_DO']) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
 # print(T['Phi_DO'])
@@ -77,12 +89,12 @@ plt.yscale('log')
 plt.grid(True)
 plt.legend(loc='lower left',fontsize=fslabel)
 plt.title(r'$\mathrm{\chi^2}=\sum_i \frac{(\log{E_i}-\log{O_i})^2}{\log{\sigma_i}^2}=$'+'%.2e'%Chi2,fontsize=fstitle)
-plt.savefig(z6figpre+'chi2_Phi_DO_'+'M1450min%.0f'%M1450_min+'max%.1fz'%M1450_max+str(z)+'MBH2e10'+
+plt.savefig(z6figpre+'chi2_Phi_DO_'+'M1450min%.0f'%M1450_min+'max%.1fz'%M1450_max+str(z)+
                 'f%3.2f'%f_duty+
                 'm%3.2f'%mu_fit+
                 's%3.2f'%sigma_fit+
                 'e%.3f'%eta8+
                 'd%.3f'%delta_fit+
                 'alpha%.1f'%alpha+'.png')
-print('chi2_Phi_DO_'+'M1450min%.0f'%M1450_min+'max%.1fz'%M1450_max+str(z)+'MBH2e10'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha+'.png')
+print('chi2_Phi_DO_'+'M1450min%.0f'%M1450_min+'max%.1fz'%M1450_max+str(z)+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha+'.png')
 print('searched %d'%i)
