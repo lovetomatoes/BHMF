@@ -121,17 +121,16 @@ for delta_fit in d_range: # .25 in np.arange(.1, .4, .05)
                         dlog10Mz = np.log10(M1M0(abin_mf[1:],dt,f_duty,mu_fit,eta8,delta_fit)/M1M0(abin_mf[:-1],dt,f_duty,mu_fit,eta8,delta_fit))
                     #!!!!!!!!!!!!! dlog10Mz[0] instead of dlog10Mz to make MF@z4 smooth...
                     ascii.write(Table([Tz['M_BH'], Tz['dn_MBH']/dlog10Mz[0]], names=['M_BH','dn_dlog10M']),
-                                   '../4',
-                                #    z4datapre+
-                                #    'MF_'+
-                                #    # 'piece'
-                                #    'z%d'%z+#'z6_2e10'
-                                #    'f%3.2f'%f_duty+
-                                #    'm%3.2f'%mu_fit+
-                                #    's%3.2f'%sigma_fit+
-                                #    'e%.3f'%eta8+
-                                #    'd%.3f'%delta_fit+
-                                #    'alpha%.1f'%alpha,
+                                   z4datapre+
+                                   'MF_'+
+                                   # 'piece'
+                                   'z%d'%z+
+                                   'f%3.2f'%f_duty+
+                                   'm%3.2f'%mu_fit+
+                                   's%3.2f'%sigma_fit+
+                                   'e%.3f'%eta8+
+                                   'd%.3f'%delta_fit+
+                                   'alpha%.1f'%alpha,
                                    formats={'M_BH':'4.2e','dn_dlog10M':'4.2e'},
                                    overwrite=True)                    
                     # exit(0)
