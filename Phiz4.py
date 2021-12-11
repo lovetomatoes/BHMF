@@ -61,8 +61,8 @@ f_best_5 = z5datapre+'MF_best_5'+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_
 T = ascii.read(f_best_5, guess=False, delimiter=' ') 
 # print(T)
 
-d_range = [0., .05, .1, .15, .2, .25, .3, .35, .4, .45, .5]
-e_range = [0., .05, .08, .1, .12, .15]
+d_range = [.05, .1, .15, .2, .25, .3, .35, .4, .45, .5]
+e_range = [.05, .08, .1, .12, .15]
 f_range = np.arange(.1, 1.1, .1)
 m_range = np.logspace(-2, 0, num=5)
 s_range = np.arange(.1, 0.5, .1)
@@ -91,20 +91,15 @@ for delta_fit in d_range: # .25 in np.arange(.1, .4, .05)
                     # # check if file exists
                     # if os.path.isfile(fname):
                     #     continue
+
+                    # converge check timestep
+                    dt = t_from_z(z)-t_from_z(5.)
+                    # M_BHz: mass bin center at z
+                    M_BHz = M1M0(M_BH,dt,f_duty,mu_fit,eta8,delta_fit)
                     dn_MBH = np.zeros(N_mf)
                     for ibin in range(N_mf):
-                        # z=5. converge check timestep
-                        dt = t_from_z(z)-t_from_z(5.)
-                        if (eta8 == 0. and delta_fit == 0.):
-                            M_BHz = M_BH
-                            x0 = kernel_MBH1(M_BH[ibin]/T['bin_right'],dt,f_duty, mu_fit, sigma_fit)
-                            x1 = kernel_MBH1(M_BH[ibin]/T['bin_left'],dt,f_duty, mu_fit, sigma_fit)
-                        else :
-                            # M_BHz: mass bin center at z
-                            M_BHz = M1M0(M_BH,dt,f_duty,mu_fit,eta8,delta_fit)
-                            # M_BHz = M_BH
-                            x0 = kernel_MBH2(M_BHz[ibin],T['bin_right'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
-                            x1 = kernel_MBH2(M_BHz[ibin],T['bin_left'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit) 
+                        x0 = kernel_MBH2(M_BHz[ibin],T['bin_right'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
+                        x1 = kernel_MBH2(M_BHz[ibin],T['bin_left'],dt,f_duty,mu_fit,sigma_fit,eta8,delta_fit)
                         # x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) # no use
                         dP_MBH = .5*(special.erfc(x0) - special.erfc(x1)) * T['dn_MBH']
                         dn_MBH[ibin] = np.nansum(dP_MBH)
