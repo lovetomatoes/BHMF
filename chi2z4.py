@@ -26,9 +26,10 @@ for delta_fit in np.arange(.15, .25, .01): # 0.2 in [0., .05, .1, .15, .2, .25, 
         for f_duty in np.arange(.2, 1., .1): # .4 in np.arange(.2, 1., .1)
             for mu_fit in np.arange(.1, .5, .05): # .2 in np.arange(.2, .6, .1)
                 for sigma_fit in np.arange(.2, 0.27, .01): # .24 in np.arange(.01, 0.25, .01)
-                    i += 1
+                    # i += 1
                     fname = z4datapre+'LF_'+'z%d'%z+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
                     if os.path.isfile(fname):
+                        i += 1
                         T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
                     else:
                         continue
@@ -43,6 +44,7 @@ for delta_fit in np.arange(.15, .25, .01): # 0.2 in [0., .05, .1, .15, .2, .25, 
                         d_min = delta_fit
                     # if i==2:
                     #     break
+print('i searched = ',i)
 
 if find_min:
     print('f_min:',f_min,'m_min',m_min, 's_min',s_min, 'chi2_min:',Chi2_min)

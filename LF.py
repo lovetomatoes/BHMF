@@ -20,8 +20,8 @@ find_min = False
 # single value in each range 
 d_range = [.1]
 e_range = [.05]
-f_range = [.5]
-m_range =[.15]
+f_range = [1.]
+m_range =[.1]
 s_range = [.05]
 
 i = 0

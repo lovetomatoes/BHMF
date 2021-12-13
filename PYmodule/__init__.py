@@ -97,8 +97,8 @@ Phi_err = {'6':np.array([.0079, .061, .17, .32, .6, 1.2, 1.7, 2., 2.6, 3.6, 8.1,
            }     
 
 
-# !!!!!!!!!!!! e_max should be used when 1/eta \simeq (1-eta)/eta breaks
-e_max = .5; e_min = 0.057 # 0.057
+# !!!!!!!!!!!! eta_max should be used when 1/eta \simeq (1-eta)/eta breaks
+eta_max = .5; eta_min = 0.057 # 0.057
 
 def M1M0(M0,dt,f_duty,mu_fit,eta8,delta):
     M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*10.*t_Edd)+pow(M0/1e8,delta),1./delta)
@@ -109,18 +109,18 @@ def M1M0(M0,dt,f_duty,mu_fit,eta8,delta):
     M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*10.*t_Edd)+pow(M0/1e8,delta),1./delta)
 
     ## if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
-    eta = ma.masked_greater(eta, e_max)
-    M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(e_max*10.*t_Edd))
+    eta = ma.masked_greater(eta, eta_max)
+    M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_max*10.*t_Edd))
     # i = ma.argmax(eta)
     # M1[eta.mask] = M0[eta.mask]/M0[i]*M1[i]
-    eta[eta.mask] = e_max
+    eta[eta.mask] = eta_max
 
     ## if eta < minimum -> use Eddington accretion -- M(t) \propto M0*exp(...)
-    eta = ma.masked_less(eta, e_min)
+    eta = ma.masked_less(eta, eta_min)
     i = ma.argmin(eta)
     M1[eta.mask] = M0[eta.mask]/M0[i]*M1[i]
     # the following exponential formula not continuous
-    # !!!!!!!! M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(e_min*10.*t_Edd))    
+    # !!!!!!!! M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_min*10.*t_Edd))    
     return M1
 
 
@@ -134,15 +134,15 @@ def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
     lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*10.*t_Edd)
     eta = eta8*pow(M0/1e8,delta)
     # if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
-    eta = ma.masked_greater(eta, e_max)
-    # M1[eta.mask] = M0[eta.mask]*np.exp(mu*f_duty*dt/(e_max*10.*t_Edd))
+    eta = ma.masked_greater(eta, eta_max)
+    # M1[eta.mask] = M0[eta.mask]*np.exp(mu*f_duty*dt/(eta_max*10.*t_Edd))
     i = ma.argmax(eta)
     lbd[eta.mask] = lbd[i] * np.log(M1/M0[eta.mask]) / np.log(M1/M0[i])
-    # lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(e_max*10.*t_Edd))
-    eta[eta.mask] = e_max
+    # lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_max*10.*t_Edd))
+    eta[eta.mask] = eta_max
 
     # if eta < minimum -> use Eddington accretion -- M(t) \propto M0
-    eta = ma.masked_less(eta, e_min)
+    eta = ma.masked_less(eta, eta_min)
     i = ma.argmin(eta)
     # lbd[i] \propto log(M1/M0[i]) from Eddington accretion
     lbd[eta.mask] = lbd[i] * np.log(M1/M0[eta.mask]) / np.log(M1/M0[i])
@@ -153,13 +153,13 @@ def kernel_MBH3(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
     lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*10.*t_Edd)
     eta = eta8*pow(M0/1e8,delta)
     # if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
-    eta = ma.masked_greater(eta, e_max)
-    # M1[eta.mask] = M0[eta.mask]*np.exp(mu*f_duty*dt/(e_max*10.*t_Edd))
-    lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(e_max*10.*t_Edd))
-    eta[eta.mask] = e_max
+    eta = ma.masked_greater(eta, eta_max)
+    # M1[eta.mask] = M0[eta.mask]*np.exp(mu*f_duty*dt/(eta_max*10.*t_Edd))
+    lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_max*10.*t_Edd))
+    eta[eta.mask] = eta_max
     # if eta < minimum -> use Eddington accretion -- M(t) \propto M0
-    eta = ma.masked_less(eta, e_min)
-    lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(e_min*10.*t_Edd))
+    eta = ma.masked_less(eta, eta_min)
+    lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_min*10.*t_Edd))
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
 def kernel_M1450(M1450, MBH, mu, sigma_dex):

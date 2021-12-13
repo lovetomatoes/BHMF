@@ -1,7 +1,7 @@
 from PYmodule import *
 # 读取z=4 的M1450 分布 （文件名带着参数信息） 对于任意参数组合 
 # 返回chi2 (我的定义 sum( pow( (Phi-Phi_obs)/sigma, 2) 
-# 存 chi2 用1维数组  输出各个para和Chi2文件
+# 存 chi2 用5维数组  输出？分析？
 
 Chi2_min = 1e10
 z = int(4)
@@ -35,31 +35,38 @@ f_range = [10., 1.]
 m_range =[.1, .01]
 s_range = [.1]
 
-Nd = len(d_range); Ne = len(e_range); Nf = len(f_range); Nm = len(m_range); Ns = len(s_range)
+Nd = len(d_range)
+Ne = len(e_range)
+Nf = len(f_range)
+Nm = len(m_range)
+Ns = len(s_range)
 N_tot = Nd*Ne*Nf*Nm*Ns
 
-Chi2s = np.ones(N_tot)
-ds = np.ones(N_tot); es = np.ones(N_tot); fs = np.ones(N_tot); ms = np.ones(N_tot); ss = np.ones(N_tot)
-
 i = -1
-for delta_fit in d_range:
-    for eta8 in e_range:
-        for f_duty in f_range:
-            for mu_fit in m_range:
-                for sigma_fit in s_range:
+Chi2s = np.ones(N_tot)
+for id in range(Nd):
+    delta_fit = d_range[id]
+    for ie in range(Ne):
+        eta8 = e_range[ie]
+        for i_f in range(Nf):
+            f_duty = f_range[i_f]
+            for im in range(Nm):
+                mu_fit = m_range[im]
+                for i_s in range(Ns):
+                    sigma_fit = s_range[i_s]
                     i += 1
-                    # continue
                     fname = z4datapre+'LF_'+'z'+str(z)+'f%3.2f'%f_duty+'m%3.2f'%mu_fit+'s%3.2f'%sigma_fit+'e%.3f'%eta8+'d%.3f'%delta_fit+'alpha%.1f'%alpha
                     if os.path.isfile(fname):
                         T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
                     else:
                         # print('nofile',fname)
+                        # Chi2s[id][ie][i_f][im][i_s] = np.nan
                         Chi2s[i] = np.nan
                         continue
                     Chi2 = np.nansum(pow( (np.log(T['Phi_DO']) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
                     Chi2s[i] = Chi2
-                    ds[i] = delta_fit; es[i] = eta8; fs[i] = f_duty; ms[i] = mu_fit; ss[i] = sigma_fit
-
+                    print('Chi2=',Chi2)
+                    print('i=%d;'%(i-1),id,ie,i_f,im,i_s,'argmin=',id+ie+i_f+im+i_s)
                     if np.nanmin([Chi2, Chi2_min]) == Chi2:
                         find_min = True
                         Chi2_min = Chi2
@@ -68,15 +75,29 @@ for delta_fit in d_range:
                         s_min = sigma_fit
                         e_min = eta8
                         d_min = delta_fit
-                        i_min = i
-print('i=',i)
+                        # print(id,ie,i_f,im,i_s,'argmin=',id+ie+i_f+im+i_s)
+                        # i_min = np.argmin(Chi2s)
+                        # print('argmin:',i_min) # !!! degeneracy
+                        # print(i_min%Ns, (i_min-i_min%Ns)%Nm, i_min-(i_min-i_min%Ns))
+                    
 
-if find_min:
-    print('f_min%3.2f'%f_min+'m_min%3.2f'%m_min,'s_min%3.2f'%s_min+'e_min%.3f'%e_min+'d_min%.3f'%d_min)
+for i in range(N_tot):
+    pass
+# print('i=',i, Nd*Ne*Nf*Nm*Ns)
+print(Chi2s.shape)
 
-T = Table([ds,es,fs,ms,ss,Chi2s],names=['ds','es','fs','ms','ss','Chi2s'])
-ascii.write(T,z4datapre+'Chi2_para',formats={'ds':'5.1e','es':'5.1e','fs':'5.1e','ms':'5.1e','ss':'5.1e','Chi2s':'5.1e'},overwrite=True)
+# if find_min:
+#     print('f_min%3.2f'%f_min+'m_min%3.2f'%m_min,'s_min%3.2f'%s_min+'e_min%.3f'%e_min+'d_min%.3f'%d_min)
 
-# range_min =  np.where(Chi2s<2e3*Chi2_min)
-range_min =  np.where(Chi2s<1.1*Chi2_min)
+# print('argmin:',np.argmin(Chi2s)) # !!! degeneracy
+range_min =  np.where(Chi2s<2e3*Chi2_min)
 print(range_min)
+print([range_min])
+# print( np.mean(range_min[0]),np.std(range_min[0]) )
+# print( np.mean(range_min[1]),np.std(range_min[1]) )
+# print( np.mean(range_min[2]),np.std(range_min[2]) )
+# print( np.mean(range_min[3]),np.std(range_min[3]) )
+# print( np.mean(range_min[4]),np.std(range_min[4]) )
+
+# print(np.where(Chi2s<2e3*Chi2_min), len(np.where(Chi2s<2e3*Chi2_min)[0]))
+# print(np.where(Chi2s<2e4*Chi2_min), len(np.where(Chi2s<2e4*Chi2_min)[0]))

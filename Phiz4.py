@@ -73,6 +73,18 @@ f_range = [1.]
 m_range =[.1]
 s_range = [.1]
 
+d_range = [.3]
+e_range = [.1]
+f_range = [.4]
+m_range = [.4]
+s_range = [.2]
+
+d_range = [.35]
+e_range = [.05]
+f_range = [.1]
+m_range = [.8]
+s_range = [.01]
+
 i = 0
 ## --------------------------   z=z   ----------------------------
 for delta_fit in d_range: # .25 in np.arange(.1, .4, .05)
