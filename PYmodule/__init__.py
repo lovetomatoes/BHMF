@@ -124,12 +124,14 @@ def M1M0(M0,dt,f_duty,mu_fit,eta8,delta):
     return M1
 
 
-# kernel*  M1: scalar; M0: scalar or array
+# ---------------- kernel*: kernel of calculating P(lbd) integral ----------------
 
+# exponential growth
 def kernel_MBH1(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
     lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*10.*t_Edd) )
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
+# power law growth + exp extrapolation
 def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
     lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*10.*t_Edd)
     eta = eta8*pow(M0/1e8,delta)
@@ -161,6 +163,17 @@ def kernel_MBH3(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
     eta = ma.masked_less(eta, eta_min)
     lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_min*10.*t_Edd))
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
+
+# lambda ~Schechter function 
+def kernelS_MBH(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
+    lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*10.*t_Edd) )
+    return 0
+    np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
+
+def kernelS_M1450(M1450, MBH, ):
+    lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
+    return 0
+    np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
 def kernel_M1450(M1450, MBH, mu, sigma_dex):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)

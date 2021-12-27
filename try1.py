@@ -8,6 +8,10 @@ print((t_from_z(5)-t_from_z(4))/Myr)
 print(M1450_Lbol(1e13*Lsun))
 print(Lsun)
 
+print('z: 50 to 17.58    : %3.2f Myr', (t_from_z(17.58)-t_from_z(50))/Myr)
+print('z: 17.58 to 6     : %3.2f Myr', (t_from_z(6)-t_from_z(17.58))/Myr)
+print('z: 6 to 4    : %3.2f Myr', (t_from_z(4)-t_from_z(6))/Myr)
+
 # i = 0
 # b = []
 # for i1 in range(N1):
@@ -44,4 +48,14 @@ for i1 in range(N1):
 
 print(a.shape)
 T = Table([p1,p2,p3,b],names=['p1','p2','p3','b'])
+a = np.ones(4)
+b[:] = a
+# b = a
+# b = a.copy()
+a += 1
+print(b)
+print('1e9, 0.1 Eddington ratio: M1450=%.1f'%M1450_Lbol(L_M(1e9,.1)))
+print('M1450=-29, edd=0.1, mass:%.1e'%M_L(Lbol_M1450(-29.),.1))
+print('M1450=-29, edd=1., mass:%.1e'%M_L(Lbol_M1450(-29.),1.))
+print('M1450=-29, edd=10, mass:%.1e'%M_L(Lbol_M1450(-29.),10.))
 # ascii.write(T,'../p1p2p3b',formats={'p1':'5.1e','p2':'5.1e','p3':'5.1e','b':'5.1e'},overwrite=True)
