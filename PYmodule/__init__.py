@@ -164,16 +164,14 @@ def kernel_MBH3(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
     lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_min*10.*t_Edd))
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
-# lambda ~Schechter function 
-def kernelS_MBH(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
+# lambda from Schechter function 
+def kernelS_MBH(Mgrow_ratio, dt, f_duty, l_cut):
     lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*10.*t_Edd) )
-    return 0
-    np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
+    return lbd/l_cut
 
-def kernelS_M1450(M1450, MBH, ):
+def kernelS_M1450(M1450, MBH, l_cut):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
-    return 0
-    np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
+    return lbd/l_cut
 
 def kernel_M1450(M1450, MBH, mu, sigma_dex):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)

@@ -58,4 +58,8 @@ print('1e9, 0.1 Eddington ratio: M1450=%.1f'%M1450_Lbol(L_M(1e9,.1)))
 print('M1450=-29, edd=0.1, mass:%.1e'%M_L(Lbol_M1450(-29.),.1))
 print('M1450=-29, edd=1., mass:%.1e'%M_L(Lbol_M1450(-29.),1.))
 print('M1450=-29, edd=10, mass:%.1e'%M_L(Lbol_M1450(-29.),10.))
+
+a = special.gamma([0.5, 1, 5])
+a = special.gammainc(1,1)
+print(a,1-1./np.exp(1))
 # ascii.write(T,'../p1p2p3b',formats={'p1':'5.1e','p2':'5.1e','p3':'5.1e','b':'5.1e'},overwrite=True)
