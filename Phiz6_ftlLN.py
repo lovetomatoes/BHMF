@@ -60,12 +60,14 @@ s_range = np.array([.01, .1, 1.])
 # s_range = [.15]
 
 i = 0
+Chi2_min = 1e10; find_min = False
 for t_life in t_range:
     for f_duty in f_range:
         for mu_fit in m_range:
             for sigma_fit in s_range:
                 i = i+1
                 # continue
+            ## --------- Mass Function ---------
                 dn_MBH = np.zeros(N_mf)
                 for iM in range(N_Mh):
                     for i_bsm in range(Nbsm):
@@ -82,7 +84,7 @@ for t_life in t_range:
                             for ibin in range(N_mf):
                                 # new seeds 
                                 if len(T_seed):
-                                    #----------- log-norm lbd -----------
+                                    # #----------- log-norm lbd -----------
                                     x0 = kernel_MBH1(bin_left[ibin] /T_seed['Mstar0'],dt_seed,f_duty, mu_fit, sigma_fit)
                                     x1 = kernel_MBH1(bin_right[ibin]/T_seed['Mstar0'],dt_seed,f_duty, mu_fit, sigma_fit)
                                     # x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) # 必删! or not conserved
@@ -96,7 +98,7 @@ for t_life in t_range:
                                 x0 = kernel_MBH1(M_BH[ibin]/bin_right,t_life,f_duty, mu_fit, sigma_fit)
                                 x1 = kernel_MBH1(M_BH[ibin]/bin_left, t_life,f_duty, mu_fit, sigma_fit)
                                 dP_MBH[ibin] = np.nansum(.5*(special.erfc(x0) - special.erfc(x1)) * dP_MBH_prev) + dP_seed
-                                
+
                             Nt -= 1
                         dn_MBH += dP_MBH*n_base[iM]*f_bsm[i_bsm]
 
@@ -116,15 +118,16 @@ for t_life in t_range:
                             overwrite=True)
                 consv_ratio = np.nansum(dn_MBH)/np.sum(n_base)
                 # print('conserved fraction=%.10f'%consv_ratio)
-                if consv_ratio<.9:
-                    print('conserved fraction=%.10f'%consv_ratio)
+                # if consv_ratio<.9:
+                #     print('conserved fraction=%.10f'%consv_ratio)
                 # exit(0)
                 T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
 
+            # # --------- Luminosity Function ---------
                 Phi = np.zeros(N_lf)
                 Phi_csv = 0.
                 for ibin in range(N_lf):
-                    #----------- log-norm lbd -----------
+                    # #----------- log-norm lbd -----------
                     x0 = kernel_M1450(bin_edg[ibin+1], T['M_BH'], mu_fit, sigma_fit)
                     x1 = kernel_M1450(bin_edg[ibin], T['M_BH'], mu_fit, sigma_fit)
                     dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))
@@ -134,9 +137,13 @@ for t_life in t_range:
                     Phi[ibin] = dPhi/bin_wid[ibin]*f_duty
                 # print('consv of dP_M1450:',Phi_csv/np.sum(n_base))
 
+                Phi *= 1e9
+                Phi_DO = Phi/corr_U14D20(bin_cen)
+                Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
+
                 T = Table(
-                    [bin_cen, Phi*1e9, Phi*1e9*(1.-f_obsc_const), Phi*1e9/corr_U14D20(bin_cen), Phi_obs],
-                    names=('bin_cen','Phi','Phi_CO','Phi_DO','Phi_obs')
+                    [bin_cen,Phi_obs,Phi_DO,Phi,Chi2*np.ones(N_lf)],
+                    names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
                 )
                 LFname = z6datapre+'LF_LN_'+'t%.1e'%(t_life/Myr)+ \
                         'f%.1f'%f_duty+ \
@@ -146,5 +153,16 @@ for t_life in t_range:
                 ascii.write(T, LFname,
                             formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e','Phi_obs':'4.2e'},
                             overwrite=True)
+
+                if np.nanmin([Chi2, Chi2_min]) == Chi2:
+                    find_min = True
+                    Chi2_min = Chi2
+                    t_min = t_life
+                    f_min = f_duty
+                    m_min = mu_fit
+                    s_min = sigma_fit
+                    LFname_min = LFname
                 # exit(0)
 print(i)
+if find_min:
+    print(LFname_min,Chi2_min)

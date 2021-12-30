@@ -60,6 +60,7 @@ a_range = np.array([.1, 1., 2., 3.]) # a>0 total P convergent
 # a_range = [.4]
 
 i = 0
+Chi2_min = 1e10; find_min = False
 for t_life in t_range:
     for f_duty in f_range:
         for l_cut in l_range:
@@ -83,11 +84,6 @@ for t_life in t_range:
                             for ibin in range(N_mf):
                                 # new seeds 
                                 if len(T_seed):
-                                    # #----------- log-norm lbd -----------
-                                    # x0 = kernel_MBH1(bin_left[ibin] /T_seed['Mstar0'],dt_seed,f_duty, mu_fit, sigma_fit)
-                                    # x1 = kernel_MBH1(bin_right[ibin]/T_seed['Mstar0'],dt_seed,f_duty, mu_fit, sigma_fit)
-                                    # # x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) # 必删! or not conserved
-                                    # dP_seed = -.5*(special.erfc(x1) - special.erfc(x0)) # P(<x) = 1-.5*erfc(x)
                                     # #----------- Schechter lbd -----------
                                     x0 = kernelS_MBH(bin_left[ibin] /T_seed['Mstar0'], dt_seed, f_duty, l_cut)
                                     x1 = kernelS_MBH(bin_right[ibin]/T_seed['Mstar0'], dt_seed, f_duty, l_cut)
@@ -98,10 +94,6 @@ for t_life in t_range:
                                 else:
                                     dP_seed = 0.
                                 # prev BHMF
-                                # #----------- log-norm lbd -----------
-                                # x0 = kernel_MBH1(M_BH[ibin]/bin_right,t_life,f_duty, mu_fit, sigma_fit)
-                                # x1 = kernel_MBH1(M_BH[ibin]/bin_left, t_life,f_duty, mu_fit, sigma_fit)
-                                # dP_MBH[ibin] = np.nansum(.5*(special.erfc(x0) - special.erfc(x1)) * dP_MBH_prev) + dP_seed
                                 # #----------- Schechter lbd -----------
                                 x0 = kernelS_MBH(M_BH[ibin]/bin_right, t_life, f_duty, l_cut)
                                 x1 = kernelS_MBH(M_BH[ibin]/bin_left,  t_life, f_duty, l_cut)
@@ -126,21 +118,16 @@ for t_life in t_range:
                             overwrite=True)
                 consv_ratio = np.nansum(dn_MBH)/np.sum(n_base)
                 # print('conserved fraction=%.10f'%consv_ratio)
-                if consv_ratio<.9:
-                    print('conserved fraction=%.10f'%consv_ratio)
+                # if consv_ratio<.9:
+                #     print('conserved fraction=%.10f'%consv_ratio)
                 # exit(0)
                 T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
 
-            ## --------- Luminosity Function ---------
+            # # --------- Luminosity Function ---------
                 Phi = np.zeros(N_lf)
                 Phi_csv = 0.
                 for ibin in range(N_lf):
-                    # #----------- log-norm lbd -----------
-                    # mu_fit = .21; sigma_fit = .15
-                    # x0 = kernel_M1450(bin_edg[ibin+1], M_BH, mu_fit, sigma_fit)
-                    # x1 = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
-                    # dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))
-                    #----------- Schechter lbd -----------
+                    # #----------- Schechter lbd -----------
                     x0 = kernelS_M1450(bin_edg[ibin+1], T['M_BH'], l_cut)
                     x1 = kernelS_M1450(bin_edg[ibin],   T['M_BH'], l_cut)
                     dP_M1450 = special.gammainc(a,x1) - special.gammainc(a,x0)
@@ -150,9 +137,13 @@ for t_life in t_range:
                     Phi[ibin] = dPhi/bin_wid[ibin]*f_duty
                 # print('consv of dP_M1450:',Phi_csv/np.sum(n_base))
 
+                Phi *= 1e9
+                Phi_DO = Phi/corr_U14D20(bin_cen)
+                Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
+
                 T = Table(
-                    [bin_cen, Phi*1e9, Phi*1e9*(1.-f_obsc_const), Phi*1e9/corr_U14D20(bin_cen), Phi_obs],
-                    names=('bin_cen','Phi','Phi_CO','Phi_DO','Phi_obs')
+                    [bin_cen,Phi_obs,Phi_DO,Phi,Chi2*np.ones(N_lf)],
+                    names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
                 )
                 LFname = z6datapre+'LF_SC_'+'t%.1e'%(t_life/Myr)+ \
                         'f%.1f'%f_duty+ \
@@ -162,5 +153,16 @@ for t_life in t_range:
                 ascii.write(T, LFname,
                             formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e','Phi_obs':'4.2e'},
                             overwrite=True)
+
+                if np.nanmin([Chi2, Chi2_min]) == Chi2:
+                    find_min = True
+                    Chi2_min = Chi2
+                    t_min = t_life
+                    f_min = f_duty
+                    l_min = l_cut
+                    a_min = a
+                    LFname_min = LFname
                 # exit(0)
 print(i)
+if find_min:
+    print(LFname_min,Chi2_min)
