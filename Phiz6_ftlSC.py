@@ -134,16 +134,15 @@ for t_life in t_range:
             ## --------- Luminosity Function ---------
                 Phi = np.zeros(N_lf)
                 Phi_csv = 0.
-                M_BH = T['M_BH']
                 for ibin in range(N_lf):
-                    #----------- log-norm lbd -----------
-                    mu_fit = .21; sigma_fit = .15
-                    x0 = kernel_M1450(bin_edg[ibin+1], M_BH, mu_fit, sigma_fit)
-                    x1 = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
-                    dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))
+                    # #----------- log-norm lbd -----------
+                    # mu_fit = .21; sigma_fit = .15
+                    # x0 = kernel_M1450(bin_edg[ibin+1], M_BH, mu_fit, sigma_fit)
+                    # x1 = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
+                    # dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))
                     #----------- Schechter lbd -----------
-                    x0 = kernelS_M1450(bin_edg[ibin+1], M_BH, l_cut)
-                    x1 = kernelS_M1450(bin_edg[ibin],   M_BH, l_cut)
+                    x0 = kernelS_M1450(bin_edg[ibin+1], T['M_BH'], l_cut)
+                    x1 = kernelS_M1450(bin_edg[ibin],   T['M_BH'], l_cut)
                     dP_M1450 = special.gammainc(a,x1) - special.gammainc(a,x0)
 
                     dPhi = np.nansum(T['dn_MBH']*dP_M1450)
