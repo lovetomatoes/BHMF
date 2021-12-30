@@ -1,5 +1,5 @@
 from PYmodule import *
-# Phiz6 paras: f_duty, t_life, lbd ~Schechter(l_cut,a)
+# Phiz6 paras: f_duty, t_life, lbd ~lognorm(mu,sigma)
 
 N_Mh = 3 # 3 base halos: 1e11, 1e12, 1e13
 Ntr = 10000
@@ -49,24 +49,23 @@ N_lf = len(bin_cen)
 
 t_range = np.array([100, 200, 500, 1000])*Myr
 f_range = np.arange(.1, 1., .3)
-l_range = np.logspace(-2, 1., num=4) # l_cut
-a_range = np.array([.1, 1., 2., 3.]) # a>0 total P convergent
-# print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
-# print(a_range); exit(0)
+m_range = np.logspace(-2, 1., num=4)
+s_range = np.array([.01, .1, 1.])
+# print(len(t_range)*len(f_range)*len(m_range)*len(s_range) )
+# print(s_range); exit(0)
 
 # t_range = [1000.*Myr]
-# f_range = [1.]
-# l_range = [.1]
-# a_range = [.4]
+# f_range = [.7]
+# m_range = [.21]
+# s_range = [.15]
 
 i = 0
 for t_life in t_range:
     for f_duty in f_range:
-        for l_cut in l_range:
-            for a in a_range:
+        for mu_fit in m_range:
+            for sigma_fit in s_range:
                 i = i+1
                 # continue
-            ## --------- Mass Function ---------
                 dn_MBH = np.zeros(N_mf)
                 for iM in range(N_Mh):
                     for i_bsm in range(Nbsm):
@@ -83,30 +82,21 @@ for t_life in t_range:
                             for ibin in range(N_mf):
                                 # new seeds 
                                 if len(T_seed):
-                                    # #----------- log-norm lbd -----------
-                                    # x0 = kernel_MBH1(bin_left[ibin] /T_seed['Mstar0'],dt_seed,f_duty, mu_fit, sigma_fit)
-                                    # x1 = kernel_MBH1(bin_right[ibin]/T_seed['Mstar0'],dt_seed,f_duty, mu_fit, sigma_fit)
-                                    # # x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) # 必删! or not conserved
-                                    # dP_seed = -.5*(special.erfc(x1) - special.erfc(x0)) # P(<x) = 1-.5*erfc(x)
-                                    # #----------- Schechter lbd -----------
-                                    x0 = kernelS_MBH(bin_left[ibin] /T_seed['Mstar0'], dt_seed, f_duty, l_cut)
-                                    x1 = kernelS_MBH(bin_right[ibin]/T_seed['Mstar0'], dt_seed, f_duty, l_cut)
-                                    x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-                                    dP_seed = special.gammainc(a,x1) - special.gammainc(a,x0)
+                                    #----------- log-norm lbd -----------
+                                    x0 = kernel_MBH1(bin_left[ibin] /T_seed['Mstar0'],dt_seed,f_duty, mu_fit, sigma_fit)
+                                    x1 = kernel_MBH1(bin_right[ibin]/T_seed['Mstar0'],dt_seed,f_duty, mu_fit, sigma_fit)
+                                    # x0 = ma.masked_invalid(x0); x1 = ma.masked_invalid(x1) # 必删! or not conserved
+                                    dP_seed = -.5*(special.erfc(x1) - special.erfc(x0)) # P(<x) = 1-.5*erfc(x)
 
                                     dP_seed = np.nansum(dP_seed)/len(T)
                                 else:
                                     dP_seed = 0.
                                 # prev BHMF
-                                # #----------- log-norm lbd -----------
-                                # x0 = kernel_MBH1(M_BH[ibin]/bin_right,t_life,f_duty, mu_fit, sigma_fit)
-                                # x1 = kernel_MBH1(M_BH[ibin]/bin_left, t_life,f_duty, mu_fit, sigma_fit)
-                                # dP_MBH[ibin] = np.nansum(.5*(special.erfc(x0) - special.erfc(x1)) * dP_MBH_prev) + dP_seed
-                                # #----------- Schechter lbd -----------
-                                x0 = kernelS_MBH(M_BH[ibin]/bin_right, t_life, f_duty, l_cut)
-                                x1 = kernelS_MBH(M_BH[ibin]/bin_left,  t_life, f_duty, l_cut)
-                                x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-                                dP_MBH[ibin] = np.nansum((special.gammainc(a,x1) - special.gammainc(a,x0)) * dP_MBH_prev) + dP_seed
+                                #----------- log-norm lbd -----------
+                                x0 = kernel_MBH1(M_BH[ibin]/bin_right,t_life,f_duty, mu_fit, sigma_fit)
+                                x1 = kernel_MBH1(M_BH[ibin]/bin_left, t_life,f_duty, mu_fit, sigma_fit)
+                                dP_MBH[ibin] = np.nansum(.5*(special.erfc(x0) - special.erfc(x1)) * dP_MBH_prev) + dP_seed
+                                
                             Nt -= 1
                         dn_MBH += dP_MBH*n_base[iM]*f_bsm[i_bsm]
 
@@ -114,10 +104,10 @@ for t_life in t_range:
                     [M_BH, dn_MBH],
                     names=('M_BH','dn_MBH')
                 )
-                MFname = z6datapre+'MF_SC_'+'t%.1e'%(t_life/Myr)+ \
+                MFname = z6datapre+'MF_LN_'+'t%.1e'%(t_life/Myr)+ \
                         'f%.1f'%f_duty+ \
-                        'l%.1e'%l_cut+ \
-                        'a%.3f'%a+ \
+                        'm%.1e'%mu_fit+ \
+                        's%.3f'%sigma_fit+ \
                         'alpha%.1f'%alpha
                 ascii.write( Table([T['M_BH'], T['dn_MBH']/dlog10M],
                             names=['M_BH','dn_dlog10M']),
@@ -131,20 +121,14 @@ for t_life in t_range:
                 # exit(0)
                 T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
 
-            ## --------- Luminosity Function ---------
                 Phi = np.zeros(N_lf)
                 Phi_csv = 0.
                 M_BH = T['M_BH']
                 for ibin in range(N_lf):
                     #----------- log-norm lbd -----------
-                    mu_fit = .21; sigma_fit = .15
                     x0 = kernel_M1450(bin_edg[ibin+1], M_BH, mu_fit, sigma_fit)
                     x1 = kernel_M1450(bin_edg[ibin], M_BH, mu_fit, sigma_fit)
                     dP_M1450 = .5*(special.erfc(x0) - special.erfc(x1))
-                    #----------- Schechter lbd -----------
-                    x0 = kernelS_M1450(bin_edg[ibin+1], M_BH, l_cut)
-                    x1 = kernelS_M1450(bin_edg[ibin],   M_BH, l_cut)
-                    dP_M1450 = special.gammainc(a,x1) - special.gammainc(a,x0)
 
                     dPhi = np.nansum(T['dn_MBH']*dP_M1450)
                     Phi_csv += dPhi
@@ -155,10 +139,10 @@ for t_life in t_range:
                     [bin_cen, Phi*1e9, Phi*1e9*(1.-f_obsc_const), Phi*1e9/corr_U14D20(bin_cen), Phi_obs],
                     names=('bin_cen','Phi','Phi_CO','Phi_DO','Phi_obs')
                 )
-                LFname = z6datapre+'LF_SC_'+'t%.1e'%(t_life/Myr)+ \
+                LFname = z6datapre+'LF_LN_'+'t%.1e'%(t_life/Myr)+ \
                         'f%.1f'%f_duty+ \
-                        'l%.1e'%l_cut+ \
-                        'a%.3f'%a+ \
+                        'm%.1e'%mu_fit+ \
+                        's%.3f'%sigma_fit+ \
                         'alpha%.1f'%alpha
                 ascii.write(T, LFname,
                             formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e','Phi_obs':'4.2e'},
