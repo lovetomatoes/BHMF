@@ -54,6 +54,13 @@ a_range = np.array([.1, 1., 2., 3.]) # a>0 total P convergent
 # print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
 # print(a_range); exit(0)
 
+t_range = np.arange(100,1000,100)*Myr
+f_range = np.arange(.1, 1., .1)
+l_range = np.append( [.01,.05], np.arange(.1,2.,.1))
+a_range = np.arange(.1, 3., .1) # a>0 total P convergent
+print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
+# exit(0)
+
 # t_range = [1000.*Myr]
 # f_range = [1.]
 # l_range = [.1]
@@ -102,24 +109,24 @@ for t_life in t_range:
                             Nt -= 1
                         dn_MBH += dP_MBH*n_base[iM]*f_bsm[i_bsm]
 
+                consv_ratio = np.nansum(dn_MBH)/np.sum(n_base)
+                # print('conserved fraction=%.10f'%consv_ratio)
+                # if consv_ratio<.9:
+                #     print('conserved fraction=%.10f'%consv_ratio)
                 T = Table(
-                    [M_BH, dn_MBH],
-                    names=('M_BH','dn_MBH')
+                    [M_BH, dn_MBH, consv_ratio*np.ones(N_mf)],
+                    names=('M_BH','dn_MBH','consv')
                 )
                 MFname = z6datapre+'MF_SC_'+'t%.1e'%(t_life/Myr)+ \
                         'f%.1f'%f_duty+ \
                         'l%.1e'%l_cut+ \
                         'a%.3f'%a+ \
                         'alpha%.1f'%alpha
-                ascii.write( Table([T['M_BH'], T['dn_MBH']/dlog10M],
-                            names=['M_BH','dn_dlog10M']),
+                ascii.write( Table([T['M_BH'], T['dn_MBH']/dlog10M, T['consv']],
+                            names=['M_BH','dn_dlog10M','consv']),
                             MFname,
-                            formats={'M_BH':'4.2e','dn_dlog10M':'4.2e'},
+                            formats={'M_BH':'4.2e','dn_dlog10M':'4.2e','consv':'4.2f'},
                             overwrite=True)
-                consv_ratio = np.nansum(dn_MBH)/np.sum(n_base)
-                # print('conserved fraction=%.10f'%consv_ratio)
-                # if consv_ratio<.9:
-                #     print('conserved fraction=%.10f'%consv_ratio)
                 # exit(0)
                 T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
 
@@ -151,7 +158,7 @@ for t_life in t_range:
                         'a%.3f'%a+ \
                         'alpha%.1f'%alpha
                 ascii.write(T, LFname,
-                            formats={'bin_cen':'6.2f','Phi':'4.2e','Phi_CO':'4.2e','Phi_DO':'4.2e','Phi_obs':'4.2e'},
+                            formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
                             overwrite=True)
 
                 if np.nanmin([Chi2, Chi2_min]) == Chi2:
