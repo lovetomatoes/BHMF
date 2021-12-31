@@ -177,6 +177,7 @@ def kernel_M1450(M1450, MBH, mu, sigma_dex):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
+# Willot+ 2010
 def MF(M,z=6):
     alpha = -1.03
     Phi_star = 1.23e-8

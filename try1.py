@@ -55,7 +55,7 @@ b[:] = a
 a += 1
 print(b)
 print('1e9, 0.1 Eddington ratio: M1450=%.1f'%M1450_Lbol(L_M(1e9,.1)))
-print('M1450=-29, edd=0.1, mass:%.1e'%M_L(Lbol_M1450(-29.),.1))
+print('M1450=-25, edd=0.1, mass:%.1e'%M_L(Lbol_M1450(-25.),.1))
 print('M1450=-29, edd=1., mass:%.1e'%M_L(Lbol_M1450(-29.),1.))
 print('M1450=-29, edd=10, mass:%.1e'%M_L(Lbol_M1450(-29.),10.))
 
