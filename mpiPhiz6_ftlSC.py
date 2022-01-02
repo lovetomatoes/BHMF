@@ -1,4 +1,8 @@
 from PYmodule import *
+import sys 
+sys.path.append('/gpfs/share/home/1801110214')
+from mpi4py import MPI
+# now = Phiz6_ftlSC.py on sk1
 # Phiz6 paras: f_duty, t_life, lbd ~Schechter(l_cut,a)
 
 N_Mh = 3 # 3 base halos: 1e11, 1e12, 1e13
@@ -58,18 +62,23 @@ t_range = np.arange(100,1000,100)*Myr
 f_range = np.arange(.1, 1., .1)
 l_range = np.append( [.01,.05], np.arange(.1,2.,.1))
 a_range = np.arange(.1, 3., .1) # a>0 total P convergent
-print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
+# print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
 # exit(0)
 
-t_range = [100.*Myr]
+t_range = np.arange(100,1001,100)*Myr
 f_range = [1.]
 d_range = [.3]
 l_range = [.1]
 a_range = [.4]
 
+comm = MPI.COMM_WORLD
+size = comm.Get_size()
+rank = comm.Get_rank()
+assert size == len(t_range)
+
 i = 0
-Chi2_min = 1e10; find_min = False
-for t_life in t_range:
+Chi2_min = 1e10; find_min = False; LFname_min = ''
+for t_life in [t_range[rank]]:
     for f_duty in f_range:
         for d_fit in d_range:
             for l_cut in l_range:
@@ -99,8 +108,6 @@ for t_life in t_range:
                                         x0 = kernelS_MBH_M(bin_left[ibin],  T_seed['Mstar0'], dt_seed, f_duty, l_cut, d_fit)
                                         x1 = kernelS_MBH_M(bin_right[ibin], T_seed['Mstar0'], dt_seed, f_duty, l_cut, d_fit)
                                         x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-                                        for i in range(len(x0)):
-                                            assert x0[i]<= x1[i]
                                         dP_seed = special.gammainc(a,x1) - special.gammainc(a,x0)
 
                                         dP_seed = np.nansum(dP_seed)/len(T)
@@ -113,8 +120,6 @@ for t_life in t_range:
                                     x0 = kernelS_MBH_M(bin_left,  M_BH[ibin], t_life, f_duty, l_cut, d_fit)
                                     x1 = kernelS_MBH_M(bin_right, M_BH[ibin], t_life, f_duty, l_cut, d_fit)
                                     x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-                                    for i in range(len(x0)):
-                                        assert x0[i]<= x1[i]
                                     dP_MBH[ibin] = np.nansum((special.gammainc(a,x1) - special.gammainc(a,x0)) * dP_MBH_prev) + dP_seed
                                 Nt -= 1
                             dn_MBH += dP_MBH*n_base[iM]*f_bsm[i_bsm]
@@ -182,6 +187,11 @@ for t_life in t_range:
                         a_min = a
                         LFname_min = LFname
                     # exit(0)
-print(i)
-if find_min:
-    print(LFname_min,Chi2_min)
+# print(i)
+# assert find_min
+
+LFnames = np.array(comm.gather(LFname_min, root=0))
+Chi2_mins = np.array(comm.gather(Chi2_min, root=0))
+if rank == 0:
+    print(Chi2_mins)
+    print(np.nanmin(Chi2_mins), LFnames[np.nanargmin(Chi2_mins)])
