@@ -60,16 +60,17 @@ a_range = np.array([.1, 1., 2., 3.]) # a>0 total P convergent
 
 t_range = np.arange(100,1001,100)*Myr
 f_range = np.arange(.1, 1.1, .1)
+d_range = np.arange(.1, 1.1, .1)
 l_range = np.append( [.01,.05], np.arange(.1,2.1,.1))
 a_range = np.arange(.1, 3.1, .1) # a>0 total P convergent
 # print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
 # exit(0)
 
-t_range = np.arange(100,1001,100)*Myr
-f_range = [1.]
-d_range = [.3]
-l_range = [.1]
-a_range = [.4]
+# t_range = np.arange(100,1001,100)*Myr
+# f_range = [1.]
+# d_range = [.3]
+# l_range = [.1]
+# a_range = [.4]
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
@@ -194,5 +195,5 @@ for d_fit in d_range:
 LFnames = np.array(comm.gather(LFname_min, root=0))
 Chi2_mins = np.array(comm.gather(Chi2_min, root=0))
 if rank == 0:
-    print(Chi2_mins)
-    print(np.nanmin(Chi2_mins), LFnames[np.nanargmin(Chi2_mins)])
+    print('Chi2_mins',Chi2_mins)
+    print('Chi2_min=\n',np.nanmin(Chi2_mins), 'file:\n',LFnames[np.nanargmin(Chi2_mins)])
