@@ -177,6 +177,10 @@ def kernelS_M1450(M1450, MBH, l_cut):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
     return lbd/l_cut
 
+def kernelS_M1450_M(M1450, MBH, l_cut, d_fit):
+    lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
+    return lbd*(1+pow(MBH/1e8,d_fit))/l_cut
+
 def kernel_M1450(M1450, MBH, mu, sigma_dex):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
