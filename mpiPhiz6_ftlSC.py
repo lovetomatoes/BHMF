@@ -140,11 +140,11 @@ for d_fit in d_range:
                     'l%.1e'%l_cut+ \
                     'a%.3f'%a+ \
                     'alpha%.1f'%alpha
-            ascii.write( Table([T['M_BH'], T['dn_MBH']/dlog10M, T['consv']],
-                        names=['M_BH','dn_dlog10M','consv']),
-                        MFname,
-                        formats={'M_BH':'4.2e','dn_dlog10M':'4.2e','consv':'4.2f'},
-                        overwrite=True)
+            # ascii.write( Table([T['M_BH'], T['dn_MBH']/dlog10M, T['consv']],
+            #             names=['M_BH','dn_dlog10M','consv']),
+            #             MFname,
+            #             formats={'M_BH':'4.2e','dn_dlog10M':'4.2e','consv':'4.2f'},
+            #             overwrite=True)
             # exit(0)
             T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
 
@@ -176,9 +176,9 @@ for d_fit in d_range:
                     'l%.1e'%l_cut+ \
                     'a%.3f'%a+ \
                     'alpha%.1f'%alpha
-            ascii.write(T, LFname,
-                        formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
-                        overwrite=True)
+            # ascii.write(T, LFname,
+            #             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
+            #             overwrite=True)
 
             if np.nanmin([Chi2, Chi2_min]) == Chi2:
                 find_min = True
