@@ -1,5 +1,6 @@
 from PYmodule import *
-# 读取z=6 的M1450 分布 （文件名带着参数信息） 对于任意参数组合 返回chi2 (我的定义 sum( pow( (Phi-Phi_obs)/sigma, 2)
+# 画几个best fitting para拟合的LF v.s. Matsu2018 data+fitting curve
+# models: 'Schechter best fit','Log-normal best fit','Schechter + mass dependent ER'
 
 Chi2_min = 1e10
 z = int(6)
@@ -20,24 +21,31 @@ Phi_err = Phi_err[str(z)]
 # Phi_err_CO = Phi_err/(1-f_obsc_const)
 # Phi_err_DO = Phi_err*corr_U14D20(bin_cen)
 
-fname = z6datapre+'LF_SC_t8.0e+02f0.8l1.0e-01a0.500alpha1.0'
-# fname = z6datapre+'LF_LN_t2.0e+02f0.7m1.0e-02s1.000alpha1.0'
-fname = z6datapre+'LF_LN_t9.0e+02f0.8m5.0e-02s0.300alpha1.0'
-T = ascii.read(fname, guess=False, delimiter=' ') #  None has np.where(T['z_col']==-1)
-Phi_DO = T['Phi_DO']
-print(Phi_obs,Phi_DO,Phi_err)
-Chi2 = np.sum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
-print(Chi2, T['Chi2'][0])
-Chi2 = T['Chi2'][0]
+fnames = [z6datapre+'LF_SC_t8.0e+02f0.8l1.0e-01a0.500alpha1.0',
+          z6datapre+'LF_LN_t9.0e+02f0.8m5.0e-02s0.300alpha1.0',
+          z6datapre+'LF_SC_t4.0e+02f0.6d1.0l8.0e-01a0.100alpha1.0']
+labels = ['Schechter best fit','Log-normal best fit','Schechter + mass dependent ER']
+# T = ascii.read(fname, guess=False, delimiter=' ')
+# Phi_DO = T['Phi_DO']
+# Chi2 = np.sum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
+# assert Chi2 == T['Chi2'][0]
 
 plt.figure(figsize=(10,10),dpi=200)
-plt.errorbar(bin_cen, Phi_obs, yerr=Phi_err, fmt="o", c='C0')
-plt.plot(bin_cen, LF_M1450(bin_cen,z)*1e9, label=lfnames[str(z)], c='C0')
-plt.scatter(bin_cen, T['Phi_DO'], c='C1', label='histogram')
+plt.errorbar(bin_cen, Phi_obs, yerr=Phi_err, fmt="o", c='black')
+plt.plot(bin_cen, LF_M1450(bin_cen,z)*1e9, label=lfnames[str(z)], c='black')
+
+for i in range(len(fnames)):
+    fname = fnames[i]; lab = labels[i]
+    T = ascii.read(fname, guess=False, delimiter=' ')
+    plt.scatter(bin_cen, T['Phi_DO'], label=lab)
+
 # plt.text(-26,1e2,'f=%3.2f'%f_duty+'\n'+r'$\mu=$'+'%3.2f'%mu_fit+'\n'+r'$\sigma=$'+'%3.2f'%sigma_fit+'\ne=%.3f'%eta8+'\n'+r'$\delta=$'+'%.3f'%delta_fit,fontsize = fstxt)
 plt.xlim(bin_edg[-1],bin_edg[0]); plt.ylim(5e-3,1e4)
 plt.yscale('log')
 plt.grid(True)
-plt.legend(loc='lower left',fontsize=fslabel)
-plt.title(r'$\mathrm{\chi^2}=\sum_i \frac{(\log{E_i}-\log{O_i})^2}{\log{\sigma_i}^2}=$'+'%.2e'%Chi2,fontsize=fstitle)
-plt.savefig(z6figpre+'ln.png')
+plt.legend(loc='upper right',fontsize=fslabel)
+plt.xlabel(r'$\mathrm{M_{1450}}$',fontsize=fslabel);
+plt.ylabel(r'$\mathrm{Gpc^{-3} mag^{-1}}$',fontsize=fslabel)
+plt.xticks(fontsize=fstick);plt.yticks(fontsize=fstick)
+# plt.title(r'$\mathrm{\chi^2}=\sum_i \frac{(\log{E_i}-\log{O_i})^2}{\log{\sigma_i}^2}=$'+'%.2e'%Chi2,fontsize=fstitle)
+plt.savefig(z6figpre+'SC_M.png')
