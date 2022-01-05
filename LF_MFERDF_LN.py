@@ -1,25 +1,38 @@
 from PYmodule import *
 # produce LF(z=6) with MF & parameterized P(λ)
+# MF, LF Willot 2010 checked right
+# 但reproduce 的LF 和Willott 2010相差很大 不管什么mass range for BHMF都不行
 
 z = int(6)
 tz = t_from_z(z)
 z6datapre = '../z6/data2/'
 # MF setting; Willot+ 2010
-abin_mf =  np.logspace(2,12,num=100)
+for M in [1e7,1e8,1e9,1e10]:
+    print('M1450=%.1f'%M1450_Lbol(L_M(M,.6)))
+abin_mf =  np.logspace(7,10,num=100)
+abin_mf =  np.logspace(8,9.5,num=100)
 M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
 M_left = abin_mf[:-1]; M_right = abin_mf[1:]
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]); print('Mbin ratio',abin_mf[1]/abin_mf[0])
 N_mf = len(abin_mf)-1
 dn_MBH = MF(M_BH)*dlog10M # number density per M_BH bin
 
+# plt.figure(figsize=(10,10),dpi=400)
+# plt.plot(M_BH,dn_MBH/dlog10M)
+# plt.xscale('log'); plt.yscale('log')
+# plt.xlim(1e7,1e10); plt.ylim(1e-10,1e-4)
+# plt.grid(True)
+# plt.savefig('../MF_W10.png')
+
 # LF data bins same w/ Matsu18
 abin_lf = np.linspace(-29,-18,num=30)
+# abin_lf = np.linspace(-30,10,num=30) # P1450 conserve checked
 dmag = abin_lf[1]-abin_lf[0] #; print(dmag)
 L_left = abin_lf[:-1]; L_right = abin_lf[1:]
 M1450  = (L_left+L_right)/2.
 N_lf = len(M1450)
 
-f_range = [.5] # 只影响normalization
+f_range = [.75] # 只影响normalization
 m_range = [.6]
 s_range = [.3]
 
@@ -57,7 +70,7 @@ for f_duty in f_range:
                 names=('M1450','Phi_Matsu','Phi','P1450_csv','Chi2')
             )
             LFname = z6datapre+'L_ME_LN_'+ \
-                    'f%.1f'%f_duty+ \
+                    'f%.2f'%f_duty+ \
                     'm%.1e'%mu_fit+ \
                     's%.3f'%sigma_fit
             ascii.write(T, LFname,
@@ -68,6 +81,17 @@ for f_duty in f_range:
                 find_min = True
                 Chi2_min = Chi2
                 LFname_min = LFname
+
+T = ascii.read(LFname_min,guess=False, delimiter=' ')
+plt.figure(figsize=(10,10),dpi=400)
+plt.plot(abin_lf,1e9*LF_M1450(abin_lf,z=6,W10=True),label='W10')
+plt.plot(T['M1450'], 1e9*T['Phi_Matsu'], '--', label='Matsu')
+plt.plot(T['M1450'], 1e9*T['Phi'], '--',label='MF+P(l)')
+plt.yscale('log')
+plt.xlim(-18,-28); plt.ylim(1e-2,1e6)
+plt.grid(True)
+plt.legend()
+plt.savefig('../LF_W10.png')
 
 print(i)
 if find_min:

@@ -229,16 +229,17 @@ def LF(l): # dn/dlogL in Mpc^-3 dex^-1
     t = (np.log10(l) - np.log10(L_1)) / (np.log10(L_2) - np.log10(L_1))
     return Phi_L_star/( pow(l/L_star,-(alpha+1)) + pow(l/L_star,-(beta+1)) ) * (2*(1-t)+3*t) 
 
-def LF_M1450(M,z=6): # dn/dmag in Mpc^-3 mag^-1
+def LF_M1450(M,z=6,W10=False): # dn/dmag in Mpc^-3 mag^-1
     if z==6: 
-        # Willot 2010 CFHQS + SDSS
-        Phi_M_star = 1.14e-8
-        M_star = -25.13
-        alpha  = -1.5; beta = -2.81
         # Matsuoka 2018
         Phi_M_star = 1.09e-8
         M_star = -24.9
         alpha  = -1.23; beta = -2.73
+        # Willot 2010 CFHQS + SDSS
+        if W10:
+            Phi_M_star = 1.14e-8
+            M_star = -25.13
+            alpha  = -1.5; beta = -2.81
     elif z==5:
         # McGreer 2018 DPL; 
         Phi_M_star = pow(10., -8.97+0.47)
