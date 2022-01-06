@@ -60,12 +60,17 @@ a_range = np.array([.1, 1., 2., 3.]) # a>0 total P convergent
 
 t_range = np.arange(500,1001,100)*Myr
 f_range = np.arange(.5, 1.1, .2)
-k_range = np.array([-.5,-.2,.1,.2,.5])
+d_range = np.arange(-1.1, 1.1, .3)
 l_range = np.append( [.01,.05], np.arange(.1,2.1,.2))
 a_range = np.arange(.1, 3.1, .2) # a>0 total P convergent
 # print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
 # exit(0)
 
+# t_range = np.arange(100,1001,100)*Myr
+# f_range = [1.]
+# d_range = [.3]
+# l_range = [.1]
+# a_range = [.4]
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
@@ -78,7 +83,7 @@ Chi2_min = 1e10; find_min = False; LFname_min = ''
 
 t_life = t_range[ rank//len(f_range)]
 f_duty = f_range[ rank%len(f_range) ]
-for k_fit in k_range:
+for d_fit in d_range:
     for l_cut in l_range:
         for a in a_range:
             i = i+1
@@ -103,8 +108,8 @@ for k_fit in k_range:
                                 # #----------- Schechter lbd -----------
                                 # x0 = kernelS_MBH(bin_left[ibin] /T_seed['Mstar0'], dt_seed, f_duty, l_cut)
                                 # x1 = kernelS_MBH(bin_right[ibin]/T_seed['Mstar0'], dt_seed, f_duty, l_cut)
-                                x0 = kernelS_MBH_Mk(bin_left[ibin],  T_seed['Mstar0'], dt_seed, f_duty, l_cut, k_fit)
-                                x1 = kernelS_MBH_Mk(bin_right[ibin], T_seed['Mstar0'], dt_seed, f_duty, l_cut, k_fit)
+                                x0 = kernelS_MBH_M(bin_left[ibin],  T_seed['Mstar0'], dt_seed, f_duty, l_cut, d_fit)
+                                x1 = kernelS_MBH_M(bin_right[ibin], T_seed['Mstar0'], dt_seed, f_duty, l_cut, d_fit)
                                 x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
                                 dP_seed = special.gammainc(a,x1) - special.gammainc(a,x0)
 
@@ -115,8 +120,8 @@ for k_fit in k_range:
                             # #----------- Schechter lbd -----------
                             # x0 = kernelS_MBH(M_BH[ibin]/bin_right, t_life, f_duty, l_cut)
                             # x1 = kernelS_MBH(M_BH[ibin]/bin_left,  t_life, f_duty, l_cut)
-                            x0 = kernelS_MBH_Mk(bin_left,  M_BH[ibin], t_life, f_duty, l_cut, k_fit)
-                            x1 = kernelS_MBH_Mk(bin_right, M_BH[ibin], t_life, f_duty, l_cut, k_fit)
+                            x0 = kernelS_MBH_M(bin_left,  M_BH[ibin], t_life, f_duty, l_cut, d_fit)
+                            x1 = kernelS_MBH_M(bin_right, M_BH[ibin], t_life, f_duty, l_cut, d_fit)
                             x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
                             dP_MBH[ibin] = np.nansum((special.gammainc(a,x1) - special.gammainc(a,x0)) * dP_MBH_prev) + dP_seed
                         Nt -= 1
@@ -130,9 +135,9 @@ for k_fit in k_range:
                 [M_BH, dn_MBH, consv_ratio*np.ones(N_mf)],
                 names=('M_BH','dn_MBH','consv')
             )
-            MFname = z6datapre+'MF_SC_Mk'+'t%.1e'%(t_life/Myr)+ \
+            MFname = z6datapre+'MF_SC_M'+'t%.1e'%(t_life/Myr)+ \
                     'f%.1f'%f_duty+ \
-                    'k%.1f'%k_fit+ \
+                    'd%.1f'%d_fit+ \
                     'l%.1e'%l_cut+ \
                     'a%.3f'%a+ \
                     'alpha%.1f'%alpha
@@ -149,8 +154,8 @@ for k_fit in k_range:
             Phi_csv = 0.
             for ibin in range(N_lf):
                 # #----------- Schechter lbd -----------
-                x0 = kernelS_M1450_Mk(bin_edg[ibin+1], T['M_BH'], l_cut, k_fit)
-                x1 = kernelS_M1450_Mk(bin_edg[ibin],   T['M_BH'], l_cut, k_fit)
+                x0 = kernelS_M1450_M(bin_edg[ibin+1], T['M_BH'], l_cut, d_fit)
+                x1 = kernelS_M1450_M(bin_edg[ibin],   T['M_BH'], l_cut, d_fit)
                 dP_M1450 = special.gammainc(a,x1) - special.gammainc(a,x0)
 
                 dPhi = np.nansum(T['dn_MBH']*dP_M1450)
@@ -166,9 +171,9 @@ for k_fit in k_range:
                 [bin_cen,Phi_obs,Phi_DO,Phi,Chi2*np.ones(N_lf)],
                 names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
             )
-            LFname = z6datapre+'LF_SC_Mk'+'t%.1e'%(t_life/Myr)+ \
+            LFname = z6datapre+'LF_SC_M'+'t%.1e'%(t_life/Myr)+ \
                     'f%.1f'%f_duty+ \
-                    'k%.1f'%k_fit+ \
+                    'd%.1f'%d_fit+ \
                     'l%.1e'%l_cut+ \
                     'a%.3f'%a+ \
                     'alpha%.1f'%alpha

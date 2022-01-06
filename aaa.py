@@ -61,11 +61,11 @@ a_range = np.arange(.1, 3., .1) # a>0 total P convergent
 print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
 # exit(0)
 
-t_range = [800.*Myr]
-f_range = [.9]
-d_range = [.7]
-l_range = [.3]
-a_range = [.1]
+t_range = [1000.*Myr]
+f_range = [1.]
+d_range = [.3]
+l_range = [.4]
+a_range = [.5]
 
 i = 0
 Chi2_min = 1e10; find_min = False
@@ -146,10 +146,8 @@ for t_life in t_range:
                     Phi_csv = 0.
                     for ibin in range(N_lf):
                         # #----------- Schechter lbd -----------
-                        # x0 = kernelS_M1450(bin_edg[ibin+1], T['M_BH'], l_cut)
-                        # x1 = kernelS_M1450(bin_edg[ibin],   T['M_BH'], l_cut)
-                        x0 = kernelS_M1450_M(bin_edg[ibin+1], T['M_BH'], l_cut, d_fit)
-                        x1 = kernelS_M1450_M(bin_edg[ibin],   T['M_BH'], l_cut, d_fit)
+                        x0 = kernelS_M1450(bin_edg[ibin+1], T['M_BH'], l_cut)
+                        x1 = kernelS_M1450(bin_edg[ibin],   T['M_BH'], l_cut)
                         dP_M1450 = special.gammainc(a,x1) - special.gammainc(a,x0)
 
                         dPhi = np.nansum(T['dn_MBH']*dP_M1450)

@@ -173,6 +173,10 @@ def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit):
     lbd = (np.log(M1/M0) + (pow(M1/1e8,d_fit)-pow(M0/1e8,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
     return lbd/l_cut
 
+def kernelS_MBH_Mk(M1, M0, dt, f_duty, l_cut, k_fit):
+    lbd = ((pow(M0/1e8,-k_fit)-pow(M1/1e8,-k_fit))/k_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
+    return lbd/l_cut
+
 def kernelS_M1450(M1450, MBH, l_cut):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
     return lbd/l_cut
@@ -180,6 +184,10 @@ def kernelS_M1450(M1450, MBH, l_cut):
 def kernelS_M1450_M(M1450, MBH, l_cut, d_fit):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
     return lbd*(1+pow(MBH/1e8,d_fit))/l_cut
+
+def kernelS_M1450_Mk(M1450, MBH, l_cut, k_fit):
+    lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
+    return lbd*pow(MBH/1e8,-k_fit)/l_cut
 
 def kernel_M1450(M1450, MBH, mu, sigma_dex):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
