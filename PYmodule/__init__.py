@@ -170,7 +170,7 @@ def kernelS_MBH(Mgrow_ratio, dt, f_duty, l_cut):
     return lbd/l_cut
 
 def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit):
-    lbd = (np.log(M1/M0) + (pow(M1/1e8,d_fit)-pow(M0/1e8,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
+    lbd = (np.log(M1/M0) + (pow(M1/1e7,d_fit)-pow(M0/1e7,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
     return lbd/l_cut
 
 def kernelS_MBH_Mk(M1, M0, dt, f_duty, l_cut, k_fit):
