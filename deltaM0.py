@@ -27,9 +27,9 @@ Phi_err = Phi_err[str(z)]
 N_lf = len(bin_edg) - 1
 
 f_duty = 1.
-d_fit = .3
-l_cut = .4
-a = .5
+d_fit = .5
+l_cut = .5
+a = .1
 
 dn_MBH = np.zeros(N_mf)
 Mstar0 = 100
@@ -37,7 +37,7 @@ dt_seed = 500*Myr
 
 T_k = ascii.read(z6datapre+'fort.16')
 hist, bin_edges = np.histogram(pow(10., T_k['logMBH']),bins=abin_mf,density=False)
-print('hist len:',np.sum(hist))
+# print('hist len:',np.sum(hist))
 hist = hist/len(T_k)*1e-3
 Phi_k = hist/dlog10M
 
@@ -60,6 +60,11 @@ T = Table(
     names=('M_BH','Phi','W10_MF','Phi_k')
 )
 MFname = z6datapre+'MF100'
+MFname = z6datapre+'MF100'+ \
+                    'f%.2f'%f_duty+ \
+                    'd%.2f'%d_fit+ \
+                    'l%.2f'%l_cut+ \
+                    'a%.2f'%a
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF'], T['Phi_k']],
             names=['M_BH','Phi','W10_MF','Phi_k']),
             MFname,

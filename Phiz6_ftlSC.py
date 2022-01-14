@@ -61,11 +61,12 @@ a_range = np.arange(.1, 3., .1) # a>0 total P convergent
 print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
 # exit(0)
 
-t_range = [1000.*Myr]
+t_range = [200.*Myr]
 f_range = [1.]
-d_range = [.3]
-l_range = [.4]
-a_range = [.5]
+d_range = [.4]
+l_range = [.9]
+a_range = [.2]
+
 
 i = 0
 Chi2_min = 1e10; find_min = False
@@ -128,7 +129,7 @@ for t_life in t_range:
                         [M_BH, dn_MBH/dlog10M, MF(M_BH)],
                         names=('M_BH','Phi','W10_MF')
                     )
-                    MFname = z6datapre+'MF_SC_M'+'t%.1e'%(t_life/Myr)+ \
+                    MFname = z6datapre+'MF_SC'+'t%.1e'%(t_life/Myr)+ \
                             'f%.1f'%f_duty+ \
                             'd%.1f'%d_fit+ \
                             'l%.1e'%l_cut+ \
