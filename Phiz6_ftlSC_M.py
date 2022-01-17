@@ -58,14 +58,15 @@ t_range = np.arange(100,1000,100)*Myr
 f_range = np.arange(.1, 1., .1)
 l_range = np.append( [.01,.05], np.arange(.1,2.,.1))
 a_range = np.arange(.1, 3., .1) # a>0 total P convergent
-print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
+# print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
 # exit(0)
 
-t_range = [800.*Myr]
-f_range = [.9]
-d_range = [.7]
-l_range = [.3]
+t_range = [120.*Myr]
+f_range = [1.]
+d_range = [.25]
+l_range = [.9]
 a_range = [.1]
+
 
 i = 0
 Chi2_min = 1e10; find_min = False
@@ -110,8 +111,8 @@ for t_life in t_range:
                                     # #----------- Schechter lbd -----------
                                     # x0 = kernelS_MBH(M_BH[ibin]/bin_right, t_life, f_duty, l_cut)
                                     # x1 = kernelS_MBH(M_BH[ibin]/bin_left,  t_life, f_duty, l_cut)
-                                    x0 = kernelS_MBH_M(bin_left,  M_BH[ibin], t_life, f_duty, l_cut, d_fit)
-                                    x1 = kernelS_MBH_M(bin_right, M_BH[ibin], t_life, f_duty, l_cut, d_fit)
+                                    x0 = kernelS_MBH_M(M_BH[ibin], bin_right, t_life, f_duty, l_cut, d_fit)
+                                    x1 = kernelS_MBH_M(M_BH[ibin], bin_left,  t_life, f_duty, l_cut, d_fit)
                                     x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
                                     for i in range(len(x0)):
                                         assert x0[i]<= x1[i]
@@ -120,12 +121,13 @@ for t_life in t_range:
                             dn_MBH += dP_MBH*n_base[iM]*f_bsm[i_bsm]
 
                     consv_ratio = np.nansum(dn_MBH)/np.sum(n_base)
-                    # print('conserved fraction=%.10f'%consv_ratio)
+                    print('conserved fraction=%.10f'%consv_ratio)
                     # if consv_ratio<.9:
                     #     print('conserved fraction=%.10f'%consv_ratio)
+
                     T = Table(
-                        [M_BH, dn_MBH, consv_ratio*np.ones(N_mf)],
-                        names=('M_BH','dn_MBH','consv')
+                        [M_BH, dn_MBH/dlog10M, MF(M_BH)],
+                        names=('M_BH','Phi','W10_MF')
                     )
                     MFname = z6datapre+'MF_SC_M'+'t%.1e'%(t_life/Myr)+ \
                             'f%.1f'%f_duty+ \
@@ -133,10 +135,11 @@ for t_life in t_range:
                             'l%.1e'%l_cut+ \
                             'a%.3f'%a+ \
                             'alpha%.1f'%alpha
-                    ascii.write( Table([T['M_BH'], T['dn_MBH']/dlog10M, T['consv']],
-                                names=['M_BH','dn_dlog10M','consv']),
+                    MFname = z6datapre+'MFIMF_M'
+                    ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
+                                names=['M_BH','Phi','W10_MF']),
                                 MFname,
-                                formats={'M_BH':'4.2e','dn_dlog10M':'4.2e','consv':'4.2f'},
+                                formats={'M_BH':'4.2e','Phi':'4.2e','W10_MF':'4.2e'},
                                 overwrite=True)
                     # exit(0)
                     T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
@@ -144,10 +147,9 @@ for t_life in t_range:
                 # # --------- Luminosity Function ---------
                     Phi = np.zeros(N_lf)
                     Phi_csv = 0.
+                    T['dn_MBH'] = T['Phi']*dlog10M
                     for ibin in range(N_lf):
-                        # #----------- Schechter lbd -----------
-                        # x0 = kernelS_M1450(bin_edg[ibin+1], T['M_BH'], l_cut)
-                        # x1 = kernelS_M1450(bin_edg[ibin],   T['M_BH'], l_cut)
+                        #----------- Schechter lbd -----------
                         x0 = kernelS_M1450_M(bin_edg[ibin+1], T['M_BH'], l_cut, d_fit)
                         x1 = kernelS_M1450_M(bin_edg[ibin],   T['M_BH'], l_cut, d_fit)
                         dP_M1450 = special.gammainc(a,x1) - special.gammainc(a,x0)
@@ -171,6 +173,7 @@ for t_life in t_range:
                             'l%.1e'%l_cut+ \
                             'a%.3f'%a+ \
                             'alpha%.1f'%alpha
+                    LFname = z6datapre+'LFIMF_M'
                     ascii.write(T, LFname,
                                 formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
                                 overwrite=True)
@@ -178,12 +181,9 @@ for t_life in t_range:
                     if np.nanmin([Chi2, Chi2_min]) == Chi2:
                         find_min = True
                         Chi2_min = Chi2
-                        t_min = t_life
-                        f_min = f_duty
-                        l_min = l_cut
-                        a_min = a
+                        T_min = T
                         LFname_min = LFname
                     # exit(0)
-print(i)
-if find_min:
-    print(LFname_min,Chi2_min)
+# print(i)
+# if find_min:
+#     print(LFname_min,Chi2_min)

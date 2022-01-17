@@ -58,14 +58,14 @@ t_range = np.arange(100,1000,100)*Myr
 f_range = np.arange(.1, 1., .1)
 l_range = np.append( [.01,.05], np.arange(.1,2.,.1))
 a_range = np.arange(.1, 3., .1) # a>0 total P convergent
-print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
+# print(len(t_range)*len(f_range)*len(l_range)*len(a_range) )
 # exit(0)
 
-t_range = [200.*Myr]
+t_range = [120.*Myr]
 f_range = [1.]
-d_range = [.4]
+d_range = [.25]
 l_range = [.9]
-a_range = [.2]
+a_range = [.1]
 
 
 i = 0
@@ -85,10 +85,15 @@ for t_life in t_range:
                             Nt = np.max((tz-T['t_col'])//t_life)
                             Nmax = Nt
                             dP_MBH = np.zeros(N_mf)
+                            # t_tot = np.zeros(len(T))
                             while Nt>=0:
                                 t_point = tz - Nt*t_life
                                 T_seed = T[np.logical_and(t_point-t_life<=T['t_col'],T['t_col']<t_point)]
                                 dt_seed = t_point - T_seed['t_col']
+                                # index = t_point-t_life<=T['t_col']
+                                # index_ =  T['t_col']<t_point
+                                # t_tot[index*index_] += t_point - T['t_col'][index*index_]
+                                # t_tot[T['t_col']<t_point-t_life]+= t_life
                                 dP_MBH_prev = dP_MBH.copy()
                                 # M_BHt = M1M0(M_BH,dt,f_duty,mu_fit,eta8,delta_fit) # if not exp growth, may needed
                                 for ibin in range(N_mf):
@@ -111,8 +116,8 @@ for t_life in t_range:
                                     # #----------- Schechter lbd -----------
                                     # x0 = kernelS_MBH(M_BH[ibin]/bin_right, t_life, f_duty, l_cut)
                                     # x1 = kernelS_MBH(M_BH[ibin]/bin_left,  t_life, f_duty, l_cut)
-                                    x0 = kernelS_MBH_M(bin_left,  M_BH[ibin], t_life, f_duty, l_cut, d_fit)
-                                    x1 = kernelS_MBH_M(bin_right, M_BH[ibin], t_life, f_duty, l_cut, d_fit)
+                                    x0 = kernelS_MBH_M(M_BH[ibin], bin_right, t_life, f_duty, l_cut, d_fit)
+                                    x1 = kernelS_MBH_M(M_BH[ibin], bin_left,  t_life, f_duty, l_cut, d_fit)
                                     x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
                                     for i in range(len(x0)):
                                         assert x0[i]<= x1[i]
@@ -184,6 +189,6 @@ for t_life in t_range:
                         T_min = T
                         LFname_min = LFname
                     # exit(0)
-print(i)
-if find_min:
-    print(LFname_min,Chi2_min)
+# print(i)
+# if find_min:
+#     print(LFname_min,Chi2_min)
