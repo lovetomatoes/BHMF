@@ -66,6 +66,7 @@ f_range = [1.]
 d_range = [.25]
 l_range = [.9]
 a_range = [.1]
+# Chi2_M = 0.007; Chi2_L = 0.67 quite small.
 
 
 i = 0
@@ -147,7 +148,9 @@ for t_life in t_range:
                                 formats={'M_BH':'4.2e','Phi':'4.2e','W10_MF':'4.2e'},
                                 overwrite=True)
                     # exit(0)
-                    T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
+                    # T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
+                    index = np.logical_and(T['M_BH']>1e7, T['M_BH']<1e10)
+                    Chi2_M = np.sum(pow(np.log(T['Phi'][index]/T['W10_MF'][index])/np.log(T['W10_MF'][index]), 2))/(np.sum(index)-1)
 
                 # # --------- Luminosity Function ---------
                     Phi = np.zeros(N_lf)
@@ -190,5 +193,5 @@ for t_life in t_range:
                         LFname_min = LFname
                     # exit(0)
 # print(i)
-# if find_min:
-#     print(LFname_min,Chi2_min)
+if find_min:
+    print(LFname_min,Chi2_min, Chi2_M)

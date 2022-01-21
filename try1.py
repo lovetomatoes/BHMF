@@ -1,18 +1,130 @@
 from time import sleep
 from PYmodule import *
+from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
-print((t_from_z(6)-t_from_z(15))/Myr)
+print('most Nt:',(t_from_z(6)-t_from_z(20))/(200.*Myr))
 print((t_from_z(6)-t_from_z(5))/Myr)
 print((t_from_z(5)-t_from_z(4))/Myr)
 print(M1450_Lbol(1e13*Lsun))
-print(Lsun)
+print(t_Edd/Myr)
+
+a = np.arange(1,10,1)
+index = np.logical_and(3<a, a<5)
+b = np.arange(2,11,1)
+print(np.append(b[index],.1))
+index_ = b<8
+print(a, index,np.sum(index),index_,index*index_)
+
+for L1450 in [1e40, 1e41, 1e42, 1e43]:
+    print(M1450_Lbol(L1450*fbol_1450))
+    print(-20.1-2.5*np.log10(L1450/1e44))
+    # print(34.1-2.5*np.log10(L1450/(3e18/1450*1e7)))
+
+print(t_Edd/Myr)
+exit(0)
+fig, ax = plt.subplots(1, 1, dpi=400)
+x = np.linspace(uniform.ppf(0.01),
+                uniform.ppf(0.99), 100)
+y = uniform.pdf(x)
+ax.plot(x, y,
+       'r-', lw=5, alpha=0.6, label='uniform pdf')
+rv = uniform()
+ax.plot(x, rv.pdf(x), 'k-', lw=2, label='frozen pdf')
+r = uniform.rvs(size=10000)
+ax.hist(r, density=True, histtype='stepfilled', alpha=0.2)
+ax.legend(loc='best', frameon=False)
+plt.savefig('../unifrom.png')
+hist, bin_edges = np.histogram(r,bins=np.append(x,1.1),density=False)
+z = hist/len(r)/(x[1]-x[0])
+ascii.write(Table([x,y,z]),'aaa',names={'x','y','z'},formats={'x':'10.5f','y':'10.5f','z':'10.5f'},overwrite=True)
+ascii.write(Table([r]),'bbb',names={'r'},formats={'r':'10.5f'},overwrite=True)
+
+fig, ax = plt.subplots(1, 1, dpi=400)
+x = np.linspace(norm.ppf(0.01),
+                norm.ppf(0.99), 100)
+y = norm.pdf(x)
+ax.plot(x, y,
+       'r-', lw=5, alpha=0.6, label='norm pdf')
+rv = norm()
+ax.plot(x, rv.pdf(x), 'k-', lw=2, label='frozen pdf')
+r = norm.rvs(size=10000)
+ax.hist(r, density=True, histtype='stepfilled', alpha=0.2)
+ax.legend(loc='best', frameon=False)
+plt.savefig('../norm.png')
+hist, bin_edges = np.histogram(r,bins=np.append(x,x[-1]**2/x[-2]),density=False)
+z = hist/len(r)/(x[1]-x[0])
+ascii.write(Table([x,y,z]),'normaaa',names={'x','y','z'},formats={'x':'10.5f','y':'10.5f','z':'10.5f'},overwrite=True)
+ascii.write(Table([r]),'normbbb',names={'r'},formats={'r':'10.5f'},overwrite=True)
+
+# Ls = np.logspace(41,48)
+# # for L in Ls:
+# M1 = M1450_Lbol(Ls)
+# M2 = -25.-2.5*(np.log10(Ls/Lsun)-13.15364)
+# ascii.write(Table([Ls,M1,M2]),'aaa',overwrite=True)
+
+def filter(x,y):
+    z = []
+    for ax in x:
+        z.append(math.floor(ax/y)*y)
+    return z
+
+xs = np.linspace(1,20,num=10000)
+plt.plot(xs,filter(xs,3.0))
+plt.savefig('../filter.png')
+exit(0)
+
+T = ascii.read('fort.10')
+ls = T['ls']
+print(np.max(ls),np.min(ls))
+print('len(ls):',len(T))
+bin_edge_l = np.linspace(np.min(ls),np.max(ls))
+bin_cen_l = (bin_edge_l[1:]+bin_edge_l[:-1]) / 2.
+bin_wid_l = bin_edge_l[1:]-bin_edge_l[:-1]
+hist, bin_edges = np.histogram(ls,bins=bin_edge_l,density=True)
+alpha = .5; beta = .4
+plt.figure(figsize=(10,10),dpi=400)
+plt.bar( bin_cen_l,hist*bin_cen_l,width=bin_wid_l,color='C'+str(1))
+plt.plot(bin_cen_l, (bin_cen_l/beta)**alpha*np.exp(-bin_cen_l/beta)/special.gamma(alpha) )
+plt.xscale('log')
+plt.savefig('../P_lbd.png')
+exit(0)
+
+x0 = kernel_M1450(10,1e8,.6,.3)
+x1 = kernel_M1450(-20,1e8,.6,.3)
+print(special.erfc(x0)-special.erfc(x1))
+print('M1450: L=1e41 ', M1450_Lbol(1e41))
+a = .5
+x1 = np.inf; x0 = 0
+print('P_tot:',special.gammainc(a,x1) - special.gammainc(a,x0))
+exit(0)
+
+x = np.arange(-21,-29,-1)
+y = corr_U14D20(x)
+print(x,y)
+plt.figure(figsize=(10,10),dpi=400)
+z = 4 + 2.5*np.tanh(.5*(x+21))
+plt.plot(x,y)
+plt.plot(x,z)
+plt.ylim(1,7)
+plt.savefig('../corr.png')
+exit(0)
 
 print('z: 50 to 17.58    : %3.2f Myr', (t_from_z(17.58)-t_from_z(50))/Myr)
 print('z: 17.58 to 6     : %3.2f Myr', (t_from_z(6)-t_from_z(17.58))/Myr)
 print('z: 6 to 4    : %3.2f Myr', (t_from_z(4)-t_from_z(6))/Myr)
 
+for M in [1e4,1e5,1e6,1e7,1e8,1e9,1e10]:
+    print('M1450=%.1f'%M1450_Lbol(L_M(M,10)))
+for i in range(100):
+    print(i//10)
+t1=time.time()
+sleep(2)
+t2=time.time()
+print(t2-t1)
+
+exit(0)
 # ERDF: 和Schulze2015 作比
 def Schechter(x,a):
     return pow(x,a)*np.exp(-x)
