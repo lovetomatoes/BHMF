@@ -66,8 +66,8 @@ f_range = [1.]
 d_range = [.25]
 l_range = [.9]
 a_range = [.1]
-# Chi2_M = 0.007; Chi2_L = 0.67 quite small.
-
+# Chi2_M = 0.007; Chi2_L = 0.68 quite small.
+# off_M = 0.1; off_L = 2.2
 
 i = 0
 Chi2_min = 1e10; find_min = False
@@ -151,6 +151,7 @@ for t_life in t_range:
                     # T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
                     index = np.logical_and(T['M_BH']>1e7, T['M_BH']<1e10)
                     Chi2_M = np.sum(pow(np.log(T['Phi'][index]/T['W10_MF'][index])/np.log(T['W10_MF'][index]), 2))/(np.sum(index)-1)
+                    off_M = np.max(abs(np.log(T['Phi'][index]/T['W10_MF'][index])/np.log(T['W10_MF'][index])))
 
                 # # --------- Luminosity Function ---------
                     Phi = np.zeros(N_lf)
@@ -170,6 +171,7 @@ for t_life in t_range:
                     Phi *= 1e9
                     Phi_DO = Phi/corr_U14D20(bin_cen)
                     Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
+                    off_L = np.nanmax(abs( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err)))
 
                     T = Table(
                         [bin_cen,Phi_obs,Phi_DO,Phi,Chi2*np.ones(N_lf)],
@@ -194,4 +196,4 @@ for t_life in t_range:
                     # exit(0)
 # print(i)
 if find_min:
-    print(LFname_min,Chi2_min, Chi2_M)
+    print(LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)
