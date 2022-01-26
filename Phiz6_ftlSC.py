@@ -1,5 +1,5 @@
 from PYmodule import *
-# Phiz6 paras: f_duty, t_life, lbd ~Schechter(l_cut,a)
+# Phiz6 paras: f_0, t_life, lbd ~Schechter(l_cut,a)
 
 N_Mh = 3 # 3 base halos: 1e11, 1e12, 1e13
 Ntr = 10000
@@ -66,13 +66,13 @@ f_range = [1.]
 d_range = [.25]
 l_range = [.9]
 a_range = [.1]
-# Chi2_M = 0.007; Chi2_L = 0.68 quite small.
-# off_M = 0.1; off_L = 2.2
+# Chi2_M = 1.7; Chi2_L = 0.68 quite small.
+# off_M = 1.6; off_L = 2.2
 
 i = 0
 Chi2_min = 1e10; find_min = False
 for t_life in t_range:
-    for f_duty in f_range:
+    for f_0 in f_range:
         for d_fit in d_range:
             for l_cut in l_range:
                 for a in a_range:
@@ -96,15 +96,14 @@ for t_life in t_range:
                                 # t_tot[index*index_] += t_point - T['t_col'][index*index_]
                                 # t_tot[T['t_col']<t_point-t_life]+= t_life
                                 dP_MBH_prev = dP_MBH.copy()
-                                # M_BHt = M1M0(M_BH,dt,f_duty,mu_fit,eta8,delta_fit) # if not exp growth, may needed
                                 for ibin in range(N_mf):
                                     # new seeds
                                     if len(T_seed):
                                         # #----------- Schechter lbd -----------
-                                        # x0 = kernelS_MBH(bin_left[ibin] /T_seed['Mstar0'], dt_seed, f_duty, l_cut)
-                                        # x1 = kernelS_MBH(bin_right[ibin]/T_seed['Mstar0'], dt_seed, f_duty, l_cut)
-                                        x0 = kernelS_MBH_M(bin_left[ibin],  T_seed['Mstar0'], dt_seed, f_duty, l_cut, d_fit)
-                                        x1 = kernelS_MBH_M(bin_right[ibin], T_seed['Mstar0'], dt_seed, f_duty, l_cut, d_fit)
+                                        # x0 = kernelS_MBH(bin_left[ibin] /T_seed['Mstar0'], dt_seed, f_0, l_cut)
+                                        # x1 = kernelS_MBH(bin_right[ibin]/T_seed['Mstar0'], dt_seed, f_0, l_cut)
+                                        x0 = kernelS_MBH_M(bin_left[ibin],  T_seed['Mstar0'], dt_seed, f_0, l_cut, d_fit)
+                                        x1 = kernelS_MBH_M(bin_right[ibin], T_seed['Mstar0'], dt_seed, f_0, l_cut, d_fit)
                                         x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
                                         for i in range(len(x0)):
                                             assert x0[i]<= x1[i]
@@ -115,10 +114,10 @@ for t_life in t_range:
                                         dP_seed = 0.
                                     # prev BHMF
                                     # #----------- Schechter lbd -----------
-                                    # x0 = kernelS_MBH(M_BH[ibin]/bin_right, t_life, f_duty, l_cut)
-                                    # x1 = kernelS_MBH(M_BH[ibin]/bin_left,  t_life, f_duty, l_cut)
-                                    x0 = kernelS_MBH_M(M_BH[ibin], bin_right, t_life, f_duty, l_cut, d_fit)
-                                    x1 = kernelS_MBH_M(M_BH[ibin], bin_left,  t_life, f_duty, l_cut, d_fit)
+                                    # x0 = kernelS_MBH(M_BH[ibin]/bin_right, t_life, f_0, l_cut)
+                                    # x1 = kernelS_MBH(M_BH[ibin]/bin_left,  t_life, f_0, l_cut)
+                                    x0 = kernelS_MBH_M(M_BH[ibin], bin_right, t_life, f_0, l_cut, d_fit)
+                                    x1 = kernelS_MBH_M(M_BH[ibin], bin_left,  t_life, f_0, l_cut, d_fit)
                                     x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
                                     for i in range(len(x0)):
                                         assert x0[i]<= x1[i]
@@ -136,7 +135,7 @@ for t_life in t_range:
                         names=('M_BH','Phi','W10_MF')
                     )
                     MFname = z6datapre+'MF_SC'+'t%.1e'%(t_life/Myr)+ \
-                            'f%.1f'%f_duty+ \
+                            'f%.1f'%f_0+ \
                             'd%.1f'%d_fit+ \
                             'l%.1e'%l_cut+ \
                             'a%.3f'%a+ \
@@ -150,8 +149,8 @@ for t_life in t_range:
                     # exit(0)
                     # T  = T[np.logical_and(True,T['M_BH']<2e10)] # select M_BH range
                     index = np.logical_and(T['M_BH']>1e7, T['M_BH']<1e10)
-                    Chi2_M = np.sum(pow(np.log(T['Phi'][index]/T['W10_MF'][index])/np.log(T['W10_MF'][index]), 2))/(np.sum(index)-1)
-                    off_M = np.max(abs(np.log(T['Phi'][index]/T['W10_MF'][index])/np.log(T['W10_MF'][index])))
+                    Chi2_M = np.sum(pow(np.log(T['Phi']/T['W10_MF'])[index], 2))/(np.sum(index)-1)
+                    off_M = np.max(abs(np.log(T['Phi']/T['W10_MF'])[index]))
 
                 # # --------- Luminosity Function ---------
                     Phi = np.zeros(N_lf)
@@ -165,7 +164,7 @@ for t_life in t_range:
 
                         dPhi = np.nansum(T['dn_MBH']*dP_M1450)
                         Phi_csv += dPhi
-                        Phi[ibin] = dPhi/bin_wid[ibin]*f_duty
+                        Phi[ibin] = dPhi/bin_wid[ibin]
                     # print('consv of dP_M1450:',Phi_csv/np.sum(n_base))
 
                     Phi *= 1e9
@@ -178,7 +177,7 @@ for t_life in t_range:
                         names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
                     )
                     LFname = z6datapre+'LF_SC'+'t%.1e'%(t_life/Myr)+ \
-                            'f%.1f'%f_duty+ \
+                            'f%.1f'%f_0+ \
                             'd%.1f'%d_fit+ \
                             'l%.1e'%l_cut+ \
                             'a%.3f'%a+ \
