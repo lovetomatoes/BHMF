@@ -6,11 +6,16 @@ import matplotlib.pyplot as plt
 from astropy.io import ascii
 from astropy.table import Table, vstack
 import os
+import sys
+
 from scipy.stats import *
 import time
 import math
 import numpy.ma as ma
 from scipy import special
+from emcee import EnsembleSampler
+import corner
+import emcee
 
 z4figpre = '../z4/figs/'
 z4datapre = '../z4/data/'
@@ -419,3 +424,31 @@ class HALO:
         #return -4*pi*G*rho_crit*delta0*Rs*Rs 
         rho_crit, delta0, Rs = self.rho_crit,  self.delta0, self.Rs
         return -4*pi*G*rho_crit*delta0*(Rs**3)/r*np.log(1+r/Rs) 
+
+# seeding files for Mh=1e11, 12, 13 Msun halos; v_bsm = 0, 1 sigma
+Ts = [] # bsm=0,1 two files
+Ntr = 10000
+N_Mh = 3
+eta = 0.3
+for iM in range(N_Mh):
+    TM = []
+    for i_bsm in range(2):
+        T=ascii.read(Mhpres[iM]+'Jcol_'+str(i_bsm)+'.txt', guess=False,delimiter=' ') #  None has np.where(T['z_col']==-1)
+        T['Mdot'] = (k_B*T['Tg_loi']*T['f_loi']/(mu*m_H))**1.5/G/(Ms/yr)
+        T['Mstar0'] = np.zeros(len(T))
+        T['Lbol_z'] = np.zeros(len(T))
+        T['M1450_z'] = np.zeros(len(T))
+        for i in range(len(T)):
+            T['Mstar0'][i] = Mdot2M(T['Mdot'][i]*eta)
+        T['t_col'] = t_from_z(T['z_col'])
+        TM.append(T)
+        # print(np.min(T['z_col']),np.max(T['z_col']),np.min(T['Mstar0']),np.max(T['Mstar0']))
+    Ts.append(TM)
+
+# MF bins
+abin_mf =  np.logspace(2,12,num=100) # default endpoint=True
+M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
+bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
+dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
+N_mf = len(abin_mf)-1
+

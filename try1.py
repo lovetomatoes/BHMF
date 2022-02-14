@@ -1,14 +1,47 @@
 from time import sleep
 from PYmodule import *
+from PYmodule.LFmcz6_easy import *
+# from PYmodule.LFmcz6 import *
 from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
-print('most Nt:',(t_from_z(6)-t_from_z(20))/(200.*Myr))
-print((t_from_z(6)-t_from_z(5))/Myr)
-print((t_from_z(5)-t_from_z(4))/Myr)
-print(M1450_Lbol(1e13*Lsun))
-print(t_Edd/Myr)
+# print('most Nt:',(t_from_z(6)-t_from_z(20))/(200.*Myr))
+# print((t_from_z(6)-t_from_z(5))/Myr)
+# print((t_from_z(5)-t_from_z(4))/Myr)
+# print(M1450_Lbol(1e13*Lsun))
+# print(t_Edd/Myr)
+
+nsteps = 1e4
+rball = 1e-4
+nwalkers = 100
+a = 'nwalkers={0:d}, nsteps={1:.0e} rball={2:.0e}'.format(int(nwalkers),int(nsteps),rball)
+print(a)
+exit(0)
+t1 =  time.time()
+t_life = 120.
+f_0  =  1.
+d_fit = .25
+l_cut = .9
+a = .1
+x = (t_life, f_0, d_fit, l_cut, a)
+print(lnlike(x))
+print('time=',time.time()-t1)
+exit(0)
+
+print(np.sum(np.NINF+2))
+for i in range(1):
+    # try:
+    #     a = np.log10(i)
+    # except ZeroDivisionError:
+    #     print('i is 0')
+    a = np.log10(i)
+    if np.isinf(a):
+        print('isinf')
+    print('print a=',a)
+print(np.nanmax([np.inf,-np.inf, np.nan, 100]))
+print(np.random.randn(2))
+exit(0)
 
 a = np.arange(1,10,1)
 index = np.logical_and(3<a, a<5)
