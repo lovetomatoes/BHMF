@@ -62,15 +62,13 @@ def lnlike(theta):
     dn_MBH = dP_MBH*n_base*f_bsm
 
     consv_ratio = np.nansum(dn_MBH)/n_base
-    print('consv_ratio',consv_ratio)
+    # print('consv_ratio',consv_ratio)
     # wli: too loose constraint!
     if abs(consv_ratio-1)>.5:
-        print('t_life=%3.2e'%(t_life/Myr), 
-        'f_0=%.1f'%f_0, 
-        'd_fit=%.1f'%d_fit, 
-        'l_cut=%.1f'%l_cut, 
-        'a=%.1f'%a)
-        assert 0
+        print('theta: ',theta)
+        print('consv_ratio: ',consv_ratio)
+        # assert 0
+
 
 # # --------- Luminosity Function ---------
     Phi = np.zeros(N_lf)

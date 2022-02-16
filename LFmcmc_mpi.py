@@ -18,7 +18,7 @@ initial = np.array([t_life, f_0, d_fit, l_cut, a])
 
 ndim = len(initial)
 nwalkers = 100
-nsteps = 2000
+nsteps = 100000
 rball = 1e-4
 
 with MPIPool() as pool:
@@ -48,8 +48,7 @@ for i in range(ndim):
     ax.yaxis.set_label_coords(-0.1, 0.5)
 axes[-1].set_xlabel("step number")
 
-prex = sys.argv[0][:-3]
-plt.savefig(prex+'_{0:d}initial_ns{1:.0e}'.format(abs(int(np.log10(rball))),nsteps) +'_chain.png')
+plt.savefig('r_{0:d}initial_ns{1:.0e}'.format(abs(int(np.log10(rball))),nsteps) +'_chain.png')
 
 samples = sampler.flatchain
 print('len of samples:', len(samples))
@@ -57,8 +56,9 @@ theta_max = samples[np.argmax(sampler.flatlnprobability)]
 print('best paras:',np.max(sampler.flatlnprobability),labels,theta_max)
 
 fig = corner.corner(samples,show_titles=True,labels=labels,plot_datapoints=True,quantiles=[0.16, 0.5, 0.84])
-plt.savefig(prex+'_{0:d}initial_ns{1:.0e}'.format(abs(int(np.log10(rball))),nsteps) +'_corner.png')
+plt.savefig('r_{0:d}initial_ns{1:.0e}'.format(abs(int(np.log10(rball))),nsteps) +'_corner.png')
 
+prex = sys.argv[0][:-3]
 print(prex,'nwalkers={0:d}, nsteps={1:.0e}, rball={2:.0e}'.format(int(nwalkers),int(nsteps),rball))
 
 print(
