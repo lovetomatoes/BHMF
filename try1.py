@@ -12,18 +12,20 @@ from scipy.stats import norm, uniform
 # print(M1450_Lbol(1e13*Lsun))
 # print(t_Edd/Myr)
 
-nsteps = 1e4
-rball = 1e-4
-nwalkers = 100
-a = 'nwalkers={0:d}, nsteps={1:.0e} rball={2:.0e}'.format(int(nwalkers),int(nsteps),rball)
-print(a)
-exit(0)
+t_range = [120.]
+f_range = [1.]
+d_range = [.25]
+l_range = [.9]
+a_range = [.1]
+
+
 t1 =  time.time()
-t_life = 120.
-f_0  =  1.
-d_fit = .25
-l_cut = .9
-a = .1
+t_life = t_range[0]
+f_0  = f_range[0]
+d_fit = d_range[0]
+l_cut = l_range[0]
+a = a_range[0]
+
 x = (t_life, f_0, d_fit, l_cut, a)
 print(lnlike(x))
 print('time=',time.time()-t1)

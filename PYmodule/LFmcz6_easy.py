@@ -62,7 +62,7 @@ def lnlike(theta):
     dn_MBH = dP_MBH*n_base*f_bsm
 
     consv_ratio = np.nansum(dn_MBH)/n_base
-    # print('consv_ratio',consv_ratio)
+    # print('MF consv_ratio',consv_ratio)
     # wli: too loose constraint!
     if abs(consv_ratio-1)>.5:
         print('theta: ',theta)
@@ -84,7 +84,6 @@ def lnlike(theta):
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(bin_cen)
     # Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
-    # print('Chi2=%.2e'%Chi2)
     ys = np.log(Phi_obs)
     y_model = np.log(Phi_DO)
     y_err = np.log(Phi_err)
@@ -95,19 +94,30 @@ def lnlike(theta):
         return -np.inf
     return -.5*Chi2
 
-
+# # 7even* ... & posPara
 # def lnprior(theta):
 #     t_life, f_0, d_fit, l_cut, a = theta
-#     # if 1<t_life<1e3 and .1<f_0<10 and d_fit>0 and l_cut and 0<a<1:
 #     if t_life>0. and f_0>0. and d_fit>0. and l_cut>0. and a>0.:
 #         return 0.0
 #     else:
 #         return -np.inf
 
+# # 4* ...
+# def lnprior(theta):
+#     t_life, f_0, d_fit, l_cut, a = theta
+#     if 1e1<t_life<1e3 and d_fit>0. and f_0>0. and 0.1<f_0*l_cut<10. and a>0.:
+#         return 0.0
+#     else:
+#         return -np.inf
+
+# range: 1e1<t_life<1e3 and .1<f_0<10. and d_fit>0. and .1<l_cut<10. and a>0.:
+# range1: 1e1<t_life<1e3 and .1<f_0<10. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
+# range2: 1e1<t_life and .1<f_0<10. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
+# range3: 1e1<t_life<1e3 and .1<f_0<10. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
+
 def lnprior(theta):
     t_life, f_0, d_fit, l_cut, a = theta
-    # 0<a<1 ?
-    if 1e1<t_life<1e3 and d_fit>0. and f_0>0. and 0.1<f_0*l_cut<10. and a>0.:
+    if 1e1<t_life<1e3 and .1<f_0<10. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
         return 0.0
     else:
         return -np.inf
