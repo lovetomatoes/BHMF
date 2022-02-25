@@ -18,10 +18,10 @@ initial = np.array([t_life, f_0, d_fit, l_cut, a])
 
 ndim = len(initial)
 nwalkers = 100
-nsteps = 10
-rball = 1e-4
+nsteps = 10000
+rball = 1e-7
 
-prex='r_{0:d}initial_ns{1:.0e}'.format(abs(int(np.log10(rball))),nsteps)
+prex='posrange5_r_{0:d}even_ns{1:.0e}'.format(abs(int(np.log10(rball))),nsteps)
 
 fname =prex+'.h5'
 
@@ -31,9 +31,10 @@ with MPIPool() as pool:
         sys.exit(0)
 
     backend = emcee.backends.HDFBackend(fname)
+    # clear output and reset
     backend.reset(nwalkers, ndim)
     np.random.seed(42)
-    p0 = [initial + rball*initial*np.random.randn(ndim) for i in range(nwalkers)]
+    p0 = [initial + rball*np.random.randn(ndim) for i in range(nwalkers)]
 
     sampler = EnsembleSampler(nwalkers, ndim, lnprobab, pool=pool, backend=backend)
     sampler.run_mcmc(p0, nsteps, progress=True)

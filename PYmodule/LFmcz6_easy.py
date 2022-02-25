@@ -84,6 +84,7 @@ def lnlike(theta):
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(bin_cen)
     # Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
+    # print('Chi2=%.2e'%Chi2)
     ys = np.log(Phi_obs)
     y_model = np.log(Phi_DO)
     y_err = np.log(Phi_err)
@@ -113,11 +114,13 @@ def lnlike(theta):
 # range: 1e1<t_life<1e3 and .1<f_0<10. and d_fit>0. and .1<l_cut<10. and a>0.:
 # range1: 1e1<t_life<1e3 and .1<f_0<10. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
 # range2: 1e1<t_life and .1<f_0<10. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
-# range3: 1e1<t_life<1e3 and .1<f_0<10. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
+# range3: 1e1<t_life<200 and .1<f_0<10. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
+# range4: 1e1<t_life<200 and .1<f_0<2. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
+# range5: 1e1<t_life<200 and .1<f_0<2. and 0<d_fit<.5 and .1<l_cut<10. and a>0.:
 
 def lnprior(theta):
     t_life, f_0, d_fit, l_cut, a = theta
-    if 1e1<t_life<1e3 and .1<f_0<10. and 0<d_fit<1. and .1<l_cut<10. and a>0.:
+    if 1e1<t_life<200. and .1<f_0<2. and 0<d_fit<.5 and .1<l_cut<10. and a>0.:
         return 0.0
     else:
         return -np.inf
