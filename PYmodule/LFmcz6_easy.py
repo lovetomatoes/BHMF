@@ -67,7 +67,7 @@ def lnlike(theta):
     if abs(consv_ratio-1)>.5:
         print('theta: ',theta)
         print('consv_ratio: ',consv_ratio)
-        # assert 0
+        return -np.inf
 
 
 # # --------- Luminosity Function ---------
