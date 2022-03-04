@@ -56,11 +56,11 @@ a_range = [.1]
 # l_range = [.96]
 # a_range = [.2]
 
-t_range = [80*Myr]
+t_range = [10*Myr]
 f_range = [1]
-d_range = [0.]
-l_range = [.7]
-a_range = [.3]
+d_range = [.25]
+l_range = [9.5]
+a_range = [.01]
 
 T = Ts[0][0]
 f_bsm = 1.
@@ -134,13 +134,6 @@ for t_life in t_range:
                     index = np.logical_and(T['M_BH']>1e7, T['M_BH']<1e10)
                     Chi2_M = np.sum(pow(np.log(T['Phi']/T['W10_MF'])[index], 2))/(np.sum(index)-1)
                     off_M = np.max(abs(np.log(T['Phi']/T['W10_MF'])[index]))
-                    
-                    index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
-                    xs = M_BH[index]
-                    ys = np.log10( MF(xs)  ) # Willott 2010 30 points as data
-                    y_model = np.log10( (dn_MBH/dlog10M) [index] )
-                    y_err = 1.
-                    Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
 
                 # # --------- Luminosity Function ---------
                     Phi = np.zeros(N_lf)
@@ -185,5 +178,5 @@ for t_life in t_range:
                     # exit(0)
 # print(i)
 if find_min:
-    print('log_prob=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
+    print('log_prob=',-.5*Chi2_min*(len(Phi_obs)-1))
     #, LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)
