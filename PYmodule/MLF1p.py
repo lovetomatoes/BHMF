@@ -31,35 +31,61 @@ def lnlike(theta):
     tz = t_from_z(z)
     dn_MBH = np.zeros(N_mf)
     Nt = np.max((tz-T['t_col'])//t_life)
+    print('Nt=',Nt, 'N latest seed to z6', np.min((tz-T['t_col'])//t_life))
     dP_MBH = np.zeros(N_mf)
     # t_tot = np.zeros(len(T))
+    t_discrete = 0; t_mf = 0 # recording computation time
     while Nt>=0:
         t_point = tz - Nt*t_life
         T_seed = T[np.logical_and(t_point-t_life<=T['t_col'],T['t_col']<t_point)]
         dt_seed = t_point - T_seed['t_col']
         dP_MBH_prev = dP_MBH.copy()
-        for ibin in range(N_mf):
-            # new seeds
-            if len(T_seed):
-                # #----------- Schechter lbd -----------
-                x0 = kernelS_MBH_M(bin_left[ibin],  T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
-                x1 = kernelS_MBH_M(bin_right[ibin], T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
-                x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-                dP_seed = special.gammainc(a,x1) - special.gammainc(a,x0)
-                dP_seed = np.nansum(dP_seed)/len(T)
-            else:
-                dP_seed = 0.
-            # prev BHMF
-            # #----------- Schechter lbd -----------
-            x0 = kernelS_MBH_M(M_BH[ibin], bin_right, t_life, 1., l_cut, d_fit)
-            x1 = kernelS_MBH_M(M_BH[ibin], bin_left,  t_life, 1., l_cut, d_fit)
-            x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-            dP_MBH[ibin] = np.nansum((special.gammainc(a,x1) - special.gammainc(a,x0)) * dP_MBH_prev) + dP_seed
+        # # #------------------
+        # # each bin
+        # for ibin in range(N_mf):
+        #     t0 = time.time()
+        #     # new seeds
+        #     if len(T_seed):
+        #         # #----------- Schechter lbd -----------
+        #         x0 = kernelS_MBH_M(bin_left[ibin],  T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+        #         x1 = kernelS_MBH_M(bin_right[ibin], T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+        #         x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
+        #         dP_seed = special.gammainc(a,x1) - special.gammainc(a,x0)
+        #         dP_seed = np.nansum(dP_seed)/len(T)
+        #     else:
+        #         dP_seed = 0.
+        #     t_discrete += time.time() - t0
+        #     t0 = time.time()
+        #     # prev BHMF
+        #     # #----------- Schechter lbd -----------
+        #     x0 = kernelS_MBH_M(M_BH[ibin], bin_right, t_life, 1., l_cut, d_fit)
+        #     x1 = kernelS_MBH_M(M_BH[ibin], bin_left,  t_life, 1., l_cut, d_fit)
+        #     x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
+        #     dP_MBH[ibin] = np.nansum((special.gammainc(a,x1) - special.gammainc(a,x0)) * dP_MBH_prev) + dP_seed
+        #     t_mf += time.time() - t0
+        
+        # using 2d meshgrids
+        # new seeds
+        if len(T_seed):
+            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+            z_mesh[z_mesh<0] = 0.
+            dP_seed = special.gammainc(a,z_mesh[1:,:]) - special.gammainc(a,z_mesh[:-1,:])
+            dP_seed = np.nansum(dP_seed, axis=1)/len(T)
+        else:
+            dP_seed = 0.
+        # prev BHMF
+        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh[z_mesh<0] = 0.
+        # _, dP_prev_mesh = np.meshgrid(M_BH,bin_left)
+        #  *dP_prev_mesh same as * dP_MBH_prev
+        dP_MBH = np.nansum((special.gammainc(a,z_mesh[:,:-1])-special.gammainc(a,z_mesh[:,1:]))*dP_MBH_prev, axis=1) + dP_seed
+        #-----------------------
+
         Nt -= 1
     dn_MBH = dP_MBH*n_base*f_bsm
-
+    print('t_discrete=%.1f'%t_discrete, 't_mf=%.1f'%t_mf)
     consv_ratio = np.nansum(dn_MBH)/n_base
-    # print('MF consv_ratio',consv_ratio)
+    print('MF consv_ratio',consv_ratio)
     # wli: too loose constraint!
     if abs(consv_ratio-1)>.5:
         print('theta: ',theta)
@@ -104,6 +130,14 @@ def lnlike(theta):
 
         dPhi = np.nansum(dn_MBH*dP_M1450)
         Phi[ibin] = dPhi/bin_wid[ibin]
+    print(Phi)
+    z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
+    P_mesh = special.gammainc(a,z_mesh[:-1,:])-special.gammainc(a,z_mesh[1:,:])
+    n_mesh, _ = np.meshgrid(dn_MBH,bin_wid)
+    # print('len(bin_wid),len(M_BH)',len(bin_wid),len(M_BH),z_mesh.shape,P_mesh.shape,n_mesh.shape)
+    dPhi_mesh = np.nansum(dn_MBH*P_mesh,axis=1)
+    Phi = dPhi_mesh/bin_wid
+    print(Phi)
 
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(bin_cen)
