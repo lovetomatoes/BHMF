@@ -181,6 +181,14 @@ def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit):
         lbd = 2.* np.log(M1/M0)  / ( f_duty*dt/(0.1*10.*t_Edd) )
     return lbd/l_cut
 
+def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit):
+    xx,yy = np.meshgrid(M0, M1)
+    if d_fit:
+        lbd = (np.log(yy/xx) + (pow(yy/1e7,d_fit)-pow(xx/1e7,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
+    else:
+        lbd = 2.* np.log(yy/xx)  / ( f_duty*dt/(0.1*10.*t_Edd) )
+    return lbd/l_cut
+
 def kernelS_MBH_Mk(M1, M0, dt, f_duty, l_cut, k_fit):
     lbd = ((pow(M0/1e8,-k_fit)-pow(M1/1e8,-k_fit))/k_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
     return lbd/l_cut
@@ -188,6 +196,11 @@ def kernelS_MBH_Mk(M1, M0, dt, f_duty, l_cut, k_fit):
 def kernelS_M1450(M1450, MBH, l_cut):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
     return lbd/l_cut
+
+def kernelS_M1450_mesh(M1450, MBH, l_cut):
+    xx,yy = np.meshgrid(MBH,M1450)
+    zz = Lbol_M1450(yy)/(1.25e38*xx)
+    return zz/l_cut
 
 def kernelS_M1450_M(M1450, MBH, l_cut, d_fit):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)

@@ -1,15 +1,21 @@
 from PYmodule import *
 from PYmodule.models import *
 
+# 1p
 fname = '../1p/M30LF_1p_r_4even_ns5e+03.h5'
+labels = ['t_life', 'prob']
+
+# # 2p
+# fname = '../2p/M30LF_2prange7_r_4even_ns5.0e+03.h5'
+# labels = ['t_life', 'a', 'prob']
+
 reader = emcee.backends.HDFBackend(fname)
 prex = fname[:-3]
-labels = ['t_life', 'prob']
 ndim = len(labels) - 1
 
 
 tau = reader.get_autocorr_time()
-print(tau)
+tau = np.max(tau); print(tau)
 Nburnin = int(3*tau)
 Nthin = int(tau/2)
 
@@ -94,4 +100,4 @@ ax.plot(xs, best_model, c='C1', label='Highest Likelihood Model')
 ax.fill_between(xs,med_model-spread,med_model+spread,color='grey',alpha=0.5,label=r'$1\sigma$ Posterior Spread')
 ax.set_xlim(-22,-29)
 ax.set_yscale('log')
-plt.savefig('../1p/model_spread.png')
+plt.savefig(fname[:6]+'model_spread.png')
