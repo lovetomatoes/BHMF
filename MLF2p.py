@@ -7,10 +7,10 @@ os.environ["OMP_NUM_THREADS"] = "1"
 from schwimmbad import MPIPool
 
 
-# initial paras
-t_life = 80.
-a = 0.3
-initial = np.array([t_life,a])
+# initial guess
+t_life = 120.
+d_fit = 0.25
+initial = np.array([t_life,d_fit])
 
 ndim = len(initial)
 nwalkers = 100
@@ -50,7 +50,7 @@ samples = sampler.get_chain()
 probs = sampler.get_log_prob()
 # print('probs',probs)
 
-labels = ['t_life', 'a', 'prob']
+labels = ['t_life', 'd_fit', 'prob']
 for i in range(ndim):
     ax = axes[i]
     ax.plot(samples[:, :, i], "k", alpha=0.3)

@@ -465,3 +465,8 @@ bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 N_mf = len(abin_mf)-1
 
+f_0 = 1. # no use
+d_fit = 0.
+
+l_cut = .9 # l_cut=2., l_cut' = l_cut/2; M=M0=1e7 grow as Eddington
+a = .1

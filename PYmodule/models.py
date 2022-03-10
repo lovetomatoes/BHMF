@@ -19,17 +19,13 @@ T = Ts[0][0]
 f_bsm = 1.
 n_base = n_base[0]
 
-f_0 = 1.
-d_fit = 0.
-l_cut = .7 # l_cut=2., l_cut' = l_cut/2; M=M0=1e7 grow as Eddington
-a = .3
 
 def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, l_cut= l_cut, a=a):
     # t_life, f_0, d_fit, l_cut, a = theta
     if len(theta) == 1:
         t_life = theta
     elif len(theta) == 2:
-        t_life, a = theta
+        t_life, d_fit = theta
     elif len(theta) == 3:
         t_life, l_cut, a = theta
 

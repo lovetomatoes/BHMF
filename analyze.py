@@ -5,9 +5,9 @@ from PYmodule.models import *
 fname = '../1p/M30LF_1p_r_4even_ns5e+03.h5'
 labels = ['t_life', 'prob']
 
-# # 2p
-# fname = '../2p/M30LF_2prange7_r_4even_ns5.0e+03.h5'
-# labels = ['t_life', 'a', 'prob']
+# 2p
+fname = '../2p/MLF2prange1_r_4even_ns5.0e+03.h5'
+labels = ['t_life', 'd_fit', 'prob']
 
 reader = emcee.backends.HDFBackend(fname)
 prex = fname[:-3]
@@ -75,29 +75,31 @@ def sample_walkers(nsamples,flattened_chain,mod_name):
     return med_model,spread
 
 
+n_draw = 100
 fig, axes = plt.subplots(1,2, figsize=(12, 6),dpi=400)
 ax = axes[0]
 mod_name = 'MF'
 best_model = model(theta_max)[mod_name]
 xs = model(theta_max)['M_BH']
 y_data = model(theta_max)[mod_name+'_data']
-med_model, spread = sample_walkers(10,samples,mod_name)
+med_model, spread = sample_walkers(n_draw,samples,mod_name)
 ax.plot(xs, y_data, label='data')
 ax.plot(xs, best_model, c='C1', label='Highest Likelihood Model')
 ax.fill_between(xs,med_model-spread,med_model+spread,color='grey',alpha=0.5,label=r'$1\sigma$ Posterior Spread')
 ax.set_xlim(1e7,1e10); ax.set_xscale('log')
 ax.set_ylim(1e-10,1e-4); ax.set_yscale('log')
-# ax.yaxis.set_label_coords(-0.1, 0.5)
+ax.legend()
 
 ax = axes[1]
 mod_name = 'LF'
 best_model = model(theta_max)[mod_name]
 xs = model(theta_max)['M1450']
 y_data = model(theta_max)[mod_name+'_data']
-med_model, spread = sample_walkers(10,samples,mod_name)
+med_model, spread = sample_walkers(n_draw,samples,mod_name)
 ax.scatter(xs, y_data, label='data')
 ax.plot(xs, best_model, c='C1', label='Highest Likelihood Model')
 ax.fill_between(xs,med_model-spread,med_model+spread,color='grey',alpha=0.5,label=r'$1\sigma$ Posterior Spread')
 ax.set_xlim(-22,-29)
 ax.set_yscale('log')
+ax.legend()
 plt.savefig(fname[:6]+'model_spread.png')

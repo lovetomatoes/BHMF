@@ -20,12 +20,9 @@ T = Ts[0][0]
 f_bsm = 1.
 n_base = n_base[0]
 
-d_fit = 0.
-l_cut = .7 # l_cut=2., l_cut' = l_cut/2; M=M0=1e7 grow as Eddington
-
 
 def lnlike(theta):
-    t_life, a = theta
+    t_life, d_fit = theta
     t_life *= Myr
 ## --------- Mass Function ---------
     tz = t_from_z(z)
@@ -38,23 +35,20 @@ def lnlike(theta):
         T_seed = T[np.logical_and(t_point-t_life<=T['t_col'],T['t_col']<t_point)]
         dt_seed = t_point - T_seed['t_col']
         dP_MBH_prev = dP_MBH.copy()
-        for ibin in range(N_mf):
-            # new seeds
-            if len(T_seed):
-                # #----------- Schechter lbd -----------
-                x0 = kernelS_MBH_M(bin_left[ibin],  T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
-                x1 = kernelS_MBH_M(bin_right[ibin], T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
-                x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-                dP_seed = special.gammainc(a,x1) - special.gammainc(a,x0)
-                dP_seed = np.nansum(dP_seed)/len(T)
-            else:
-                dP_seed = 0.
-            # prev BHMF
-            # #----------- Schechter lbd -----------
-            x0 = kernelS_MBH_M(M_BH[ibin], bin_right, t_life, 1., l_cut, d_fit)
-            x1 = kernelS_MBH_M(M_BH[ibin], bin_left,  t_life, 1., l_cut, d_fit)
-            x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-            dP_MBH[ibin] = np.nansum((special.gammainc(a,x1) - special.gammainc(a,x0)) * dP_MBH_prev) + dP_seed
+
+        # new seeds (using 2d meshgrids)
+        if len(T_seed):
+            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+            z_mesh[z_mesh<0] = 0.
+            dP_seed = special.gammainc(a,z_mesh[1:,:]) - special.gammainc(a,z_mesh[:-1,:])
+            dP_seed = np.nansum(dP_seed, axis=1)/len(T)
+        else:
+            dP_seed = 0.
+        # prev BHMF
+        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh[z_mesh<0] = 0.
+        dP_MBH = np.nansum((special.gammainc(a,z_mesh[:,:-1])-special.gammainc(a,z_mesh[:,1:]))*dP_MBH_prev, axis=1) + dP_seed
+
         Nt -= 1
     dn_MBH = dP_MBH*n_base*f_bsm
 
@@ -66,26 +60,6 @@ def lnlike(theta):
         print('consv_ratio: ',consv_ratio)
         return -np.inf
 
-    # # prev 4 points:
-    # T_MF = Table([M_BH, dn_MBH/dlog10M],names=('M_BH','Phi'))
-    # T_log = np.log10(M_BH)
-    # T_Phi = T_MF['Phi']
-    # ys = []
-    # y_model =  np.log10(MF(pow(10.,logMs)))
-    # # print(y_model)
-    # y_err = np.array([2., 1., .4, 2.])
-    # for logM0 in logMs:
-    #     i = np.max(np.where(T_log<logM0))
-    #     t = (logM0 - T_log[i])/ (T_log[i+1]-T_log[i])
-
-    #     y1 = np.log10(T_Phi[i]*(1-t) + T_Phi[i+1]*t)
-    #     if not np.isfinite(y1):
-    #         print('theta=',theta)
-    #         print('inf or nan? y1=',y1)
-    #         return -np.inf
-    #     ys.append(y1)
-    # ys = np.array(ys)
-
     # 30 N_M in 1e7-1e10 range, plus 12 N_L
     index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
     xs = M_BH[index]
@@ -96,14 +70,11 @@ def lnlike(theta):
 
 # # --------- Luminosity Function ---------
     Phi = np.zeros(N_lf)
-    for ibin in range(N_lf):
-        #----------- Schechter lbd -----------
-        x0 = kernelS_M1450(bin_edg[ibin+1], M_BH, l_cut)
-        x1 = kernelS_M1450(bin_edg[ibin],   M_BH, l_cut)
-        dP_M1450 = special.gammainc(a,x1) - special.gammainc(a,x0)
-
-        dPhi = np.nansum(dn_MBH*dP_M1450)
-        Phi[ibin] = dPhi/bin_wid[ibin]
+    
+    z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
+    P_mesh = special.gammainc(a,z_mesh[:-1,:])-special.gammainc(a,z_mesh[1:,:])
+    dPhi_mesh = np.nansum(P_mesh*dn_MBH,axis=1)
+    Phi = dPhi_mesh/bin_wid
 
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(bin_cen)
@@ -130,8 +101,8 @@ def lnlike(theta):
 # range7: 1e1<t_life<200 and .1<l_cut<10. and 0.1<a<0.5:
 
 def lnprior(theta):
-    t_life, a = theta
-    if 1e1<t_life<200. and 0.1<a<0.5:
+    t_life, d_fit = theta
+    if 1e1<t_life<200. and 0.1<d_fit<0.5:
         return 0.0
     else:
         return -np.inf
