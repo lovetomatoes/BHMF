@@ -28,7 +28,7 @@ figpre = '../figs/'
 
 f_0 = 1. # no use
 d_fit = 0.
-M_0 = 1e7
+logM0 = 7.
 l_cut = .9 # l_cut=2., l_cut' = l_cut/2; M=M_cut=1e7 grow as Eddington
 a = .1
 
@@ -183,14 +183,16 @@ def kernelS_MBH(Mgrow_ratio, dt, f_duty, l_cut):
     lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*10.*t_Edd) )
     return lbd/l_cut
 
-def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, M_cut=M_0):
+def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
+    M_cut = pow(10., logM_0)
     if d_fit:
         lbd = (np.log(M1/M0) + (pow(M1/M_cut,d_fit)-pow(M0/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
     else:
         lbd = 2.* np.log(M1/M0)  / ( f_duty*dt/(0.1*10.*t_Edd) )
     return lbd/l_cut
 
-def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit, M_cut=M_0):
+def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
+    M_cut = pow(10., logM_0)
     xx,yy = np.meshgrid(M0, M1)
     if d_fit:
         lbd = (np.log(yy/xx) + (pow(yy/M_cut,d_fit)-pow(xx/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
