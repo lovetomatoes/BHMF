@@ -41,23 +41,20 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, l_cut= l_cut, a=a):
         T_seed = T[np.logical_and(t_point-t_life<=T['t_col'],T['t_col']<t_point)]
         dt_seed = t_point - T_seed['t_col']
         dP_MBH_prev = dP_MBH.copy()
-        for ibin in range(N_mf):
-            # new seeds
-            if len(T_seed):
-                # #----------- Schechter lbd -----------
-                x0 = kernelS_MBH_M(bin_left[ibin],  T_seed['Mstar0'], dt_seed, f_0, l_cut, d_fit)
-                x1 = kernelS_MBH_M(bin_right[ibin], T_seed['Mstar0'], dt_seed, f_0, l_cut, d_fit)
-                x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-                dP_seed = special.gammainc(a,x1) - special.gammainc(a,x0)
-                dP_seed = np.nansum(dP_seed)/len(T)
-            else:
-                dP_seed = 0.
-            # prev BHMF
-            # #----------- Schechter lbd -----------
-            x0 = kernelS_MBH_M(M_BH[ibin], bin_right, t_life, f_0, l_cut, d_fit)
-            x1 = kernelS_MBH_M(M_BH[ibin], bin_left,  t_life, f_0, l_cut, d_fit)
-            x0[x0<0] = 0.; x1[x1<0] = 0. # let P(growth_ratio<1)=0, must! or not conserved!
-            dP_MBH[ibin] = np.nansum((special.gammainc(a,x1) - special.gammainc(a,x0)) * dP_MBH_prev) + dP_seed
+
+        # new seeds (using 2d meshgrids)
+        if len(T_seed):
+            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+            z_mesh[z_mesh<0] = 0.
+            dP_seed = special.gammainc(a,z_mesh[1:,:]) - special.gammainc(a,z_mesh[:-1,:])
+            dP_seed = np.nansum(dP_seed, axis=1)/len(T)
+        else:
+            dP_seed = 0.
+        # prev BHMF
+        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh[z_mesh<0] = 0.
+        dP_MBH = np.nansum((special.gammainc(a,z_mesh[:,:-1])-special.gammainc(a,z_mesh[:,1:]))*dP_MBH_prev, axis=1) + dP_seed
+
         Nt -= 1
     dn_MBH = dP_MBH*n_base*f_bsm
 
@@ -78,14 +75,12 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, l_cut= l_cut, a=a):
 
 # # --------- Luminosity Function ---------
     Phi = np.zeros(N_lf)
-    for ibin in range(N_lf):
-        #----------- Schechter lbd -----------
-        x0 = kernelS_M1450(bin_edg[ibin+1], M_BH, l_cut)
-        x1 = kernelS_M1450(bin_edg[ibin],   M_BH, l_cut)
-        dP_M1450 = special.gammainc(a,x1) - special.gammainc(a,x0)
 
-        dPhi = np.nansum(dn_MBH*dP_M1450)
-        Phi[ibin] = dPhi/bin_wid[ibin]
+    z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
+    P_mesh = special.gammainc(a,z_mesh[:-1,:])-special.gammainc(a,z_mesh[1:,:])
+    dPhi_mesh = np.nansum(P_mesh*dn_MBH,axis=1)
+    Phi = dPhi_mesh/bin_wid
+
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(bin_cen)
     ys = np.log(Phi_obs)

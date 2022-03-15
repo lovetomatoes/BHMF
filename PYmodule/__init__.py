@@ -26,6 +26,15 @@ z6datapre = '../z6/data/'
 datapre = '../data/'
 figpre = '../figs/'
 
+f_0 = 1. # no use
+d_fit = 0.
+M_0 = 1e7
+l_cut = .9 # l_cut=2., l_cut' = l_cut/2; M=M_cut=1e7 grow as Eddington
+a = .1
+
+l_mean, a_mean = .9, .1
+sigma_l, sigma_a = .2, .02
+
 typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
 lfnames = {'4':'Akiyama_18','5':'Niida_20','6':'Matsuoka_18'}
 
@@ -174,17 +183,17 @@ def kernelS_MBH(Mgrow_ratio, dt, f_duty, l_cut):
     lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*10.*t_Edd) )
     return lbd/l_cut
 
-def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit):
+def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, M_cut=M_0):
     if d_fit:
-        lbd = (np.log(M1/M0) + (pow(M1/1e7,d_fit)-pow(M0/1e7,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
+        lbd = (np.log(M1/M0) + (pow(M1/M_cut,d_fit)-pow(M0/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
     else:
         lbd = 2.* np.log(M1/M0)  / ( f_duty*dt/(0.1*10.*t_Edd) )
     return lbd/l_cut
 
-def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit):
+def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit, M_cut=M_0):
     xx,yy = np.meshgrid(M0, M1)
     if d_fit:
-        lbd = (np.log(yy/xx) + (pow(yy/1e7,d_fit)-pow(xx/1e7,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
+        lbd = (np.log(yy/xx) + (pow(yy/M_cut,d_fit)-pow(xx/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
     else:
         lbd = 2.* np.log(yy/xx)  / ( f_duty*dt/(0.1*10.*t_Edd) )
     return lbd/l_cut
@@ -464,9 +473,3 @@ M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
 bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 N_mf = len(abin_mf)-1
-
-f_0 = 1. # no use
-d_fit = 0.
-
-l_cut = .9 # l_cut=2., l_cut' = l_cut/2; M=M0=1e7 grow as Eddington
-a = .1
