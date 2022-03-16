@@ -20,15 +20,19 @@ f_bsm = 1.
 n_base = n_base[0]
 
 
-def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, l_cut= l_cut, a=a):
+def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=a):
     # t_life, f_0, d_fit, l_cut, a = theta
     if len(theta) == 1:
         t_life = theta
     elif len(theta) == 2:
         t_life, d_fit = theta
     elif len(theta) == 3:
-        t_life, l_cut, a = theta
-
+        # t_life, l_cut, a = theta
+        t_life, d_fit, logM0 = theta
+    elif len(theta) == 4:
+        t_life, d_fit, l_cut, a = theta
+    else:
+        assert 0
     t_life = t_life * Myr # wli: not *=!!!!!! theta changed by this
 ## --------- Mass Function ---------
     tz = t_from_z(z)
@@ -44,14 +48,14 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, l_cut= l_cut, a=a):
 
         # new seeds (using 2d meshgrids)
         if len(T_seed):
-            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
             z_mesh[z_mesh<0] = 0.
             dP_seed = special.gammainc(a,z_mesh[1:,:]) - special.gammainc(a,z_mesh[:-1,:])
             dP_seed = np.nansum(dP_seed, axis=1)/len(T)
         else:
             dP_seed = 0.
         # prev BHMF
-        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
         z_mesh[z_mesh<0] = 0.
         dP_MBH = np.nansum((special.gammainc(a,z_mesh[:,:-1])-special.gammainc(a,z_mesh[:,1:]))*dP_MBH_prev, axis=1) + dP_seed
 
