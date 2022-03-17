@@ -8,7 +8,7 @@ from schwimmbad import MPIPool
 
 
 # initial guess
-t_life = 120.
+t_life = 80.
 d_fit = 0.25
 initial = np.array([t_life,d_fit])
 
@@ -17,7 +17,7 @@ nwalkers = 100
 nsteps = 5000
 rball = 1e-4
 
-prex='M30LF_2prange7_r_{0:d}even_ns{1:.1e}'.format(abs(int(np.log10(rball))),nsteps)
+prex='MLF2prange1_M{0:d}_l0_{1:.1e}_a_{2:.1e}'.format(int(logM0),l_cut,a)
 
 fname =prex+'.h5'
 
@@ -73,6 +73,7 @@ samples = sampler.flatchain
 probs = sampler.flatlnprobability
 print('len of samples:', len(samples))
 theta_max = samples[np.argmax(probs)]
+print('initial paras: t_life, d_fit, logM0, l_cut, a, prob',labels,t_life,d_fit,logM0,l_cut,a,probs[0])
 print('best paras:',labels,theta_max,np.max(probs))
 
 all_samples = np.concatenate(

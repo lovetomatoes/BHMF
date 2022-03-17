@@ -49,7 +49,7 @@ best_model = model(theta_max)[mod_name]
 xs = model(theta_max)['M_BH']
 y_data = model(theta_max)[mod_name+'_data']
 ax.plot(xs, y_data, label='data')
-ndraw = 100
+ndraw = 10
 draw = np.floor(np.random.uniform(0,len(samples),size=ndraw)).astype(int)
 thetas = samples[draw]
 for i in thetas:
