@@ -99,6 +99,7 @@ def lnlike(theta):
 # range5: 1e1<t_life<200 and .1<f_0<2. and 0<d_fit<.5 and .1<l_cut<10. and a>0.:
 # range6: 1e1<t_life<200 and .1<l_cut<10. and 0.<a<1.:
 # range7: 1e1<t_life<200 and .1<l_cut<10. and 0.1<a<0.5:
+# 2prange1: 1e1<t_life<200. and 0.1<d_fit<0.5:
 
 def lnprior(theta):
     t_life, d_fit = theta
