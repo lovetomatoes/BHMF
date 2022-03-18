@@ -475,3 +475,24 @@ M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
 bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 N_mf = len(abin_mf)-1
+
+# # LF bins
+# abin_lf = np.linspace(-29,-22.5,num=30)
+# dmag = abin_lf[1]-abin_lf[0]
+# L_left = abin_lf[:-1]; L_right = abin_lf[1:]
+# M1450  = (L_left+L_right)/2.
+# N_lf = len(M1450)
+
+# bin_edg = abin_lf
+# bin_wid = dmag
+# bin_cen = M1450
+# Phi_obs = LF_M1450(M1450)*1e9
+# Phi_err = 10.**.5
+
+# LF bins same w/ Matsu18
+z = int(6)
+bin_edg = bin_edg[str(z)]
+bin_wid = bin_wid[str(z)]
+bin_cen = bin_cen[str(z)]
+Phi_obs = Phi_obs[str(z)]
+Phi_err = Phi_err[str(z)]

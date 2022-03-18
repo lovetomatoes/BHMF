@@ -4,18 +4,7 @@ from PYmodule import *
 # eta = 0.3
 # alpha = 1.
 
-logMs = np.linspace(7,10,num=4)
-
-# LF bins same w/ Matsu18
 z = int(6)
-bin_edg = bin_edg[str(z)]
-bin_wid = bin_wid[str(z)]
-bin_cen = bin_cen[str(z)]
-Phi_obs = Phi_obs[str(z)]
-Phi_err = Phi_err[str(z)]
-N_lf = len(bin_cen)
-
-
 T = Ts[0][0]
 f_bsm = 1.
 n_base = n_base[0]
@@ -66,11 +55,10 @@ def lnlike(theta):
     ys = np.log10( MF(xs)  ) # Willott 2010 30 points as data
     y_model = np.log10( (dn_MBH/dlog10M) [index] )
     y_err = 1.
+    y_err = (np.log10(xs)-8.5)**2/3 + .5 # from 0.5 to 1.2 
     Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
 
-# # --------- Luminosity Function ---------
-    Phi = np.zeros(N_lf)
-    
+# # --------- Luminosity Function ---------    
     z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
     P_mesh = special.gammainc(a,z_mesh[:-1,:])-special.gammainc(a,z_mesh[1:,:])
     dPhi_mesh = np.nansum(P_mesh*dn_MBH,axis=1)
@@ -80,9 +68,9 @@ def lnlike(theta):
     Phi_DO = Phi/corr_U14D20(bin_cen)
     # Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
     # print('Chi2=%.2e'%Chi2)
-    ys = np.log(Phi_obs)
-    y_model = np.log(Phi_DO)
-    y_err = np.log(Phi_err)
+    ys = np.log10(Phi_obs)
+    y_model = np.log10(Phi_DO)
+    y_err = np.log10(Phi_err)
     Chi2_L = np.sum( pow((ys - y_model)/y_err, 2))
     if not np.isfinite(Chi2_L):
         print('theta=',theta)
