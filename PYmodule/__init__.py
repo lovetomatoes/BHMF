@@ -54,7 +54,7 @@ Omega_L0 = 1 - Omega_m0
 h0 = .677
 H0 = h0*100*km/Mpc
 
-t_Edd = 1./(4*pi*G/.4/(0.1*c))
+t_Edd = 1./(4*pi*G/.4/c)
 fbol_1450 = 4.4
 
 log10Ms = [11,12,13]
@@ -115,16 +115,16 @@ Phi_err = {'6':np.array([.0079, .061, .17, .32, .6, 1.2, 1.7, 2., 2.6, 3.6, 8.1,
 eta_max = .5; eta_min = 0.057 # 0.057
 
 def M1M0(M0,dt,f_duty,mu_fit,eta8,delta):
-    M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*10.*t_Edd)+pow(M0/1e8,delta),1./delta)
+    M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*t_Edd)+pow(M0/1e8,delta),1./delta)
 
     ## eta mimicking Ueda14 empirical formula: eta = eta8*(M/M8)**delta
     eta = eta8*pow(M0/1e8,delta)
     ## M1: mass after growth following t^(1/delta) power
-    M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*10.*t_Edd)+pow(M0/1e8,delta),1./delta)
+    M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*t_Edd)+pow(M0/1e8,delta),1./delta)
 
     ## if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
     eta = ma.masked_greater(eta, eta_max)
-    M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_max*10.*t_Edd))
+    M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_max*t_Edd))
     # i = ma.argmax(eta)
     # M1[eta.mask] = M0[eta.mask]/M0[i]*M1[i]
     eta[eta.mask] = eta_max
@@ -134,27 +134,69 @@ def M1M0(M0,dt,f_duty,mu_fit,eta8,delta):
     i = ma.argmin(eta)
     M1[eta.mask] = M0[eta.mask]/M0[i]*M1[i]
     # the following exponential formula not continuous
-    # !!!!!!!! M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_min*10.*t_Edd))    
+    # !!!!!!!! M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_min*t_Edd))    
     return M1
 
+eta_0 = 0.1
+M_cut = 10**logM0
+def M0M1(M1, l, dt, delta, M_cut = M_cut):
+# dM_tilt/dt_tilt = l M_tilt/(eta_0*(1+M_tilt**delta)); M_tilt=M/M_cut, t_tilt=t/t_Edd
+    # M1 = M1/M_cut
+    # M0 = M1
+    # print('M0={0:f}\n'.format(M0))
+    
+    # for i in range(10):
+    #     fM0 = l*dt/(eta_0*t_Edd) + np.log(M0/M1) + (pow(M0, delta)-pow(M1, delta))/delta
+    #     dfdM0 = 1/M0 + pow(M0, delta-1)
+    #     M0 = M0 - fM0/dfdM0
+    #     print('i={0:d}, fM0={1:e}, dfdM={2:e}, M0={3:e}\n'.format(i,fM0,dfdM0,M0))
+
+    #     if abs(fM0/dfdM0) < .01*M0:
+    #         break
+    #     if i>5:
+    #         print('i: %d too much interation'%i)
+    # if i==9:
+    #     print('not converge...')
+    # print('final match?',np.log(M1/M0) + (pow(M1, delta)-pow(M0, delta))/delta - l*dt/eta_0/t_Edd )
+    # M0 *= M_cut
+
+# dM/dt  = l*M /(eta_0*t_Edd)
+    l=.5*l
+    M0 = M1
+    for i in range(100):
+        fM0 = eta_0*np.log(M0/M1)/l + dt/t_Edd
+        dfdM0 = eta_0/M0/l
+        M0 = M0 - fM0/dfdM0
+        print('i={0:d}, fM0={1:e}, dfdM={2:e}, M0={3:e}\n'.format(i,fM0,dfdM0,M0))
+
+        if abs(fM0/dfdM0) < .01*M0:
+            break
+        if i>40:
+            print('i: %d too much interation'%i)
+    if i==100:
+        print('not converge...')
+    print('final match?',np.log(M1/M0) - l*dt/eta_0/t_Edd )
+
+    print('i=%d'%i)
+    return M0
 
 # ---------------- kernel*: kernel of calculating P(lbd) integral ----------------
 
 # exponential growth
 def kernel_MBH1(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
-    lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*10.*t_Edd) )
+    lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*t_Edd) )
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
 # power law growth + exp extrapolation
 def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
-    lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*10.*t_Edd)
+    lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*t_Edd)
     eta = eta8*pow(M0/1e8,delta)
     # if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
     eta = ma.masked_greater(eta, eta_max)
-    # M1[eta.mask] = M0[eta.mask]*np.exp(mu*f_duty*dt/(eta_max*10.*t_Edd))
+    # M1[eta.mask] = M0[eta.mask]*np.exp(mu*f_duty*dt/(eta_max*t_Edd))
     i = ma.argmax(eta)
     lbd[eta.mask] = lbd[i] * np.log(M1/M0[eta.mask]) / np.log(M1/M0[i])
-    # lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_max*10.*t_Edd))
+    # lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_max*t_Edd))
     eta[eta.mask] = eta_max
 
     # if eta < minimum -> use Eddington accretion -- M(t) \propto M0
@@ -166,42 +208,42 @@ def kernel_MBH2(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
 
 # piece-wise lbd; 2 exp + 1 pow
 def kernel_MBH3(M1, M0, dt, f_duty, mu, sigma_dex, eta8, delta):
-    lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*10.*t_Edd)
+    lbd = ( pow(M1/1e8, delta) - pow(M0/1e8, delta) )/(f_duty*delta*dt)*(eta8*t_Edd)
     eta = eta8*pow(M0/1e8,delta)
     # if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
     eta = ma.masked_greater(eta, eta_max)
-    # M1[eta.mask] = M0[eta.mask]*np.exp(mu*f_duty*dt/(eta_max*10.*t_Edd))
-    lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_max*10.*t_Edd))
+    # M1[eta.mask] = M0[eta.mask]*np.exp(mu*f_duty*dt/(eta_max*t_Edd))
+    lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_max*t_Edd))
     eta[eta.mask] = eta_max
     # if eta < minimum -> use Eddington accretion -- M(t) \propto M0
     eta = ma.masked_less(eta, eta_min)
-    lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_min*10.*t_Edd))
+    lbd[eta.mask] = np.log(M1/M0[eta.mask])/ (f_duty*dt/(eta_min*t_Edd))
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
 # lambda from Schechter function 
 def kernelS_MBH(Mgrow_ratio, dt, f_duty, l_cut):
-    lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*10.*t_Edd) )
+    lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*t_Edd) )
     return lbd/l_cut
 
 def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
     M_cut = pow(10., logM_0)
     if d_fit:
-        lbd = (np.log(M1/M0) + (pow(M1/M_cut,d_fit)-pow(M0/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
+        lbd = (np.log(M1/M0) + (pow(M1/M_cut,d_fit)-pow(M0/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*t_Edd) )
     else:
-        lbd = 2.* np.log(M1/M0)  / ( f_duty*dt/(0.1*10.*t_Edd) )
+        lbd = 2.* np.log(M1/M0)  / ( f_duty*dt/(0.1*t_Edd) )
     return lbd/l_cut
 
 def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
     M_cut = pow(10., logM_0)
     xx,yy = np.meshgrid(M0, M1)
     if d_fit:
-        lbd = (np.log(yy/xx) + (pow(yy/M_cut,d_fit)-pow(xx/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
+        lbd = (np.log(yy/xx) + (pow(yy/M_cut,d_fit)-pow(xx/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*t_Edd) )
     else:
-        lbd = 2.* np.log(yy/xx)  / ( f_duty*dt/(0.1*10.*t_Edd) )
+        lbd = 2.* np.log(yy/xx)  / ( f_duty*dt/(0.1*t_Edd) )
     return lbd/l_cut
 
 def kernelS_MBH_Mk(M1, M0, dt, f_duty, l_cut, k_fit):
-    lbd = ((pow(M0/1e8,-k_fit)-pow(M1/1e8,-k_fit))/k_fit) / ( f_duty*dt/(0.1*10.*t_Edd) )
+    lbd = ((pow(M0/1e8,-k_fit)-pow(M1/1e8,-k_fit))/k_fit) / ( f_duty*dt/(0.1*t_Edd) )
     return lbd/l_cut
 
 def kernelS_M1450(M1450, MBH, l_cut):
