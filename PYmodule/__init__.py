@@ -140,44 +140,26 @@ def M1M0(M0,dt,f_duty,mu_fit,eta8,delta):
 eta_0 = 0.1
 M_cut = 10**logM0
 def M0M1(M1, l, dt, delta, M_cut = M_cut):
-# dM_tilt/dt_tilt = l M_tilt/(eta_0*(1+M_tilt**delta)); M_tilt=M/M_cut, t_tilt=t/t_Edd
-    # M1 = M1/M_cut
-    # M0 = M1
-    # print('M0={0:f}\n'.format(M0))
-    
-    # for i in range(10):
-    #     fM0 = l*dt/(eta_0*t_Edd) + np.log(M0/M1) + (pow(M0, delta)-pow(M1, delta))/delta
-    #     dfdM0 = 1/M0 + pow(M0, delta-1)
-    #     M0 = M0 - fM0/dfdM0
-    #     print('i={0:d}, fM0={1:e}, dfdM={2:e}, M0={3:e}\n'.format(i,fM0,dfdM0,M0))
-
-    #     if abs(fM0/dfdM0) < .01*M0:
-    #         break
-    #     if i>5:
-    #         print('i: %d too much interation'%i)
-    # if i==9:
-    #     print('not converge...')
-    # print('final match?',np.log(M1/M0) + (pow(M1, delta)-pow(M0, delta))/delta - l*dt/eta_0/t_Edd )
-    # M0 *= M_cut
-
-# dM/dt  = l*M /(eta_0*t_Edd)
-    l=.5*l
+    # dM_tilt/dt_tilt = l M_tilt/(eta_0*(1+M_tilt**delta)); M_tilt=M/M_cut, t_tilt=t/t_Edd
+    M1 = M1/M_cut
     M0 = M1
-    for i in range(100):
-        fM0 = eta_0*np.log(M0/M1)/l + dt/t_Edd
-        dfdM0 = eta_0/M0/l
+    # print('M0={0:e}\n'.format(M0))
+    
+    for i in range(10):
+        fM0 = l*dt/(eta_0*t_Edd) + np.log(M0/M1) + (pow(M0, delta)-pow(M1, delta))/delta
+        dfdM0 = 1/M0 + pow(M0, delta-1)
         M0 = M0 - fM0/dfdM0
-        print('i={0:d}, fM0={1:e}, dfdM={2:e}, M0={3:e}\n'.format(i,fM0,dfdM0,M0))
+        # print('i={0:d}, fM0={1:e}, dfdM={2:e}, M0={3:e}\n'.format(i,fM0,dfdM0,M0))
 
         if abs(fM0/dfdM0) < .01*M0:
             break
-        if i>40:
+        if i>5:
             print('i: %d too much interation'%i)
-    if i==100:
+    if i==9:
         print('not converge...')
-    print('final match?',np.log(M1/M0) - l*dt/eta_0/t_Edd )
+    # print('final match?',np.log(M1/M0) + (pow(M1, delta)-pow(M0, delta))/delta - l*dt/eta_0/t_Edd )
+    M0 *= M_cut
 
-    print('i=%d'%i)
     return M0
 
 # ---------------- kernel*: kernel of calculating P(lbd) integral ----------------
@@ -429,6 +411,9 @@ def t_freefall(nH):
 
 def t_from_z(z): # age of universe at redshift z: tH = 2/(3Hz)
     return 2./(3*H0*np.sqrt(Omega_m0)) * pow(1+z, -1.5)
+
+def z_tH(t): # t in Myr
+    return pow( 2/(3*H0*np.sqrt(Omega_m0)*t*Myr), 2./3.)-1
 
 def Tv(Mh,z):
     return alpha_T * (Mh/1.e8)**(2./3.) *  (1+z)/11.
