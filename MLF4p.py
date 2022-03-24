@@ -23,7 +23,7 @@ nwalkers = 100
 nsteps = 5000
 rball = 1e-4
 
-prex='MLF4prange1_Gs.2_l0_{0:.1e}_a_{1:.1e}'.format(l_cut,a)
+prex='../4p/MLF4prange1_Gs.2_l0_{0:.1e}_a_{1:.1e}'.format(l_cut,a)
 
 fname =prex+'.h5'
 

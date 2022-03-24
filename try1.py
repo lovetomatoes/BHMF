@@ -1,6 +1,6 @@
 from time import sleep
 from PYmodule import *
-from PYmodule.LFmcz6_easy import *
+# from PYmodule.LFmcz6_easy import *
 # from PYmodule.LFmcz6 import *
 from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5

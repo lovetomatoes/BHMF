@@ -17,7 +17,7 @@ nwalkers = 100
 nsteps = 10000
 rball = 1e-4
 
-prex='M30LF_1p_r_{0:d}even_ns{1:.1e}'.format(abs(int(np.log10(rball))),nsteps)
+prex='../1p/M30LF_1p_r_{0:d}even_ns{1:.1e}'.format(abs(int(np.log10(rball))),nsteps)
 
 fname =prex+'.h5'
 

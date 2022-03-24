@@ -9,17 +9,11 @@ tz = t_from_z(z)
 alpha = 1.
 
 # LF bins same w/ Matsu18
-bin_edg = bin_edg[str(z)]
-bin_wid = bin_wid[str(z)]
-bin_cen = bin_cen[str(z)]
-Phi_obs = Phi_obs[str(z)]
-Phi_err = Phi_err[str(z)]
 N_lf = len(bin_cen)
 
+t_life, d_fit, logM0, l_cut, a = 80 ,  0.3 ,  8 ,  1 ,  .5
 
-t_life, d_fit, logM0 = 198.08025684,   0.2509987,    5.96
-
-print('theta: ',t_life,d_fit,logM0, l_cut,a)
+print('t_life, d_fit, logM0, l_cut, a: ', t_life,', ',d_fit,', ',logM0,', ', l_cut,', ',a)
 
 t_life *= Myr
 T = Ts[0][0]
