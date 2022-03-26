@@ -11,7 +11,10 @@ alpha = 1.
 # LF bins same w/ Matsu18
 N_lf = len(bin_cen)
 
-t_life, d_fit, logM0, l_cut, a = 80 ,  0.3 ,  8 ,  1 ,  .5
+t_life, d_fit, logM0, l_cut, a = 80 ,  0.3 ,  8 ,  .5 ,  .5
+t_life, d_fit, logM0, l_cut, a = 50 ,  0.3 ,  8 ,  .5 ,  .3
+t_life, d_fit, logM0, l_cut, a = 10 ,  1.,  8 ,  1,  .5; #almost impossible
+t_life, d_fit, logM0, l_cut, a = 150 ,  0.,  8 ,  .5,  .3
 
 print('t_life, d_fit, logM0, l_cut, a: ', t_life,', ',d_fit,', ',logM0,', ', l_cut,', ',a)
 
@@ -19,6 +22,8 @@ t_life *= Myr
 T = Ts[0][0]
 f_bsm = 1.
 n_base = n_base[0]
+
+print('mean Dt:',np.mean((tz-T['t_col']))/Myr)
 
 i = 0
 Chi2_min = 1e10; find_min = False

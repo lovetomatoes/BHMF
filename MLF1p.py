@@ -1,5 +1,6 @@
 from PYmodule import *
 from PYmodule.MLF1p import *
+from PYmodule.models import *
 from emcee import EnsembleSampler as EnsembleSampler
 import corner
 import os
@@ -7,17 +8,17 @@ os.environ["OMP_NUM_THREADS"] = "1"
 from schwimmbad import MPIPool
 
 
-# initial paras
+# initial guess
 t_life = 80.
-
 initial = np.array([t_life])
 
 ndim = len(initial)
 nwalkers = 100
-nsteps = 10000
+nsteps = 5000
 rball = 1e-4
 
-prex='../1p/M30LF_1p_r_{0:d}even_ns{1:.1e}'.format(abs(int(np.log10(rball))),nsteps)
+prex='../1p/d_{0:d}_l{1:.1f}_a{2:.1f}'.format(d_fit,l_cut,a)
+# LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
 
@@ -73,6 +74,7 @@ samples = sampler.flatchain
 probs = sampler.flatlnprobability
 print('len of samples:', len(samples))
 theta_max = samples[np.argmax(probs)]
+print('initial paras: t_life, d_fit, logM0, l_cut, a, prob',labels,t_life,d_fit,logM0,l_cut,a,probs[0])
 print('best paras:',labels,theta_max,np.max(probs))
 
 all_samples = np.concatenate(
@@ -91,3 +93,36 @@ print(
 
 tau = sampler.get_autocorr_time(tol=1)
 print(tau)
+
+ndraw = 100
+fig, axes = plt.subplots(1,2, figsize=(12, 6),dpi=400)
+ax = axes[0]; curve_name = 'MF'
+best_model = model(theta_max)
+xs = best_model['M_BH']
+y_data = best_model[curve_name+'_data']
+y_best = best_model[curve_name]
+ax.plot(xs, y_data, label='data')
+draw = np.floor(np.random.uniform(0,len(samples),size=ndraw)).astype(int)
+thetas = samples[draw]
+for i in thetas:
+    mod = model(i)[curve_name]
+    ax.plot(xs, mod, c='grey',label='_',alpha=.2)
+ax.plot(xs, y_best, c='C1', label='Highest Likelihood Model')
+ax.set_xlim(1e7,1e10); ax.set_xscale('log')
+ax.set_ylim(1e-10,1e-4); ax.set_yscale('log')
+ax.legend()
+ax = axes[1]; curve_name = 'LF'
+xs = best_model['M1450']
+y_data = best_model[curve_name+'_data']
+y_best = best_model[curve_name]
+ax.scatter(xs, y_data, label='_')
+for i in thetas:
+    mod = model(i)[curve_name]
+    ax.plot(xs, mod, c='grey',label='_',alpha=.2)
+ax.plot(xs, y_best, c='C1', label='_')
+ax.text(-26,3e1,r'$t_{life}=$'+'{0:.1e}Myr\n'.format(theta_max[0]))
+ax.set_xlim(-22,-29)
+ax.set_ylim(1e-2,1e2)
+ax.set_yscale('log')
+ax.legend()
+plt.savefig(prex+'_spread.png')
