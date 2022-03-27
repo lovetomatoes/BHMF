@@ -1,7 +1,7 @@
 from time import sleep
 from PYmodule import *
-# from PYmodule.LFmcz6_easy import *
-# from PYmodule.LFmcz6 import *
+from PYmodule.l_intg import *
+from PYmodule.MLF2p import *
 from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
@@ -11,6 +11,28 @@ from scipy.stats import norm, uniform
 # print((t_from_z(5)-t_from_z(4))/Myr)
 # print(M1450_Lbol(1e13*Lsun))
 # print(t_Edd/Myr)
+
+t1 = time.time()
+l = np.logspace(-2,1,num=1000)
+a = 1.
+# print(P_left_norm(a,l))
+P_left_norm(a,l)
+t2 = time.time()
+print('t2-t1',t2-t1)
+# print((special.gammainc(a,l)-special.gammainc(a,0.01))/(special.gammainc(a,10)-special.gammainc(a,0.01)))
+(special.gammainc(a,l)-special.gammainc(a,0.01))/(special.gammainc(a,10)-special.gammainc(a,0.01))
+t3 = time.time()
+print('t3-t2',t3-t2)
+
+l = [.01,.1,1,10]
+a = 1.
+print(P_left_norm(a,l))
+print((special.gammainc(a,l)-special.gammainc(a,0.01))/(special.gammainc(a,10)-special.gammainc(a,0.01)))
+
+x = np.arange(logx_min,logx_max,dlogx)
+print(len(x))
+
+exit(0)
 
 t_range = [120.]
 f_range = [1.]
@@ -27,7 +49,7 @@ l_cut = l_range[0]
 a = a_range[0]
 
 x = (t_life, f_0, d_fit, l_cut, a)
-print(lnlike(x))
+# print(lnlike(x))
 print('time=',time.time()-t1)
 exit(0)
 
