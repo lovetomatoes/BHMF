@@ -18,7 +18,7 @@ nwalkers = 100
 nsteps = 5000
 rball = 1e-4
 
-prex='../2p/range3l.5a.5'
+prex='../2p/range3_l{1:.1f}_a{2:.1f}'.format(d_fit,l_cut,a)
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'

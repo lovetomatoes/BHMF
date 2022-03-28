@@ -6,6 +6,47 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+
+m,n = int(2),int(3)
+b = np.zeros((m,n))
+for i in  range(m):
+    for j in range(n):
+        b[i][j] = i*n+j+1
+print(b)
+
+
+a = -.5
+x = np.logspace(-2,4,num=100)
+x0 = 0.01
+Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
+print('Pnorm:',Pnorm)
+# lhs = gamma(a+1) * (gammainc(a+1,x) - gammainc(a+1,x0))
+# rhs = -pow(x,a)*np.exp(-x)+pow(x0,a)*np.exp(-x0) + a*gamma(a)*(gammainc(a,x) - gammainc(a,x0))
+# lhs = gamma(a)*(gammainc(a,x)-gammainc(a,x0))
+# rhs = ((gammainc(a+1,x)-gammainc(a+1,x0))*gamma(a+1) + pow(x,a)*np.exp(-x) - pow(x0,a)*np.exp(-x0))
+# print('min and max of lhs:',lhs[0],lhs[-1])
+
+# lhs = (gammainc(a,x)- gammainc(a,x0))/gammaincc(a,x0)
+rhs = ( gamma(a+1)*(gammainc(a+1,x)-gammainc(a+1,x0))+pow(x,a)*np.exp(-x)-pow(x0,a)*np.exp(-x0) )/Pnorm
+nume = P_left_norm(a,x)
+
+# plt.plot(x,lhs)
+plt.plot(x,rhs)
+plt.plot(x,nume)
+# plt.plot(x,rhs/a)
+plt.xscale('log')
+plt.savefig('../closed.png')
+# closed = np.all(np.isclose(lhs,rhs,rtol=1e-2))
+# closed_ = np.all(np.isclose(lhs,nume,rtol=1e-2))
+# print('closed=',closed,closed_)
+
+closed__ = np.all(np.isclose(rhs,nume,rtol=1e-2))
+print('closed=',closed__)
+
+exit(0)
+
+print(P_left2d(1,a)/P_tot(1))
+print((gammainc(1,a)-gammainc(1,0.01))/(gammainc(1,10)-gammainc(1,.01)))
 # print('most Nt:',(t_from_z(6)-t_from_z(20))/(200.*Myr))
 # print((t_from_z(6)-t_from_z(5))/Myr)
 # print((t_from_z(5)-t_from_z(4))/Myr)
@@ -13,16 +54,27 @@ from scipy.stats import norm, uniform
 # print(t_Edd/Myr)
 
 t1 = time.time()
-l = np.logspace(-2,1,num=1000)
+l = np.logspace(-2,2,num=10)
 a = 1.
 # print(P_left_norm(a,l))
-P_left_norm(a,l)
+x=P_left_norm(a,l)
 t2 = time.time()
 print('t2-t1',t2-t1)
 # print((special.gammainc(a,l)-special.gammainc(a,0.01))/(special.gammainc(a,10)-special.gammainc(a,0.01)))
-(special.gammainc(a,l)-special.gammainc(a,0.01))/(special.gammainc(a,10)-special.gammainc(a,0.01))
+y=(special.gammainc(a,l)-special.gammainc(a,0.01))/(special.gammainc(a,10)-special.gammainc(a,0.01))
 t3 = time.time()
 print('t3-t2',t3-t2)
+
+all_zeros = np.all(np.isclose(x,y,rtol=1e-2))
+# print(x)
+# print(y)
+print(all_zeros)
+plt.figure(figsize=(10,10),dpi=400)
+plt.plot(l,x)
+plt.plot(l,y)
+plt.xscale('log')
+plt.savefig('../Ps.png')
+# exit(0)
 
 l = [.01,.1,1,10]
 a = 1.
@@ -32,13 +84,14 @@ print((special.gammainc(a,l)-special.gammainc(a,0.01))/(special.gammainc(a,10)-s
 x = np.arange(logx_min,logx_max,dlogx)
 print(len(x))
 
-exit(0)
+# exit(0)
 
+t1 = time.time()
 t_range = [120.]
 f_range = [1.]
 d_range = [.25]
 l_range = [.9]
-a_range = [.1]
+a_range = [1.]
 
 
 t1 =  time.time()
@@ -48,8 +101,8 @@ d_fit = d_range[0]
 l_cut = l_range[0]
 a = a_range[0]
 
-x = (t_life, f_0, d_fit, l_cut, a)
-# print(lnlike(x))
+x = (t_life, d_fit)
+print(lnlike(x))
 print('time=',time.time()-t1)
 exit(0)
 

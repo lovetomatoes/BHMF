@@ -3,6 +3,17 @@ from PYmodule import *
 dlogx = .0001
 logx_min = -2.; logx_max = 1.+dlogx
 
+def P_left2d(a,l2d):
+    # integration of dP ~ x^a exp(-x) dlogx; normalized by integral over (-2,1)
+    x = pow(10., np.arange(logx_min,logx_max,dlogx))
+    m,n = l2d.shape
+    l = l2d.reshape(-1)
+    xx, ll = np.meshgrid(x,l)
+    zz = (xx<ll)*(logx_min<=np.log10(ll)) * pow(xx,a)*np.exp(-xx) * dlogx
+    # print(xx.shape)
+    return np.sum(zz,axis=1).reshape(m,n)
+
+
 def P_tot(a):
     logls = np.arange(logx_min,logx_max,dlogx)
     ls = pow(10., logls)
@@ -12,9 +23,8 @@ def P_left(a,l):
     # integration of dP ~ x^a exp(-x) dlogx; normalized by integral over (-2,1)
     x = pow(10., np.arange(logx_min,logx_max,dlogx))
     xx, ll = np.meshgrid(x, l)
-    yy = xx<ll
-    zz = yy*np.logical_and(logx_min<=np.log10(ll),np.log10(ll)<=logx_max) * pow(xx,a)*np.exp(-xx) * dlogx
     # zz = (xx<ll)*np.logical_and(logx_min<=np.log10(ll),np.log10(ll)<=logx_max) * pow(xx,a)*np.exp(-xx) * dlogx
+    zz = (xx<ll)*(logx_min<=np.log10(ll)) * pow(xx,a)*np.exp(-xx) * dlogx
     return np.sum(zz,axis=1)
 
 def P_left_norm(a,l):

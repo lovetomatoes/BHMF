@@ -13,6 +13,7 @@ import time
 import math
 import numpy.ma as ma
 from scipy import special
+from scipy.special import gamma, gammainc, gammaincc
 from emcee import EnsembleSampler
 import corner
 import emcee
@@ -31,6 +32,9 @@ d_fit = 0.
 logM0 = 8.
 l_cut = .5 # l_cut=2., l_cut' = l_cut/2; M=M_cut=1e7 grow as Eddington
 a = .5
+
+x0 = 0.01
+Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
 
 l_mean, a_mean = .9, .1
 sigma_l, sigma_a = .2, .02
