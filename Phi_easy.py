@@ -1,6 +1,8 @@
 from PYmodule import *
 # Phiz6 paras: f_0, t_life, lbd ~Schechter(l_cut,a)
 
+t1 = time.time()
+
 N_Mh = 3 # 3 base halos: 1e11, 1e12, 1e13
 Ntr = 10000
 eta = 0.3
@@ -15,6 +17,9 @@ t_life, d_fit, logM0, l_cut, a = 80 ,  0.3 ,  8 ,  .5 ,  .5
 t_life, d_fit, logM0, l_cut, a = 50 ,  0.3 ,  8 ,  .5 ,  .3
 t_life, d_fit, logM0, l_cut, a = 10 ,  1.,  8 ,  1,  .5; #almost impossible
 t_life, d_fit, logM0, l_cut, a = 150 ,  0.,  8 ,  .5,  .3
+
+x0 = 0.01
+Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
 
 print('t_life, d_fit, logM0, l_cut, a: ', t_life,', ',d_fit,', ',logM0,', ', l_cut,', ',a)
 
@@ -44,15 +49,23 @@ while Nt>=0:
     # new seeds (using 2d meshgrids)
     if len(T_seed):
         z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
-        z_mesh[z_mesh<0] = 0.
-        dP_seed = special.gammainc(a,z_mesh[1:,:]) - special.gammainc(a,z_mesh[:-1,:])
+        # z_mesh[z_mesh<0] = 0.
+        # Ps = gammainc(a,z_mesh) # a>0
+        z_mesh[z_mesh<x0] = x0 # a<0
+        # Ps = (gammainc(a,z_mesh)- gammainc(a,x0))/gammaincc(a,x0) # same with line below
+        Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+        dP_seed = Ps[1:,:] - Ps[:-1,:]
         dP_seed = np.nansum(dP_seed, axis=1)/len(T)
     else:
         dP_seed = 0.
     # prev BHMF
     z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
-    z_mesh[z_mesh<0] = 0.
-    dP_MBH = np.nansum((special.gammainc(a,z_mesh[:,:-1])-special.gammainc(a,z_mesh[:,1:]))*dP_MBH_prev, axis=1) + dP_seed
+    # z_mesh[z_mesh<0] = 0.
+    # Ps = gammainc(a,z_mesh) # a>0
+    z_mesh[z_mesh<x0] = x0 # a<0
+    # Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
+    Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+    dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
     Nt -= 1
 
@@ -97,8 +110,12 @@ Phi = np.zeros(N_lf)
 
 T['dn_MBH'] = T['Phi']*dlog10M
 z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
-P_mesh = special.gammainc(a,z_mesh[:-1,:])-special.gammainc(a,z_mesh[1:,:])
-dPhi_mesh = np.nansum(P_mesh*dn_MBH,axis=1)
+Ps = gammainc(a,z_mesh) # a>0
+z_mesh[z_mesh<x0] = x0 # a<0
+# Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
+Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
+
 Phi = dPhi_mesh/bin_wid
 
 Phi *= 1e9
@@ -131,3 +148,5 @@ if np.nanmin([Chi2, Chi2_min]) == Chi2:
 if find_min:
     print('log_prob=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
     #, LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)
+
+print('time: ',time.time()-t1)
