@@ -28,15 +28,27 @@ def lnlike(theta):
         # new seeds (using 2d meshgrids)
         if len(T_seed):
             z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
-            z_mesh[z_mesh<0] = 0.
-            dP_seed = special.gammainc(a,z_mesh[1:,:]) - special.gammainc(a,z_mesh[:-1,:])
+            if a>0:
+                z_mesh[z_mesh<0] = 0.
+                Ps = gammainc(a,z_mesh)
+            elif -1<a<0:
+                z_mesh[z_mesh<x0] = x0
+                # Ps = (gammainc(a,z_mesh)- gammainc(a,x0))/gammaincc(a,x0) # same with line below
+                Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+            dP_seed = Ps[1:,:] - Ps[:-1,:]
             dP_seed = np.nansum(dP_seed, axis=1)/len(T)
         else:
             dP_seed = 0.
         # prev BHMF
         z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
-        z_mesh[z_mesh<0] = 0.
-        dP_MBH = np.nansum((special.gammainc(a,z_mesh[:,:-1])-special.gammainc(a,z_mesh[:,1:]))*dP_MBH_prev, axis=1) + dP_seed
+        if a>0:
+            z_mesh[z_mesh<0] = 0.
+            Ps = gammainc(a,z_mesh)
+        elif -1<a<0:
+            z_mesh[z_mesh<x0] = x0
+            # Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
+            Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+        dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
         Nt -= 1
     dn_MBH = dP_MBH*n_base*f_bsm
@@ -60,8 +72,14 @@ def lnlike(theta):
 
 # # --------- Luminosity Function ---------    
     z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
-    P_mesh = special.gammainc(a,z_mesh[:-1,:])-special.gammainc(a,z_mesh[1:,:])
-    dPhi_mesh = np.nansum(P_mesh*dn_MBH,axis=1)
+    if a>0:
+        Ps = gammainc(a,z_mesh)
+    elif -1<a<0:
+        z_mesh[z_mesh<x0] = x0
+        # Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
+        Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+    dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
+
     Phi = dPhi_mesh/bin_wid
 
     Phi *= 1e9
@@ -90,6 +108,7 @@ def lnlike(theta):
 # 2prange1: 1e1<t_life<200. and 0.1<d_fit<0.5:
 # 2prange2: 1e1<t_life<200. and 0.1<d_fit<1:
 # 2prange3: 1e1<t_life<200. and 0.01<d_fit<1:
+# 2prange4: 1e1<t_life<200. and 0.<=d_fit<1:
 
 def lnprior(theta):
     t_life, d_fit = theta

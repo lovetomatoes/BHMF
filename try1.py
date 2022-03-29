@@ -7,6 +7,13 @@ from scipy.stats import norm, uniform
 # a = np.ones((N1,N2,N3,N4,N5))
 
 
+t1 =  time.time()
+t_life, d_fit, logM0, l_cut, a = 120 ,  0.3,  8 ,  1.,  -.7
+
+x = (t_life, d_fit)
+print(lnlike(x))
+print('time=',time.time()-t1)
+
 m,n = int(2),int(3)
 b = np.zeros((m,n))
 for i in  range(m):

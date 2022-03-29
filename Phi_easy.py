@@ -17,6 +17,7 @@ t_life, d_fit, logM0, l_cut, a = 80 ,  0.3 ,  8 ,  .5 ,  .5
 t_life, d_fit, logM0, l_cut, a = 50 ,  0.3 ,  8 ,  .5 ,  .3
 t_life, d_fit, logM0, l_cut, a = 10 ,  1.,  8 ,  1,  .5; #almost impossible
 t_life, d_fit, logM0, l_cut, a = 150 ,  0.,  8 ,  .5,  .3
+t_life, d_fit, logM0, l_cut, a = 120 ,  0.3,  8 ,  1.,  -.7
 
 x0 = 0.01
 Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
@@ -49,22 +50,26 @@ while Nt>=0:
     # new seeds (using 2d meshgrids)
     if len(T_seed):
         z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
-        # z_mesh[z_mesh<0] = 0.
-        # Ps = gammainc(a,z_mesh) # a>0
-        z_mesh[z_mesh<x0] = x0 # a<0
-        # Ps = (gammainc(a,z_mesh)- gammainc(a,x0))/gammaincc(a,x0) # same with line below
-        Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+        if a>0:
+            z_mesh[z_mesh<0] = 0.
+            Ps = gammainc(a,z_mesh)
+        elif -1<a<0:
+            z_mesh[z_mesh<x0] = x0
+            # Ps = (gammainc(a,z_mesh)- gammainc(a,x0))/gammaincc(a,x0) # same with line below
+            Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
         dP_seed = Ps[1:,:] - Ps[:-1,:]
         dP_seed = np.nansum(dP_seed, axis=1)/len(T)
     else:
         dP_seed = 0.
     # prev BHMF
     z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
-    # z_mesh[z_mesh<0] = 0.
-    # Ps = gammainc(a,z_mesh) # a>0
-    z_mesh[z_mesh<x0] = x0 # a<0
-    # Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
-    Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+    if a>0:
+        z_mesh[z_mesh<0] = 0.
+        Ps = gammainc(a,z_mesh)
+    elif -1<a<0:
+        z_mesh[z_mesh<x0] = x0
+        # Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
+        Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
     dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
     Nt -= 1
@@ -98,11 +103,13 @@ index = np.logical_and(T['M_BH']>1e7, T['M_BH']<1e10)
 Chi2_M = np.sum(pow(np.log(T['Phi']/T['W10_MF'])[index], 2))/(np.sum(index)-1)
 off_M = np.max(abs(np.log(T['Phi']/T['W10_MF'])[index]))
 
+# 30 N_M in 1e7-1e10 range, plus 12 N_L
 index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
 xs = M_BH[index]
 ys = np.log10( MF(xs)  ) # Willott 2010 30 points as data
 y_model = np.log10( (dn_MBH/dlog10M) [index] )
 y_err = 1.
+y_err = (np.log10(xs)-8.5)**2/3 + .5 # from 0.5 to 1.2 
 Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
 
 # # --------- Luminosity Function ---------
@@ -110,10 +117,12 @@ Phi = np.zeros(N_lf)
 
 T['dn_MBH'] = T['Phi']*dlog10M
 z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
-Ps = gammainc(a,z_mesh) # a>0
-z_mesh[z_mesh<x0] = x0 # a<0
-# Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
-Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+if a>0:
+    Ps = gammainc(a,z_mesh)
+elif -1<a<0:
+    z_mesh[z_mesh<x0] = x0
+    # Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
+    Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
 dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
 
 Phi = dPhi_mesh/bin_wid
