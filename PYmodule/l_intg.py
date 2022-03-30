@@ -1,7 +1,7 @@
 from PYmodule import *
 
 dlogx = .0001
-logx_min = -2.; logx_max = 1.+dlogx
+logx_min = -3.; logx_max = 1.+dlogx
 
 def P_left2d(a,l2d):
     # integration of dP ~ x^a exp(-x) dlogx; normalized by integral over (-2,1)

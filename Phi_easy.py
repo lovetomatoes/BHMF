@@ -19,7 +19,12 @@ t_life, d_fit, logM0, l_cut, a = 10 ,  1.,  8 ,  1,  .5; #almost impossible
 t_life, d_fit, logM0, l_cut, a = 150 ,  0.,  8 ,  .5,  .3
 t_life, d_fit, logM0, l_cut, a = 120 ,  0.3,  8 ,  1.,  -.7
 
-x0 = 0.01
+t_life, d_fit, logM0, l_cut, a, x0 = 150 ,  0.163,  8 ,  1.,  -.7, 0.1
+t_life, d_fit, logM0, l_cut, a, x0 = 66.43062875,  0.06772173,  8 ,  1.,  -.7, 0.1
+t_life, d_fit, logM0, l_cut, a, x0 = 77,  0.01,  8 ,  1.,  -.7, 0.1
+# t_life, d_fit = 1.80438151e+02, 1.00071295e-02
+
+# x0 = 0.1
 Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
 
 print('t_life, d_fit, logM0, l_cut, a: ', t_life,', ',d_fit,', ',logM0,', ', l_cut,', ',a)
@@ -77,7 +82,7 @@ while Nt>=0:
 dn_MBH = dP_MBH*n_base*f_bsm
 
 consv_ratio = np.nansum(dn_MBH)/n_base
-print('MF conserved fraction=%.10f'%consv_ratio)
+print('in Phi_easy: MF conserved fraction=%.10f'%consv_ratio)
 # if consv_ratio<.9:
 #     print('conserved fraction=%.10f'%consv_ratio)
 

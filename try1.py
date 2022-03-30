@@ -2,6 +2,7 @@ from time import sleep
 from PYmodule import *
 from PYmodule.l_intg import *
 from PYmodule.MLF2p import *
+from PYmodule.models import *
 from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
@@ -9,9 +10,12 @@ from scipy.stats import norm, uniform
 
 t1 =  time.time()
 t_life, d_fit, logM0, l_cut, a = 120 ,  0.3,  8 ,  1.,  -.7
+t_life, d_fit, logM0, l_cut, a = 7.15327407e+01, 4.69571841e-02,  8 ,  1.,  -.7
+t_life, d_fit = 1.80438151e+02, 1.00071295e-02
 
 x = (t_life, d_fit)
 print(lnlike(x))
+print('x0:',x0)
 print('time=',time.time()-t1)
 
 m,n = int(2),int(3)
@@ -21,12 +25,47 @@ for i in  range(m):
         b[i][j] = i*n+j+1
 print(b)
 
+# dP/dlogx for x0 = 0.01, 0.001
+a = -.1
 
-a = -.5
-x = np.logspace(-2,4,num=100)
+plt.figure(figsize=(10,10),dpi=400)
 x0 = 0.01
+x = np.logspace(-3,2,num=100)
 Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
-print('Pnorm:',Pnorm)
+x[x<x0] = x0
+P_left = ( gamma(a+1)*(gammainc(a+1,x)-gammainc(a+1,x0))+pow(x,a)*np.exp(-x)-pow(x0,a)*np.exp(-x0) )/Pnorm
+# plt.plot(x[:-1],(P_left[1:]-P_left[:-1])/np.log(x[1]/x[0]), label='x0=%.0e'%x0)
+x = np.logspace(-3,2,num=100)
+plt.plot(x,P_left, label='x0=%.0e'%x0)
+x0 = 0.001
+x = np.logspace(-3,2,num=100)
+Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
+x[x<x0] = x0
+P_left = ( gamma(a+1)*(gammainc(a+1,x)-gammainc(a+1,x0))+pow(x,a)*np.exp(-x)-pow(x0,a)*np.exp(-x0) )/Pnorm
+# plt.plot(x[:-1],(P_left[1:]-P_left[:-1])/np.log(x[1]/x[0]), label='x0=%.0e'%x0)
+plt.plot(x,P_left, label='x0=%.0e'%x0)
+plt.xscale('log'); plt.yscale('log')
+plt.legend()
+plt.savefig('../P_left%.1f.png'%a)
+
+plt.figure(figsize=(10,10),dpi=400)
+x0 = 0.01
+x = np.logspace(-2,1,num=100)
+Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
+x = x[x>=x0]
+P_left = ( gamma(a+1)*(gammainc(a+1,x)-gammainc(a+1,x0))+pow(x,a)*np.exp(-x)-pow(x0,a)*np.exp(-x0) )/Pnorm
+plt.plot(x[:-1],(P_left[1:]-P_left[:-1])/np.log(x[1]/x[0]), label='x0=%.0e'%x0)
+
+x0 = 0.001
+x = np.logspace(-3,1,num=100)
+Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
+x[x<x0] = x0
+P_left = ( gamma(a+1)*(gammainc(a+1,x)-gammainc(a+1,x0))+pow(x,a)*np.exp(-x)-pow(x0,a)*np.exp(-x0) )/Pnorm
+plt.plot(x[:-1],(P_left[1:]-P_left[:-1])/np.log(x[1]/x[0]), label='x0=%.0e'%x0)
+plt.xscale('log'); plt.yscale('log')
+plt.legend()
+plt.savefig('../dPdx%.1f.png'%a)
+
 # lhs = gamma(a+1) * (gammainc(a+1,x) - gammainc(a+1,x0))
 # rhs = -pow(x,a)*np.exp(-x)+pow(x0,a)*np.exp(-x0) + a*gamma(a)*(gammainc(a,x) - gammainc(a,x0))
 # lhs = gamma(a)*(gammainc(a,x)-gammainc(a,x0))
@@ -37,6 +76,7 @@ print('Pnorm:',Pnorm)
 rhs = ( gamma(a+1)*(gammainc(a+1,x)-gammainc(a+1,x0))+pow(x,a)*np.exp(-x)-pow(x0,a)*np.exp(-x0) )/Pnorm
 nume = P_left_norm(a,x)
 
+plt.figure(figsize=(10,10),dpi=400)
 # plt.plot(x,lhs)
 plt.plot(x,rhs)
 plt.plot(x,nume)

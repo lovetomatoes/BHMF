@@ -54,7 +54,7 @@ def lnlike(theta):
     dn_MBH = dP_MBH*n_base*f_bsm
 
     consv_ratio = np.nansum(dn_MBH)/n_base
-    # print('MF consv_ratio',consv_ratio)
+    # print('in MLF2p: MF consv_ratio',consv_ratio)
     # wli: too loose constraint!
     if abs(consv_ratio-1)>.5:
         print('theta: ',theta)

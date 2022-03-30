@@ -9,7 +9,7 @@ from schwimmbad import MPIPool
 
 
 # initial guess
-t_life = 100.
+t_life = 120.
 d_fit = .3
 initial = np.array([t_life,d_fit])
 
@@ -18,7 +18,7 @@ nwalkers = 100
 nsteps = 5000
 rball = 1e-4
 
-prex='../2p/range3_l{1:.1f}_a{2:.1f}'.format(d_fit,l_cut,a)
+prex='../2p/range3_l{0:.1f}_a{1:.1f}_x0={2:.0e}'.format(l_cut,a,x0)
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
