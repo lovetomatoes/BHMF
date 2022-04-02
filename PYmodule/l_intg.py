@@ -1,7 +1,25 @@
 from PYmodule import *
 
+def integral(a,x,x0=x0):
+    if a>0:
+        return gamma(a)*(gammainc(a,x)-gammainc(a,x0))
+    elif a ==0:
+        a= 1e-8
+        return integral(a,x)
+    else:
+        return 1./a * (integral(a+1,x) + pow(x,a)*np.exp(-x)-pow(x0,a)*np.exp(-x0))
+
+def integral_toinf(a,x0=x0):
+    if a>0:
+        return gamma(a)*gammaincc(a,x0)
+    elif a==0:
+        a = 1e-8
+        return integral_toinf(a)
+    else:
+        return 1./a * (integral_toinf(a+1)-pow(x0,a)*np.exp(-x0))
+
 dlogx = .0001
-logx_min = -3.; logx_max = 1.+dlogx
+logx_min = np.log10(x0); logx_max = 2.+dlogx
 
 def P_left2d(a,l2d):
     # integration of dP ~ x^a exp(-x) dlogx; normalized by integral over (-2,1)

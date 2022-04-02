@@ -8,10 +8,42 @@ from scipy.stats import norm, uniform
 # a = np.ones((N1,N2,N3,N4,N5))
 
 
-t1 =  time.time()
-t_life, d_fit, logM0, l_cut, a = 120 ,  0.3,  8 ,  1.,  -.7
-t_life, d_fit, logM0, l_cut, a = 7.15327407e+01, 4.69571841e-02,  8 ,  1.,  -.7
-t_life, d_fit = 1.80438151e+02, 1.00071295e-02
+# 验证了 integral(a,x,x0=x0)/integral_toinf(a,x0=x0) 就是P after normalization
+# 原则上可用于 a=任何值, 都是从x0 开始积分 
+x0 = 0.01
+a = .1
+x = np.logspace(-3,2,num=1000)
+x[x<x0] = x0
+
+
+z = (gammainc(a,x)-gammainc(a,x0))/gammaincc(a,x0)
+
+y = integral(a,x)/integral_toinf(a)
+plt.figure(figsize=(10,8),dpi=400)
+plt.plot(x,y)
+plt.plot(x,P_left_norm(a,x),c='C1')
+plt.plot(x,z,c='C2')
+plt.xscale('log');plt.yscale('log')
+plt.savefig('../P_a%.1f.png'%a)
+
+# fix x0->x 对a 连续
+a = np.linspace(-2, 1, num = 1000)
+x = 0.1
+y = [integral(a[i],x)/integral_toinf(a[i]) for i in range(len(a))]
+z = [P_left_norm(a[i],x) for i in range(len(a))]
+plt.figure(figsize=(10,8),dpi=400)
+plt.scatter(a,y)
+plt.plot(a,z)
+# plt.xscale('log');
+plt.yscale('log')
+plt.savefig('../P_x%.1f.png'%x)
+
+exit(0)
+
+# t1 =  time.time()
+# t_life, d_fit, logM0, l_cut, a = 120 ,  0.3,  8 ,  1.,  -.7
+# t_life, d_fit, logM0, l_cut, a = 7.15327407e+01, 4.69571841e-02,  8 ,  1.,  -.7
+# t_life, d_fit = 1.80438151e+02, 1.00071295e-02
 
 x = (t_life, d_fit)
 print(lnlike(x))
