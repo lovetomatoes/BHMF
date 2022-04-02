@@ -18,6 +18,9 @@ def integral_toinf(a,x0=x0):
     else:
         return 1./a * (integral_toinf(a+1)-pow(x0,a)*np.exp(-x0))
 
+# global normalization for a & x0 defined in __init__.py
+I_toinf = integral_toinf(a)
+
 dlogx = .0001
 logx_min = np.log10(x0); logx_max = 2.+dlogx
 

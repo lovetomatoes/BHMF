@@ -32,11 +32,10 @@ t_life, d_fit, logM0, l_cut, a, x0 = 84 ,  0.27,  8 ,  .9,  .1,  0.01
 # positive a, cut at x0
 t_life, d_fit, logM0, l_cut, a, x0 = 80,   0.25,  8,   .9,  .1, 0.01
 # best fit (t_life, d_fit)
-t_life, d_fit, logM0, l_cut, a, x0 = 62,   0.01,  8,   .9,  -.1, 0.01
+t_life, d_fit, logM0, l_cut, a, x0 = 62,   0.01,  8,   .9,  .1, 0.01
 # t_life, d_fit, logM0, l_cut, a, x0 = 74,   0.04,  8,   .9,  .1, 0.001
 
-
-Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
+I_toinf =  integral_toinf(a)
 
 print('t_life, d_fit, logM0, l_cut, a: ', t_life,', ',d_fit,', ',logM0,', ', l_cut,', ',a)
 
@@ -67,19 +66,7 @@ while Nt>=0:
     if len(T_seed):
         z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
         z_mesh[z_mesh<x0] = x0
-        Ps = integral(a,z_mesh)/integral_toinf(a)
-        # Ps_ = (gammainc(a,z_mesh)- gammainc(a,x0))/gammaincc(a,x0) # same with line below
-        Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
-
-        # print(np.allclose(Ps,Ps_,rtol=1.e-1))
-
-        # if a>0:
-        #     z_mesh[z_mesh<x0] = 0.
-        #     Ps = gammainc(a,z_mesh)
-        # # elif -1<a<0:
-        # z_mesh[z_mesh<x0] = x0
-        # Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
-        
+        Ps = integral(a,z_mesh)/I_toinf
         dP_seed = Ps[1:,:] - Ps[:-1,:]
         dP_seed = np.nansum(dP_seed, axis=1)/len(T)
     else:
@@ -87,25 +74,7 @@ while Nt>=0:
     # prev BHMF
     z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
     z_mesh[z_mesh<x0] = x0
-    Ps = integral(a,z_mesh)/integral_toinf(a)
-    # Ps_ = (gammainc(a,z_mesh)- gammainc(a,x0))/gammaincc(a,x0) # same with line below
-    Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
-
-    # print(np.allclose(Ps,Ps_,rtol=1.5e-1))
-
-    # if not np.allclose(Ps,Ps_,rtol=1e-1):
-    #     print('z_mesh:',z_mesh)
-    #     print('Ps:    ',Ps)
-    #     print('Ps_:   ',Ps_)
-    # if np.any(Ps<0):
-    #     print('sth wrong!')
-
-    # if a>0:
-    #     z_mesh[z_mesh<x0] = x0
-    #     Ps = gammainc(a,z_mesh)
-    # # elif -1<a<0:
-    # z_mesh[z_mesh<x0] = np.nan
-    # Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+    Ps = integral(a,z_mesh)/I_toinf
     dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
     Nt -= 1
@@ -153,19 +122,8 @@ Phi = np.zeros(N_lf)
 
 T['dn_MBH'] = T['Phi']*dlog10M
 z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
-
 z_mesh[z_mesh<x0] = x0
-Ps = integral(a,z_mesh)/integral_toinf(a)
-# Ps_ = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
-Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
-
-# print(np.allclose(Ps,Ps_,rtol=1.5e-1))
-# if a>0:
-#     z_mesh[z_mesh<x0] = x0
-#     Ps = gammainc(a,z_mesh)
-# # elif -1<a<0:
-# z_mesh[z_mesh<x0] = x0
-# Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+Ps = integral(a,z_mesh)/I_toinf
 dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
 
 Phi = dPhi_mesh/bin_wid

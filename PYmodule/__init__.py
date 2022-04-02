@@ -34,7 +34,6 @@ l_cut = 1. # l_cut=2., l_cut' = l_cut/2; M=M_cut=1e7 grow as Eddington
 a = -.7
 
 x0 = 0.01
-Pnorm = gamma(a+1)*gammaincc(a+1,x0)-pow(x0,a)*np.exp(-x0)
 
 l_mean, a_mean = .9, .1
 sigma_l, sigma_a = .2, .02

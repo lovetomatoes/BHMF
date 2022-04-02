@@ -11,6 +11,7 @@ from schwimmbad import MPIPool
 # initial guess
 t_life = 120.
 d_fit = .3
+t_life, d_fit = 50, 0.2 #  8 ,  1.,  -.1,  0.01
 initial = np.array([t_life,d_fit])
 
 ndim = len(initial)
@@ -23,7 +24,7 @@ prex='../2p/range3_l{0:.1f}_a{1:.1f}_x0={2:.0e}'.format(l_cut,a,x0)
 
 fname =prex+'.h5'
 
-# nsteps = 10000
+# nsteps = 10
 # prex += '_xu'
 
 with MPIPool() as pool:
@@ -45,6 +46,7 @@ with MPIPool() as pool:
     # sampler = EnsembleSampler(nwalkers, ndim, lnprobab, pool=pool, backend=backend)
     # sampler.run_mcmc(None, nsteps, progress=True)
 
+# exit(0)
 
 fig, axes = plt.subplots(ndim+1, figsize=(10, 7), sharex=True)
 samples = sampler.get_chain()

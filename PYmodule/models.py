@@ -1,4 +1,5 @@
 from PYmodule import *
+from PYmodule.l_intg import *
 
 # pre-determined in __init__.py
 # eta = 0.3
@@ -39,27 +40,17 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
 
         # new seeds (using 2d meshgrids)
         if len(T_seed):
-            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
-            if a>0:
-                z_mesh[z_mesh<0] = 0.
-                Ps = gammainc(a,z_mesh)
-            elif -1<a<0:
-                z_mesh[z_mesh<x0] = x0
-                # Ps = (gammainc(a,z_mesh)- gammainc(a,x0))/gammaincc(a,x0) # same with line below
-                Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+            z_mesh[z_mesh<x0] = x0
+            Ps = integral(a,z_mesh)/I_toinf
             dP_seed = Ps[1:,:] - Ps[:-1,:]
             dP_seed = np.nansum(dP_seed, axis=1)/len(T)
         else:
             dP_seed = 0.
         # prev BHMF
-        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
-        if a>0:
-            z_mesh[z_mesh<0] = 0.
-            Ps = gammainc(a,z_mesh)
-        elif -1<a<0:
-            z_mesh[z_mesh<x0] = x0
-            # Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
-            Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh[z_mesh<x0] = x0
+        Ps = integral(a,z_mesh)/I_toinf
         dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
         Nt -= 1
@@ -67,8 +58,6 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
     dn_MBH = dP_MBH*n_base*f_bsm
 
     consv_ratio = np.nansum(dn_MBH)/n_base
-    # print('MF consv_ratio',consv_ratio)
-    # wli: too loose constraint!
     if abs(consv_ratio-1)>.5:
         print('theta: ',theta, 'consv_ratio: ',consv_ratio)
         # assert 0
@@ -84,12 +73,8 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
 
 # # --------- Luminosity Function ---------
     z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
-    if a>0:
-        Ps = gammainc(a,z_mesh)
-    elif -1<a<0:
-        z_mesh[z_mesh<x0] = x0
-        # Ps = (gammainc(a,z_mesh)-gammainc(a,x0))/gammaincc(a,x0) # same with line below
-        Ps = ( gamma(a+1)*(gammainc(a+1,z_mesh)-gammainc(a+1,x0))+pow(z_mesh,a)*np.exp(-z_mesh)-pow(x0,a)*np.exp(-x0) )/Pnorm
+    z_mesh[z_mesh<x0] = x0
+    Ps = integral(a,z_mesh)/I_toinf
     dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
 
     Phi = dPhi_mesh/bin_wid
