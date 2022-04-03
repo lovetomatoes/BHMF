@@ -33,7 +33,11 @@ t_life, d_fit, logM0, l_cut, a, x0 = 84 ,  0.27,  8 ,  .9,  .1,  0.01
 t_life, d_fit, logM0, l_cut, a, x0 = 80,   0.25,  8,   .9,  .1, 0.01
 # best fit (t_life, d_fit)
 t_life, d_fit, logM0, l_cut, a, x0 = 62,   0.01,  8,   .9,  .1, 0.01
+t_life, d_fit, logM0, l_cut, a, x0 = 55,   0.01,  8,   1.,  .05, 0.01
 # t_life, d_fit, logM0, l_cut, a, x0 = 74,   0.04,  8,   .9,  .1, 0.001
+
+# # initial guess 
+# t_life, d_fit, logM0, l_cut, a, x0 = 90,   0.1,  8,  0.75, 0., 0.01
 
 I_toinf =  integral_toinf(a)
 

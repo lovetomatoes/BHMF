@@ -35,8 +35,8 @@ a = -.7
 
 x0 = 0.01
 
-l_mean, a_mean = .9, .1
-sigma_l, sigma_a = .2, .02
+l_mean, a_mean = 0.75, 0.
+sigma_l, sigma_a = .45, .1
 
 typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
 lfnames = {'4':'Akiyama_18','5':'Niida_20','6':'Matsuoka_18'}

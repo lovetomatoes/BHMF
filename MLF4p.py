@@ -2,6 +2,7 @@
 
 from PYmodule import *
 from PYmodule.MLF4p import *
+from PYmodule.models import *
 from emcee import EnsembleSampler as EnsembleSampler
 import corner
 import os
@@ -11,8 +12,8 @@ from schwimmbad import MPIPool
 t1 = time.time()
 
 # initial guess
-t_life = 120.
-d_fit = 0.25
+t_life = 90.
+d_fit = .1
 l_cut = l_mean # defined in PYmodule/__init__.py, l_mean and a_mean
 a = a_mean
 
@@ -23,11 +24,12 @@ nwalkers = 100
 nsteps = 5000
 rball = 1e-4
 
-prex='../4p/MLF4prange1_Gs.2_l0_{0:.1e}_a_{1:.1e}'.format(l_cut,a)
+prex='../4p/4prange2_Gs.1_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}'.format(l_cut,a,sigma_l,sigma_a)
+# LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
 
-# nsteps = 10000
+# nsteps = 10
 # prex += '_xu'
 
 with MPIPool() as pool:
@@ -49,6 +51,7 @@ with MPIPool() as pool:
     # sampler = EnsembleSampler(nwalkers, ndim, lnprobab, pool=pool, backend=backend)
     # sampler.run_mcmc(None, nsteps, progress=True)
 
+# exit(0)
 
 fig, axes = plt.subplots(ndim+1, figsize=(10, 7), sharex=True)
 samples = sampler.get_chain()
@@ -79,6 +82,8 @@ samples = sampler.flatchain
 probs = sampler.flatlnprobability
 print('len of samples:', len(samples))
 theta_max = samples[np.argmax(probs)]
+print('initial paras: t_life={0:.1e}, d_fit={1:.1e}, logM0={2:.1f}, l_cut={3:.1f}, a={4:.1f}, x0{5:.0e}, prob{6:.1e}'.format(t_life,d_fit,logM0,l_cut,a,x0,probs[0]))
+print('Gaussian scatter sigma_l,sigma_a:',sigma_l,sigma_a)
 print('best paras:',labels,theta_max,np.max(probs))
 
 all_samples = np.concatenate(
@@ -96,7 +101,42 @@ print(
 )
 
 tau = sampler.get_autocorr_time(tol=1)
-print(tau)
+print('Autocorrelation timescale: ',tau)
 
-print('l_mean={0:.1e}, sigma_l={1:.1e}, a_mean={2:.1e}, sigma_a={3:.1e}'.format(l_mean,sigma_l,a_mean,sigma_a))
 print('running time: {0:.1f} hrs'.format((time.time()-t1)/3600))
+
+ndraw = 100
+fig, axes = plt.subplots(1,2, figsize=(12, 6),dpi=400)
+ax = axes[0]; curve_name = 'MF'
+best_model = model(theta_max)
+xs = best_model['M_BH']
+y_data = best_model[curve_name+'_data']
+y_best = best_model[curve_name]
+ax.plot(xs, y_data, label='data')
+draw = np.floor(np.random.uniform(0,len(samples),size=ndraw)).astype(int)
+thetas = samples[draw]
+for i in thetas:
+    mod = model(i)[curve_name]
+    ax.plot(xs, mod, c='grey',label='_',alpha=.2)
+ax.plot(xs, y_best, c='C1', label='Highest Likelihood Model')
+ax.set_xlim(1e7,1e10); ax.set_xscale('log')
+ax.set_ylim(1e-10,1e-4); ax.set_yscale('log')
+ax.legend()
+ax = axes[1]; curve_name = 'LF'
+xs = best_model['M1450']
+y_data = best_model[curve_name+'_data']
+y_best = best_model[curve_name]
+ax.scatter(xs, y_data, label='_')
+for i in thetas:
+    mod = model(i)[curve_name]
+    ax.plot(xs, mod, c='grey',label='_',alpha=.2)
+ax.plot(xs, y_best, c='C1', label='_')
+ax.text(-26,10,
+r'$t_{life}=$'+'{0:.1e}Myr\n'.format(theta_max[0])+r'$\delta=$'+'{0:.2f}\n'.format(theta_max[1])\
++r'$\lambda_{cut}=$'+'{0:.1e}\n'.format(theta_max[2])+r'$\alpha=$'+'{0:.2f}\n'.format(theta_max[3])
+)
+ax.set_xlim(-22,-29)
+ax.set_ylim(1e-2,1e2)
+ax.set_yscale('log')
+ax.legend()
+plt.savefig(prex+'_spread.png')

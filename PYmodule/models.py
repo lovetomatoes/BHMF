@@ -26,6 +26,8 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
     else:
         assert 0
     t_life = t_life * Myr # wli: not *=!!!!!! theta changed by this
+    I_toinf = integral_toinf(a)
+
 ## --------- Mass Function ---------
     tz = t_from_z(z)
     dn_MBH = np.zeros(N_mf)
