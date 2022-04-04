@@ -117,27 +117,32 @@ Phi_err = {'6':np.array([.0079, .061, .17, .32, .6, 1.2, 1.7, 2., 2.6, 3.6, 8.1,
 # !!!!!!!!!!!! eta_max should be used when 1/eta \simeq (1-eta)/eta breaks
 eta_max = .5; eta_min = 0.057 # 0.057
 
-def M1M0(M0,dt,f_duty,mu_fit,eta8,delta):
-    M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*t_Edd)+pow(M0/1e8,delta),1./delta)
+# def M1M0(M0,dt,f_duty,mu_fit,eta8,delta):
+#     M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*t_Edd)+pow(M0/1e8,delta),1./delta)
 
-    ## eta mimicking Ueda14 empirical formula: eta = eta8*(M/M8)**delta
-    eta = eta8*pow(M0/1e8,delta)
-    ## M1: mass after growth following t^(1/delta) power
-    M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*t_Edd)+pow(M0/1e8,delta),1./delta)
+#     ## eta mimicking Ueda14 empirical formula: eta = eta8*(M/M8)**delta
+#     eta = eta8*pow(M0/1e8,delta)
+#     ## M1: mass after growth following t^(1/delta) power
+#     M1 = 1e8*pow(mu_fit*f_duty*delta*dt/(eta8*t_Edd)+pow(M0/1e8,delta),1./delta)
 
-    ## if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
-    eta = ma.masked_greater(eta, eta_max)
-    M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_max*t_Edd))
-    # i = ma.argmax(eta)
-    # M1[eta.mask] = M0[eta.mask]/M0[i]*M1[i]
-    eta[eta.mask] = eta_max
+#     ## if eta > maximum -> use Eddington accretion -- M(t) \propto M0*exp(...)
+#     eta = ma.masked_greater(eta, eta_max)
+#     M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_max*t_Edd))
+#     # i = ma.argmax(eta)
+#     # M1[eta.mask] = M0[eta.mask]/M0[i]*M1[i]
+#     eta[eta.mask] = eta_max
 
-    ## if eta < minimum -> use Eddington accretion -- M(t) \propto M0*exp(...)
-    eta = ma.masked_less(eta, eta_min)
-    i = ma.argmin(eta)
-    M1[eta.mask] = M0[eta.mask]/M0[i]*M1[i]
-    # the following exponential formula not continuous
-    # !!!!!!!! M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_min*t_Edd))    
+#     ## if eta < minimum -> use Eddington accretion -- M(t) \propto M0*exp(...)
+#     eta = ma.masked_less(eta, eta_min)
+#     i = ma.argmin(eta)
+#     M1[eta.mask] = M0[eta.mask]/M0[i]*M1[i]
+#     # the following exponential formula not continuous
+#     # !!!!!!!! M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_min*t_Edd))    
+#     return M1
+
+def M1M0(M0,dt,l):
+    M1 = M0*np.exp(l*dt/(.1*t_Edd))
+    # print('efolding:',l*dt/(.1*t_Edd))
     return M1
 
 eta_0 = 0.1

@@ -7,6 +7,19 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
+xs = M_BH[index]
+ys = np.log10(MF(xs))  # Willott 2010 30 points as data
+y_err = pow(np.log10(xs)-8.5,2)/3. + .2 # from 0.2 to 0.95
+print(len(xs),np.log10(xs[0]),np.log10(xs[-1]))
+print(np.log10(xs[::len(xs)//10]))
+plt.figure(figsize=(10,8),dpi=400)
+plt.errorbar(xs,ys,y_err,color='C1')
+plt.xlim(1e7,1e10); plt.xscale('log')
+plt.ylim(-10,-4)
+plt.grid(1)
+plt.savefig('../MF_W10.2.png')
+exit(0)
 
 # 验证了 integral(a,x,x0=x0)/integral_toinf(a,x0=x0) 就是P after normalization
 # 原则上可用于 a=任何值, 都是从x0 开始积分 

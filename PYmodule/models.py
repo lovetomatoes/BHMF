@@ -64,13 +64,12 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
         print('theta: ',theta, 'consv_ratio: ',consv_ratio)
         # assert 0
 
-    # 30 N_M in 1e7-1e10 range, plus 12 N_L
+    # 10 N_M in 1e7-1e10 range, plus 12 N_L
     index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
-    xs = M_BH[index]
-    ys = np.log10( MF(xs)  ) # Willott 2010 30 points as data
-    y_model = np.log10( (dn_MBH/dlog10M) [index] )
-    y_err = 1.
-    y_err = (np.log10(xs)-8.5)**2/3 + .5 # from 0.5 to 1.2 
+    xs = M_BH[index][::len(index[0])//10]
+    ys = np.log10( MF(xs)  ) # Willott 2010 as data
+    y_model = np.log10( (dn_MBH/dlog10M)[index][::len(index[0])//10] )
+    y_err = pow(np.log10(xs)-8.5,2)/3. + .2 # from 0.2 to 0.95
     Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
 
 # # --------- Luminosity Function ---------
