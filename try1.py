@@ -7,6 +7,88 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+# a = np.arange(10)
+# b = np.ones(len(a))
+# index = np.logical_and(1<a,a<3)
+# print(index, a[index])
+# print(np.nonzero(index), np.nonzero(index)[0])
+# print(np.argmax(index), a[index])
+
+Tz6 = ascii.read('../BHatz6.dat', guess=False, delimiter=' ')
+print(Tz6.info)
+index = np.logical_and(1e7<Tz6['M1'],Tz6['M1']<1e10)
+Mmin = np.min(Tz6['M1']); Mmax = np.max(Tz6['M1'])
+print('min max of M1 {0:.1e}, {1:.1e}'.format(Mmin,Mmax))
+lmin = np.min(Tz6['ls']); lmax = np.max(Tz6['ls'])
+print('min max of ls {0:.1e}, {1:.1e}'.format(lmin,lmax))
+
+
+index = np.logical_and(Mmin<=Tz6['M1'],Tz6['M1']<=Mmax)
+
+M1 = Tz6['M1'][index]; L1 = Tz6['L1'][index]; ls = Tz6['ls'][index]
+abin = np.linspace(7,10,num=20)
+hist, bin_edges = np.histogram(np.log10(M1),bins=abin,density=True)
+plt.figure(figsize=(10,8),dpi=400)
+plt.scatter( bin_edges[:-1],hist)
+# print(np.sum(hist)/len(ls))
+# print(np.sum((Pa_x[1:]-Pa_x[:-1])))
+# plt.plot(np.log10(x[:-1]),(Pa_x[1:]-Pa_x[:-1]),c='C1')
+plt.yscale('log')
+plt.ylim(bottom=.1/len(M1))
+# plt.savefig('../hist_M.png')
+
+abin = np.linspace(-2,1.2,num=20)
+hist, bin_edges = np.histogram(np.log10(ls),bins=abin,density=False)
+plt.figure(figsize=(10,8),dpi=400)
+plt.scatter( bin_edges[:-1],hist/len(ls))
+plt.yscale('log')
+plt.ylim(.1/len(ls), 1)
+plt.savefig('../hist_l.png')
+
+hist, bin_edges = np.histogram(np.log10(ls),bins=abin,density=False)
+plt.figure(figsize=(10,8),dpi=400)
+plt.scatter( bin_edges[:-1],hist/len(ls))
+# print(np.sum((Pa_x[1:]-Pa_x[:-1])))
+# plt.plot(np.log10(x[:-1]),(Pa_x[1:]-Pa_x[:-1]),c='C1')
+plt.yscale('log')
+plt.savefig('../Plambda_final.png')
+
+
+index = np.where(1e46<L1)
+M1_ = M1[index]; L1_ = L1[index]; ls_ = ls[index]
+hist, bin_edges = np.histogram(np.log10(ls_),bins=abin,density=False)
+plt.figure(figsize=(10,8),dpi=400)
+plt.scatter( bin_edges[:-1],hist/len(ls))
+plt.yscale('log')
+plt.ylim(.1/len(ls), 1)
+plt.savefig('../hist_l_Llim.png')
+
+hist = np.zeros(len(abin)-1)
+index = np.where(1e46<L1)
+M1_ = M1[index]; L1_ = L1[index]; ls_ = ls[index]
+hist, bin_edges = np.histogram(np.log10(ls_),bins=abin,density=False)
+plt.figure(figsize=(10,8),dpi=400)
+ytop = np.max(hist/len(ls))+1e-4
+plt.scatter( bin_edges[:-1],hist/len(ls))
+plt.ylim(bottom=0, top=ytop)
+# plt.plot( )
+# plt.ylim(.1/len(ls))
+# ascii.write(Table([bin_edges[:-1],hist/len(ls)]))
+
+ascii.write(Table([bin_edges[:-1],hist/len(ls)]),'../hist.dat',names=['log_l','hist'],formats={'log_l':'10.2f','hist':'10.2e'},overwrite=True)
+
+plt.savefig('../hist_l_Llim_lin.png')
+
+index = np.logical_and(1e7<Tz6['M1'],Tz6['M1']<1e10)
+M1_ = M1[index]; L1_ = L1[index]; ls_ = ls[index]
+hist, bin_edges = np.histogram(np.log10(ls_),bins=abin,density=False)
+plt.figure(figsize=(10,8),dpi=400)
+plt.scatter( bin_edges[:-1],hist/len(ls))
+plt.yscale('log')
+plt.ylim(.1/len(ls), 1)
+plt.savefig('../hist_l_M7to10.png')
+exit(0)
+
 index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
 xs = M_BH[index]
 ys = np.log10(MF(xs))  # Willott 2010 30 points as data
