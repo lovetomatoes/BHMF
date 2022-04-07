@@ -16,7 +16,7 @@ t_life *= Myr
 
 # table stores the cdf of lambda 
 I_toinf = integral_toinf(a)
-x = np.logspace(np.log10(x0),1.2,num=1000)
+x = np.logspace(np.log10(x0),1.2,num=200)
 Pa_x = integral(a,x)/I_toinf
 
 N_BH = int(1e7)
@@ -33,6 +33,7 @@ L1s = [L_M(M0,.01)*np.ones(N_BH)]
 N_act = [0]; ts = [0]; L_limit = 1e47
 
 t = t0
+L_low = 1e43
 for i in range(Nt):
     if t + t_life > t_end:
         dt = t_end - t
@@ -40,10 +41,14 @@ for i in range(Nt):
     else:
         t = t + t_life
         dt = t_life
-    aaa = np.random.uniform(size=N_BH)
-    xx,yy = np.meshgrid(aaa,Pa_x)
-    # argmax: the first yy>xx
-    ls = x[(yy>xx).argmax(axis=0)]
+    uniform_a = np.random.uniform(size=N_BH)
+    ls = np.zeros(N_BH)
+    for i in range(N_BH):
+        ls[i] = x[np.argmax(Pa_x>uniform_a[i])]
+    ls = ls*l_cut/2.
+    # xx,yy = np.meshgrid(uniform_a,Pa_x)
+    # # argmax: the first yy>xx
+    # ls = x[(yy>xx).argmax(axis=0)] / 2.
 
     M1 = M1M0(M0,dt,ls)
     M0 = M1
@@ -62,7 +67,7 @@ print('time after evol:',time.time()-t1)
 M1s = np.array(M1s)
 L1s = np.array(L1s)
 
-print('N_act at zs', N_act)
+# print('N_act at zs', N_act)
 ascii.write(Table([zs,ts,N_act]),'../Nact_evol.dat',names=['zs','ts','N_act'],formats={'zs':'10.2f','ts':'10.2e','N_act':'10.2e'},overwrite=True)
 
 # all BHs, all time: lambda distribution
@@ -70,9 +75,9 @@ abin = np.log10(x)
 hist, bin_edges = np.histogram(np.log10(ls),bins=abin,density=False)
 plt.figure(figsize=(10,8),dpi=400)
 plt.scatter( bin_edges[:-1],hist/len(ls))
-print(np.sum(hist)/len(ls))
-print(np.sum((Pa_x[1:]-Pa_x[:-1])))
-plt.plot(np.log10(x[:-1]),(Pa_x[1:]-Pa_x[:-1]),c='C1')
+# print(np.sum(hist)/len(ls))
+# print(np.sum((Pa_x[1:]-Pa_x[:-1])))
+plt.plot(np.log10(x[:-1])/2.,(Pa_x[1:]-Pa_x[:-1]),c='C1')
 plt.yscale('log')
 plt.savefig('../Plambda_all_MBHevol.png')
 
@@ -83,8 +88,8 @@ print('index',index, len(index))
 
 prex = '../BH'
 plt.figure(figsize=(10,10),dpi=400)
-print('M1s.transpose()[index]',M1s.transpose()[index].shape)
-print('M1s.transpose()[0]',M1s.transpose()[0].shape)
+# print('M1s.transpose()[index]',M1s.transpose()[index].shape)
+# print('M1s.transpose()[0]',M1s.transpose()[0].shape)
 for i in index:
     plt.plot(zs,M1s.transpose()[i])
 index = np.argmax(M0)
@@ -95,13 +100,13 @@ plt.ylim(1e2,1e10)
 plt.grid(True)
 plt.xlabel(r'$\mathrm{z}$',fontsize=fslabel)
 plt.ylabel(r'$\mathrm{M_{BH}}$',fontsize=fslabel)
-plt.legend(loc='best',fontsize=fslabel)
+# plt.legend(loc='best',fontsize=fslabel)
 plt.savefig(prex+'_M.png')
 
 # L_bol evol.
 index = np.logical_and(1e9<M0,M0<1e10)
 index = np.nonzero(index)[0]
-print(len(index))
+# print(len(index))
 
 plt.figure(figsize=(10,10),dpi=400)
 for i in index:
@@ -114,5 +119,5 @@ plt.ylim(1e41,1e48)
 plt.grid(True)
 plt.xlabel(r'$\mathrm{z}$',fontsize=fslabel)
 plt.ylabel(r'$\mathrm{L_{bol}}$',fontsize=fslabel)
-plt.legend(loc='best',fontsize=fslabel)
+# plt.legend(loc='best',fontsize=fslabel)
 plt.savefig(prex+'_L.png')

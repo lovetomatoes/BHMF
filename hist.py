@@ -1,14 +1,14 @@
 from PYmodule import *
 # analyse BH ERDF from sampling in MBH_evol
 
-# print(Lbol_M1450(-26)) # L_limit = 1e47
+# M1450=-26, Lbol=1e47; M1450=-22, Lbol=2e45
 L_limit = 1e46
 
 lbin = np.linspace(-2,1.2,num=20)
 hist_tot = np.zeros(len(lbin)-1)
 Nfiles = int(10)
-for ii in range(Nfiles):
-    Tz6 = ascii.read('../BHatz6%d.dat'%ii, guess=False, delimiter=' ')
+for ii in range(1):
+    Tz6 = ascii.read('../BHatz6.dat', guess=False, delimiter=' ')
     # print(Tz6.info)
     Mmin = np.min(Tz6['M1']); Mmax = np.max(Tz6['M1'])
     # print('min max of M1 {0:.1e}, {1:.1e}'.format(Mmin,Mmax))
