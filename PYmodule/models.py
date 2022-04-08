@@ -12,18 +12,11 @@ f_bsm = 1.
 n_base = n_base[0]
 
 
-def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=a):
-    # t_life, f_0, d_fit, l_cut, a = theta
-    if len(theta) == 1:
-        t_life = theta
-    elif len(theta) == 2:
-        t_life, d_fit = theta
-    elif len(theta) == 3:
-        # t_life, l_cut, a = theta
-        # t_life, d_fit, logM0 = theta
+def model(theta, z = int(6), l_cut= l_cut, a=a):
+    if len(theta) == 3:
         t_life, l_cut, a = theta
     elif len(theta) == 4:
-        t_life, d_fit, l_cut, a = theta
+        t_life, f_seed, l_cut, a = theta
     else:
         assert 0
     t_life = t_life * Myr # wli: not *=!!!!!! theta changed by this
@@ -44,7 +37,6 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
         # new seeds (using 2d meshgrids)
         if len(T_seed):
             z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
-            # z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, f_0, l_cut, d_fit)
             z_mesh[z_mesh<x0] = x0
             Ps = integral(a,z_mesh)/I_toinf
             dP_seed = Ps[1:,:] - Ps[:-1,:]
@@ -53,18 +45,17 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
             dP_seed = 0.
         # prev BHMF
         z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
-        # z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
         z_mesh[z_mesh<x0] = x0
         Ps = integral(a,z_mesh)/I_toinf
         dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
         Nt -= 1
 
-    dn_MBH = dP_MBH*n_base*f_bsm
+    dn_MBH = dP_MBH*n_base*f_bsm*f_seed
 
-    consv_ratio = np.nansum(dn_MBH)/n_base
+    consv_ratio = np.nansum(dn_MBH)/(n_base*f_seed)
     if abs(consv_ratio-1)>.5:
-        print('theta: ',theta, 'consv_ratio: ',consv_ratio)
+        print('theta: ',theta,'x0',x0, 'consv_ratio: ',consv_ratio)
         # assert 0
 
     # 10 N_M in 1e7-1e10 range, plus 12 N_L

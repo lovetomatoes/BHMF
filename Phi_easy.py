@@ -1,6 +1,5 @@
 from PYmodule import *
 from PYmodule.l_intg import *
-# Phiz6 paras: f_0, t_life, lbd ~Schechter(l_cut,a)
 
 t1 = time.time()
 
@@ -38,6 +37,8 @@ t_life, d_fit, logM0, l_cut, a, x0 = 55,   0.01,  8,   1.,  .05, 0.01
 
 # # initial guess 
 t_life, l_cut, a, x0 = 80, 0.5, 0., 0.01
+# t_life, l_cut, a, x0 = 23, 1.1688, -0.16688, 0.01
+t_life, f_seed, l_cut, a, x0 = 80, .01, 0.5, 0., 0.001
 
 I_toinf =  integral_toinf(a)
 
@@ -85,9 +86,9 @@ while Nt>=0:
 
     Nt -= 1
 
-dn_MBH = dP_MBH*n_base*f_bsm
+dn_MBH = dP_MBH*n_base*f_bsm*f_seed
 
-consv_ratio = np.nansum(dn_MBH)/n_base
+consv_ratio = np.nansum(dn_MBH)/(n_base*f_seed)
 print('in Phi_easy: MF conserved fraction=%.10f'%consv_ratio)
 # if consv_ratio<.9:
 #     print('conserved fraction=%.10f'%consv_ratio)
@@ -96,12 +97,7 @@ T = Table(
     [M_BH, dn_MBH/dlog10M, MF(M_BH)],
     names=('M_BH','Phi','W10_MF')
 )
-MFname = z6datapre+'MF_SC'+'t%.1e'%(t_life/Myr)+ \
-        'f%.1f'%f_0+ \
-        'd%.1f'%d_fit+ \
-        'l%.1e'%l_cut+ \
-        'a%.3f'%a+ \
-        'alpha%.1f'%alpha
+
 MFname = z6datapre+'MFIMF'
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
@@ -142,12 +138,7 @@ T = Table(
     [bin_cen,Phi_obs,Phi_DO,Phi,Chi2*np.ones(N_lf)],
     names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
 )
-LFname = z6datapre+'LF_SC'+'t%.1e'%(t_life/Myr)+ \
-        'f%.1f'%f_0+ \
-        'd%.1f'%d_fit+ \
-        'l%.1e'%l_cut+ \
-        'a%.3f'%a+ \
-        'alpha%.1f'%alpha
+
 LFname = z6datapre+'LFIMF'
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},

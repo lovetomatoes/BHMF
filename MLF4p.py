@@ -13,11 +13,11 @@ t1 = time.time()
 
 # initial guess
 t_life = 90.
-d_fit = .1
+f_seed = 1.
 l_cut = l_mean # defined in PYmodule/__init__.py, l_mean and a_mean
 a = a_mean
 
-initial = np.array([t_life,d_fit,l_cut,a])
+initial = np.array([t_life,f_seed,l_cut,a])
 
 ndim = len(initial)
 nwalkers = 100
@@ -59,7 +59,7 @@ samples = sampler.get_chain()
 probs = sampler.get_log_prob()
 # print('probs',probs)
 
-labels = ['t_life', 'd_fit', 'l_cut', 'a', 'prob']
+labels = ['t_life', 'f_seed', 'l_cut', 'a', 'prob']
 for i in range(ndim):
     ax = axes[i]
     ax.plot(samples[:, :, i], "k", alpha=0.3)
@@ -82,7 +82,7 @@ samples = sampler.flatchain
 probs = sampler.flatlnprobability
 print('len of samples:', len(samples))
 theta_max = samples[np.argmax(probs)]
-print('initial paras: t_life={0:.1e}, d_fit={1:.1e}, logM0={2:.1f}, l_cut={3:.1f}, a={4:.1f}, x0{5:.0e}, prob{6:.1e}'.format(t_life,d_fit,logM0,l_cut,a,x0,probs[0]))
+print('initial paras: t_life={0:.1e}, f_seed={1:.1e}, l_cut={2:.1f}, a={3:.1f}, x0{4:.0e}, prob{5:.1e}'.format(t_life,f_seed,l_cut,a,x0,probs[0]))
 print('Gaussian scatter sigma_l,sigma_a:',sigma_l,sigma_a)
 print('best paras:',labels,theta_max,np.max(probs))
 

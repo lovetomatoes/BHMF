@@ -27,7 +27,7 @@ z6datapre = '../z6/data/'
 datapre = '../data/'
 figpre = '../figs/'
 
-f_0 = 1. # no use
+f_seed = 1.
 d_fit = 0.
 logM0 = 8.
 l_cut = 1. # l_cut=2., l_cut' = l_cut/2; M=M_cut=1e7 grow as Eddington
