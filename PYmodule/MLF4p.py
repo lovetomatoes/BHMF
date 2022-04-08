@@ -29,6 +29,7 @@ def lnlike(theta):
 
         # new seeds (using 2d meshgrids)
         if len(T_seed):
+            z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
             z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
             z_mesh[z_mesh<x0] = x0
             Ps = integral(a,z_mesh)/I_toinf
@@ -37,6 +38,7 @@ def lnlike(theta):
         else:
             dP_seed = 0.
         # prev BHMF
+        z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
         z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
         z_mesh[z_mesh<x0] = x0
         Ps = integral(a,z_mesh)/I_toinf

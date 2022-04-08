@@ -37,7 +37,7 @@ t_life, d_fit, logM0, l_cut, a, x0 = 55,   0.01,  8,   1.,  .05, 0.01
 # t_life, d_fit, logM0, l_cut, a, x0 = 74,   0.04,  8,   .9,  .1, 0.001
 
 # # initial guess 
-# t_life, d_fit, logM0, l_cut, a, x0 = 90,   0.1,  8,  0.75, 0., 0.01
+t_life, l_cut, a, x0 = 80, 0.5, 0., 0.01
 
 I_toinf =  integral_toinf(a)
 
@@ -68,7 +68,8 @@ while Nt>=0:
     dP_MBH_prev = dP_MBH.copy()
     # new seeds (using 2d meshgrids)
     if len(T_seed):
-        z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
+        z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
+        # z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
         z_mesh[z_mesh<x0] = x0
         Ps = integral(a,z_mesh)/I_toinf
         dP_seed = Ps[1:,:] - Ps[:-1,:]
@@ -76,7 +77,8 @@ while Nt>=0:
     else:
         dP_seed = 0.
     # prev BHMF
-    z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
+    z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
+    # z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
     z_mesh[z_mesh<x0] = x0
     Ps = integral(a,z_mesh)/I_toinf
     dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed

@@ -36,7 +36,7 @@ a = -.7
 x0 = 0.01
 
 l_mean, a_mean = 0.75, 0.
-sigma_l, sigma_a = .45, .1
+sigma_l, sigma_a = .45, .3
 
 typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
 lfnames = {'4':'Akiyama_18','5':'Niida_20','6':'Matsuoka_18'}
@@ -171,6 +171,12 @@ def M0M1(M1, l, dt, delta, M_cut = M_cut):
     return M0
 
 # ---------------- kernel*: kernel of calculating P(lbd) integral ----------------
+def kernelS_MBHmesh(M1, M0, dt, l_cut):
+    # eta = 0.1; (1-eta)/eta
+    xx,yy = np.meshgrid(M0, M1)
+    lbd = np.log(yy/xx) / ( 9.*dt/t_Edd )
+    return lbd/l_cut
+
 
 # exponential growth
 def kernel_MBH1(Mgrow_ratio, dt, f_duty, mu, sigma_dex):
@@ -232,9 +238,6 @@ def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
         lbd = 2.* np.log(yy/xx)  / ( f_duty*dt/(0.1*t_Edd) )
     return lbd/l_cut
 
-def kernelS_MBH_Mk(M1, M0, dt, f_duty, l_cut, k_fit):
-    lbd = ((pow(M0/1e8,-k_fit)-pow(M1/1e8,-k_fit))/k_fit) / ( f_duty*dt/(0.1*t_Edd) )
-    return lbd/l_cut
 
 def kernelS_M1450(M1450, MBH, l_cut):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
@@ -244,14 +247,6 @@ def kernelS_M1450_mesh(M1450, MBH, l_cut):
     xx,yy = np.meshgrid(MBH,M1450)
     zz = Lbol_M1450(yy)/(1.25e38*xx)
     return zz/l_cut
-
-def kernelS_M1450_M(M1450, MBH, l_cut, d_fit):
-    lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
-    return lbd*(1+pow(MBH/1e8,d_fit))/l_cut
-
-def kernelS_M1450_Mk(M1450, MBH, l_cut, k_fit):
-    lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
-    return lbd*pow(MBH/1e8,-k_fit)/l_cut
 
 def kernel_M1450(M1450, MBH, mu, sigma_dex):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)

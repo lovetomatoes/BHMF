@@ -20,7 +20,8 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
         t_life, d_fit = theta
     elif len(theta) == 3:
         # t_life, l_cut, a = theta
-        t_life, d_fit, logM0 = theta
+        # t_life, d_fit, logM0 = theta
+        t_life, l_cut, a = theta
     elif len(theta) == 4:
         t_life, d_fit, l_cut, a = theta
     else:
@@ -42,7 +43,8 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
 
         # new seeds (using 2d meshgrids)
         if len(T_seed):
-            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+            z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
+            # z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, f_0, l_cut, d_fit)
             z_mesh[z_mesh<x0] = x0
             Ps = integral(a,z_mesh)/I_toinf
             dP_seed = Ps[1:,:] - Ps[:-1,:]
@@ -50,7 +52,8 @@ def model(theta, z = int(6), f_0=f_0, d_fit=d_fit, logM0=logM0, l_cut= l_cut, a=
         else:
             dP_seed = 0.
         # prev BHMF
-        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
+        # z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
         z_mesh[z_mesh<x0] = x0
         Ps = integral(a,z_mesh)/I_toinf
         dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
