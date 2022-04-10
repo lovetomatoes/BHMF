@@ -13,9 +13,9 @@ t1 = time.time()
 
 # initial guess
 t_life = 90.
-f_seed = 1.
 l_cut = l_mean # defined in PYmodule/__init__.py, l_mean and a_mean
 a = a_mean
+t_life, f_seed, l_cut, a = 50, .01, 1., 0. # x0 = 0.01
 
 initial = np.array([t_life,f_seed,l_cut,a])
 
@@ -24,7 +24,7 @@ nwalkers = 100
 nsteps = 5000
 rball = 1e-4
 
-prex='../4p/4prange2_Gs.1_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}'.format(l_cut,a,sigma_l,sigma_a)
+prex='../4p/4prange3_Gs.3_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_x0_{4:.1e}'.format(l_cut,a,sigma_l,sigma_a,x0)
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
@@ -132,7 +132,7 @@ for i in thetas:
     ax.plot(xs, mod, c='grey',label='_',alpha=.2)
 ax.plot(xs, y_best, c='C1', label='_')
 ax.text(-26,10,
-r'$t_{life}=$'+'{0:.1e}Myr\n'.format(theta_max[0])+r'$\delta=$'+'{0:.2f}\n'.format(theta_max[1])\
+r'$t_{life}=$'+'{0:.1e}Myr\n'.format(theta_max[0])+r'$f_{seed}=$'+'{0:.2f}\n'.format(theta_max[1])\
 +r'$\lambda_{cut}=$'+'{0:.1e}\n'.format(theta_max[2])+r'$\alpha=$'+'{0:.2f}\n'.format(theta_max[3])
 )
 ax.set_xlim(-22,-29)

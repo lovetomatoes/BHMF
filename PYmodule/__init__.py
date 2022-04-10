@@ -27,13 +27,13 @@ z6datapre = '../z6/data/'
 datapre = '../data/'
 figpre = '../figs/'
 
-f_seed = 1.
 d_fit = 0.
 logM0 = 8.
 l_cut = 1. # l_cut=2., l_cut' = l_cut/2; M=M_cut=1e7 grow as Eddington
 a = -.7
 
 x0 = 0.01
+f_seed = .01
 
 l_mean, a_mean = 0.75, 0.
 sigma_l, sigma_a = .45, .3

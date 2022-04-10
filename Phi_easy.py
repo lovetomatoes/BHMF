@@ -35,14 +35,33 @@ t_life, d_fit, logM0, l_cut, a, x0 = 62,   0.01,  8,   .9,  .1, 0.01
 t_life, d_fit, logM0, l_cut, a, x0 = 55,   0.01,  8,   1.,  .05, 0.01
 # t_life, d_fit, logM0, l_cut, a, x0 = 74,   0.04,  8,   .9,  .1, 0.001
 
-# # initial guess 
-t_life, l_cut, a, x0 = 80, 0.5, 0., 0.01
+# # 3p initial guess 
+t_life, l_cut, a, x0 = 50, 0.75, 0., 0.01
+t_life, d_fit, l_cut, a, x0 = 50, 0.01, 0.75, 0., 0.01
+t_life, d_fit, l_cut, a, x0 = 59, 0.01, 1, 0.03, 1e-02
+# t_life, d_fit, l_cut, a, x0 = 59, 0.0,  .5, 0.03, 1e-02
+
+# if d_fit==0:
+#     l_cut = l_cut /2.
+
 # t_life, l_cut, a, x0 = 23, 1.1688, -0.16688, 0.01
-t_life, f_seed, l_cut, a, x0 = 80, .01, 0.5, 0., 0.001
+# t_life, f_seed, l_cut, a, x0 = 80, .01, 0.5, 0., 0.001
+# t_life, l_cut, a, x0 = 30, 1.5, 0., 0.001
+
+# # 4p ini
+# t_life, f_seed, l_cut, a, x0 = 50, .01, 1., 0., 0.01
+# t_life, f_seed, l_cut, a, x0 = 50, .01, 1., 0., 0.001
+# t_life, d_fit, logM0, l_cut, a, x0 = 74,   0.04,  8,   .9,  .1, 0.001
+# t_life, d_fit, logM0, l_cut, a, x0 = 55,   0.01,  8,   1.,  .05, 0.01
+# l_cut = l_cut/2.
+
+t_life, l_cut, a = 20, 1., 0.2 # x0=0.01, f_seed = 
+# t_life, l_cut, a = 45, 1.34e-2, 2.89e-1 # x0=0.01, f_seed = 
+# t_life, l_cut, a = 50, 1.5, 0. # x0=0.001, f_seed = 1
 
 I_toinf =  integral_toinf(a)
 
-print('t_life, d_fit, logM0, l_cut, a: ', t_life,', ',d_fit,', ',logM0,', ', l_cut,', ',a)
+print('t_life, f_seed, x0, l_cut, a: ', t_life,', ',f_seed,', ',x0,', ', l_cut,', ',a)
 
 t_life *= Myr
 T = Ts[0][0]

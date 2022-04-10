@@ -12,7 +12,7 @@ f_bsm = 1.
 n_base = n_base[0]
 
 
-def model(theta, z = int(6), l_cut= l_cut, a=a):
+def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
     if len(theta) == 3:
         t_life, l_cut, a = theta
     elif len(theta) == 4:

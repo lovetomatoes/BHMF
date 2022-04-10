@@ -45,9 +45,9 @@ def lnlike(theta):
         dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
         Nt -= 1
-    dn_MBH = dP_MBH*n_base*f_bsm
+    dn_MBH = dP_MBH*n_base*f_bsm*f_seed
 
-    consv_ratio = np.nansum(dn_MBH)/n_base
+    consv_ratio = np.nansum(dn_MBH)/(n_base*f_seed)
     if abs(consv_ratio-1)>.5:
         print('theta: ',theta,'x0',x0)
         print('consv_ratio: ',consv_ratio)
