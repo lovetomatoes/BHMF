@@ -13,55 +13,15 @@ alpha = 1.
 # LF bins same w/ Matsu18
 N_lf = len(bin_cen)
 
-t_life, d_fit, logM0, l_cut, a = 80 ,  0.3 ,  8 ,  .5 ,  .5
-t_life, d_fit, logM0, l_cut, a = 50 ,  0.3 ,  8 ,  .5 ,  .3
-t_life, d_fit, logM0, l_cut, a = 10 ,  1.,  8 ,  1,  .5; #almost impossible
-t_life, d_fit, logM0, l_cut, a = 150 ,  0.,  8 ,  .5,  .3
-t_life, d_fit, logM0, l_cut, a = 120 ,  0.3,  8 ,  1.,  -.7
-
-t_life, d_fit, logM0, l_cut, a, x0 = 150 ,  0.163,  8 ,  1.,  -.7, 0.1
-t_life, d_fit, logM0, l_cut, a, x0 = 66.43062875,  0.06772173,  8 ,  1.,  -.7, 0.1
-t_life, d_fit, logM0, l_cut, a, x0 = 77,  0.01,  8 ,  1.,  -.7, 0.1
-# t_life, d_fit = 1.80438151e+02, 1.00071295e-02
-
-t_life, d_fit, logM0, l_cut, a, x0 = 50 ,  0.2,  8 ,  1.,  -.1,  0.01
-t_life, d_fit, logM0, l_cut, a, x0 = 100 ,  0.2,  8 ,  1.,  -.5,  0.01
-t_life, d_fit, logM0, l_cut, a, x0 = 84 ,  0.27,  8 ,  .9,  .1,  0.01
-
-# positive a, cut at x0
-t_life, d_fit, logM0, l_cut, a, x0 = 80,   0.25,  8,   .9,  .1, 0.01
-# best fit (t_life, d_fit)
-t_life, d_fit, logM0, l_cut, a, x0 = 62,   0.01,  8,   .9,  .1, 0.01
-t_life, d_fit, logM0, l_cut, a, x0 = 55,   0.01,  8,   1.,  .05, 0.01
-# t_life, d_fit, logM0, l_cut, a, x0 = 74,   0.04,  8,   .9,  .1, 0.001
-
-# # 3p initial guess 
-t_life, l_cut, a, x0 = 50, 0.75, 0., 0.01
-t_life, d_fit, l_cut, a, x0 = 50, 0.01, 0.75, 0., 0.01
-t_life, d_fit, l_cut, a, x0 = 59, 0.01, 1, 0.03, 1e-02
-# t_life, d_fit, l_cut, a, x0 = 59, 0.0,  .5, 0.03, 1e-02
-
-# if d_fit==0:
-#     l_cut = l_cut /2.
-
-# t_life, l_cut, a, x0 = 23, 1.1688, -0.16688, 0.01
-# t_life, f_seed, l_cut, a, x0 = 80, .01, 0.5, 0., 0.001
-# t_life, l_cut, a, x0 = 30, 1.5, 0., 0.001
-
-# # 4p ini
-# t_life, f_seed, l_cut, a, x0 = 50, .01, 1., 0., 0.01
-# t_life, f_seed, l_cut, a, x0 = 50, .01, 1., 0., 0.001
-# t_life, d_fit, logM0, l_cut, a, x0 = 74,   0.04,  8,   .9,  .1, 0.001
-# t_life, d_fit, logM0, l_cut, a, x0 = 55,   0.01,  8,   1.,  .05, 0.01
-# l_cut = l_cut/2.
-
-t_life, l_cut, a = 20, 1., 0.2 # x0=0.01, f_seed = 
-# t_life, l_cut, a = 45, 1.34e-2, 2.89e-1 # x0=0.01, f_seed = 
-# t_life, l_cut, a = 50, 1.5, 0. # x0=0.001, f_seed = 1
+# x0=0.01, logM0 = 8.
+t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
+t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
+t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
 
 I_toinf =  integral_toinf(a)
 
-print('t_life, f_seed, x0, l_cut, a: ', t_life,', ',f_seed,', ',x0,', ', l_cut,', ',a)
+print('t_life, d_fit, l_cut, a,  f_seed, x0, logM0 = ', 
+t_life,', ',d_fit,', ', l_cut,', ',a,', ', f_seed,', ', x0,', ', logM0,', ')
 
 t_life *= Myr
 T = Ts[0][0]
@@ -88,8 +48,8 @@ while Nt>=0:
     dP_MBH_prev = dP_MBH.copy()
     # new seeds (using 2d meshgrids)
     if len(T_seed):
-        z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
-        # z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
+        # z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
+        z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
         z_mesh[z_mesh<x0] = x0
         Ps = integral(a,z_mesh)/I_toinf
         dP_seed = Ps[1:,:] - Ps[:-1,:]
@@ -97,8 +57,8 @@ while Nt>=0:
     else:
         dP_seed = 0.
     # prev BHMF
-    z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
-    # z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
+    # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
+    z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
     z_mesh[z_mesh<x0] = x0
     Ps = integral(a,z_mesh)/I_toinf
     dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed

@@ -12,7 +12,7 @@ n_base = n_base[0]
 
 
 def lnlike(theta):
-    t_life, f_seed, l_cut, a = theta
+    t_life, d_fit, l_cut, a = theta
     t_life *= Myr
     I_toinf = integral_toinf(a)
 ## --------- Mass Function ---------
@@ -29,8 +29,8 @@ def lnlike(theta):
 
         # new seeds (using 2d meshgrids)
         if len(T_seed):
-            z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
-            # z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+            # z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
+            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
             z_mesh[z_mesh<x0] = x0
             Ps = integral(a,z_mesh)/I_toinf
             dP_seed = Ps[1:,:] - Ps[:-1,:]
@@ -38,8 +38,8 @@ def lnlike(theta):
         else:
             dP_seed = 0.
         # prev BHMF
-        z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
-        # z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+        # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
+        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
         z_mesh[z_mesh<x0] = x0
         Ps = integral(a,z_mesh)/I_toinf
         dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
@@ -90,10 +90,11 @@ def lnlike(theta):
 # 4prange1: 1e1<t_life<200. and 0.1<d_fit<0.5:
 # 4prange2: 1e1<t_life<200. and 0.01<d_fit<0.5 and l_cut>0:
 # 4prange3: 1e1<t_life<200. and 0.<f_seed<1. and l_cut>0:
+# 4prange4: 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0:
 
 def lnprior(theta):
-    t_life, f_seed, l_cut, a = theta
-    if 1e1<t_life<200. and 0.<f_seed<1. and l_cut>0:
+    t_life, d_fit, l_cut, a = theta
+    if 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0:
         return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2
     else:
         return -np.inf

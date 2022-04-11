@@ -33,7 +33,7 @@ l_cut = 1. # l_cut=2., l_cut' = l_cut/2; M=M_cut=1e7 grow as Eddington
 a = -.7
 
 x0 = 0.01
-f_seed = .01
+f_seed = 1
 
 l_mean, a_mean = 0.75, 0.
 sigma_l, sigma_a = .45, .3
@@ -233,9 +233,9 @@ def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
     M_cut = pow(10., logM_0)
     xx,yy = np.meshgrid(M0, M1)
     if d_fit:
-        lbd = (np.log(yy/xx) + (pow(yy/M_cut,d_fit)-pow(xx/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*t_Edd) )
+        lbd = .5*(np.log(yy/xx) + (pow(yy/M_cut,d_fit)-pow(xx/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*t_Edd) )
     else:
-        lbd = 2.* np.log(yy/xx)  / ( f_duty*dt/(0.1*t_Edd) )
+        lbd = np.log(yy/xx)  / ( f_duty*dt/(0.1*t_Edd) )
     return lbd/l_cut
 
 

@@ -1,11 +1,21 @@
 from time import sleep
 from PYmodule import *
 from PYmodule.l_intg import *
-from PYmodule.MLF2p import *
+from PYmodule.MLF4p import *
 from PYmodule.models import *
 from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
+
+# test MLF4p lnlike & models same w/ Phi_easy.py
+t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
+x = (t_life, d_fit, l_cut, a)
+print(lnlike(x))
+print('x0:',x0, 'f_seed:',f_seed)
+
+print(-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+exit(0)
+
 
 # a = np.arange(10)
 # b = np.ones(len(a))
