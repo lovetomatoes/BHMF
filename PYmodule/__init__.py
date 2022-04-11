@@ -140,35 +140,35 @@ eta_max = .5; eta_min = 0.057 # 0.057
 #     # !!!!!!!! M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_min*t_Edd))    
 #     return M1
 
-def M1M0(M0,dt,l):
+def M1M0_e(M0,dt,l):
     M1 = M0*np.exp(l*dt/(.1*t_Edd))
     # print('efolding:',l*dt/(.1*t_Edd))
     return M1
 
 eta_0 = 0.1
 M_cut = 10**logM0
-def M0M1(M1, l, dt, delta, M_cut = M_cut):
-    # dM_tilt/dt_tilt = l M_tilt/(eta_0*(1+M_tilt**delta)); M_tilt=M/M_cut, t_tilt=t/t_Edd
-    M1 = M1/M_cut
-    M0 = M1
+def M1M0_d(M0, l, dt, delta, M_cut = M_cut):
+    # dM_tilt/dt_tilt = l M_tilt/(eta_0*.5*(1+M_tilt**delta)); M_tilt=M/M_cut, t_tilt=t/t_Edd
+    M0 = M0/M_cut
+    M1 = M0
     # print('M0={0:e}\n'.format(M0))
     
     for i in range(10):
-        fM0 = l*dt/(eta_0*t_Edd) + np.log(M0/M1) + (pow(M0, delta)-pow(M1, delta))/delta
-        dfdM0 = 1/M0 + pow(M0, delta-1)
-        M0 = M0 - fM0/dfdM0
+        fM1 = np.log(M1/M0) + (pow(M1, delta)-pow(M0, delta))/delta - l*dt/(.5*eta_0*t_Edd)
+        dfdM1 = 1./M1 + pow(M1, delta-1)
+        dM1 = - fM1/dfdM1
+        M1 = M1 + dM1
         # print('i={0:d}, fM0={1:e}, dfdM={2:e}, M0={3:e}\n'.format(i,fM0,dfdM0,M0))
 
-        if abs(fM0/dfdM0) < .01*M0:
+        if abs(dM1) < .01*M1:
             break
         if i>5:
             print('i: %d too much interation'%i)
     if i==9:
         print('not converge...')
     # print('final match?',np.log(M1/M0) + (pow(M1, delta)-pow(M0, delta))/delta - l*dt/eta_0/t_Edd )
-    M0 *= M_cut
-
-    return M0
+    M1 *= M_cut
+    return M1
 
 # ---------------- kernel*: kernel of calculating P(lbd) integral ----------------
 def kernelS_MBHmesh(M1, M0, dt, l_cut):
