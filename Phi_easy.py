@@ -13,10 +13,13 @@ alpha = 1.
 # LF bins same w/ Matsu18
 N_lf = len(bin_cen)
 
-# x0=0.01, logM0 = 8.
+# initial: x0=0.01, logM0 = 8.
 t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
 t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
 t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
+
+# best:
+t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
 
 I_toinf =  integral_toinf(a)
 

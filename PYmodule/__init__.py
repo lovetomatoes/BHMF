@@ -160,7 +160,7 @@ def M1M0_d(M0, l, dt, delta, M_cut = M_cut):
         M1 = M1 + dM1
         # print('i={0:d}, fM0={1:e}, dfdM={2:e}, M0={3:e}\n'.format(i,fM0,dfdM0,M0))
 
-        if abs(dM1) < .01*M1:
+        if np.all(abs(dM1) < .01*M1):
             break
         if i>5:
             print('i: %d too much interation'%i)
@@ -503,6 +503,7 @@ for iM in range(N_Mh):
 abin_mf =  np.logspace(2,12,num=100) # default endpoint=True
 M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
 bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
+wid_mf = bin_right - bin_left
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 N_mf = len(abin_mf)-1
 

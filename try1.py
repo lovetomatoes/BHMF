@@ -7,6 +7,35 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+# how many heavy seeds in 1e11 progenitors?
+T = Ts[0][0]
+print(np.max(T['Mstar0']), T['z_col'][np.argmax(T['Mstar0'])])
+print(len(np.where(T['Mstar0']>1e5)[0]))
+exit(0)
+
+# test when d-->0, kernel(d) converge to exp growth kernel
+dt = 30 *Myr
+M0 = 1e5; l = 1.
+# print('exp:%.5e'%M1M0(M0,dt,l))
+# print('exp:%.5e'%M0M1(M0,l,-dt,0.00001))
+M1 = M0*np.e; dt = .1*t_Edd
+a = kernelS_MBH_M_mesh(M1, M0, dt, 1., l_cut, 0.)
+print('M0:%.1e'%M0, 'M1:%.1e'%M1)
+
+for dd in np.logspace(-4,-2,num=10):
+    b = kernelS_MBH_M_mesh(M1, M0, dt, 1., l_cut, dd)
+    # print(a,b)
+    print('M1_e predict:%.5e'%M1M0_e(M0,dt,l), 'M1_d predict:%.5e'%M1M0_d(M0,l,dt,dd))
+
+print('-------------------------------')
+for dd in np.logspace(-2,-1,num=10):
+    b = kernelS_MBH_M_mesh(M1, M0, dt, 1., l_cut, dd)
+    # print(a,b)
+    print('M1_e predict:%.5e'%M1M0_e(M0,dt,l), 'M1_d predict:%.5e'%M1M0_d(M0,l,dt,dd))
+
+
+exit(0)
+
 # test MLF4p lnlike & models same w/ Phi_easy.py
 t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
 x = (t_life, d_fit, l_cut, a)
