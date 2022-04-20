@@ -490,8 +490,6 @@ for iM in range(N_Mh):
         T=ascii.read(Mhpres[iM]+'Jcol_'+str(i_bsm)+'.txt', guess=False,delimiter=' ') #  None has np.where(T['z_col']==-1)
         T['Mdot'] = (k_B*T['Tg_loi']*T['f_loi']/(mu*m_H))**1.5/G/(Ms/yr)
         T['Mstar0'] = np.zeros(len(T))
-        T['Lbol_z'] = np.zeros(len(T))
-        T['M1450_z'] = np.zeros(len(T))
         for i in range(len(T)):
             T['Mstar0'][i] = Mdot2M(T['Mdot'][i]*eta)
         T['t_col'] = t_from_z(T['z_col'])
