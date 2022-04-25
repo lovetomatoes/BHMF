@@ -15,10 +15,14 @@ f_seed = 0.01
 t_life, d_fit, l_cut, a = 1.68814272e+01, 7.31406767e-03, 1.02157385e+00, 1.46099557e-01 # f_seed = .01
 t_life *= Myr
 
-# table stores the cdf of lambda 
+# table stores the cdf of lambda
 I_toinf = integral_toinf(a)
 x = np.logspace(np.log10(lambda_0),1.2,num=200)
 Pa_x = integral(a,x)/I_toinf
+# x0 = lambda_0/l_cut
+# I_toinf = integral_toinf(a,x0)
+# x = np.logspace(np.log10(x0),1.2,num=200)
+# Pa_x = integral(a,x,x0)/I_toinf
 
 N_BH = int(1e5)
 # N_BH = int(1e1)
@@ -95,6 +99,11 @@ lbin = np.linspace(-2,1.2,num=20)
 hist, bin_edges = np.histogram(np.log10(ls),bins=lbin,density=False)
 x = np.logspace(np.log10(lambda_0),1.2,num=len(lbin)) # for Pana
 Pana = integral(a,x)/I_toinf
+# xbin = np.linspace(np.log10(x0),1.2,num=20)
+# lbin = xbin * l_cut
+# hist, bin_edges = np.histogram(np.log10(ls),bins=lbin,density=False)
+# x = np.logspace(np.log10(x0),1.2,num=len(lbin)) # for Pana
+# Pana = integral(a,x,x0)/I_toinf
 
 index = np.where(L_limit<L1)
 M1_ = M1[index]; L1_ = L1[index]; ls_ = ls[index]

@@ -14,7 +14,8 @@ n_base = n_base[0]
 def lnlike(theta):
     t_life, d_fit, l_cut, a = theta
     t_life *= Myr
-    I_toinf = integral_toinf(a)
+    x0 = lambda_0/l_cut
+    I_toinf = integral_toinf(a,x0)
 ## --------- Mass Function ---------
     tz = t_from_z(z)
     dn_MBH = np.zeros(N_mf)
@@ -32,7 +33,7 @@ def lnlike(theta):
             # z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
             z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
             z_mesh[z_mesh<x0] = x0
-            Ps = integral(a,z_mesh)/I_toinf
+            Ps = integral(a,z_mesh,x0)/I_toinf
             dP_seed = Ps[1:,:] - Ps[:-1,:]
             dP_seed = np.nansum(dP_seed, axis=1)/len(T)
         else:
@@ -41,7 +42,7 @@ def lnlike(theta):
         # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
         z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
         z_mesh[z_mesh<x0] = x0
-        Ps = integral(a,z_mesh)/I_toinf
+        Ps = integral(a,z_mesh,x0)/I_toinf
         dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
         Nt -= 1
@@ -68,7 +69,7 @@ def lnlike(theta):
 # # --------- Luminosity Function ---------
     z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
     z_mesh[z_mesh<x0] = x0
-    Ps = integral(a,z_mesh)/I_toinf
+    Ps = integral(a,z_mesh,x0)/I_toinf
     dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
     Phi = dPhi_mesh/bin_wid
 
@@ -89,12 +90,15 @@ def lnlike(theta):
 
 # 4prange1: 1e1<t_life<200. and 0.1<d_fit<0.5:
 # 4prange2: 1e1<t_life<200. and 0.01<d_fit<0.5 and l_cut>0:
-# 4prange3: 1e1<t_life<200. and 0.<f_seed<1. and l_cut>0:
-# 4prange4: 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0:
+# #4prange3: 1e1<t_life<200. and 0.<f_seed<1. and l_cut>0:
+# 4prange3: 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0.:
+# 4prange4: 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0.01:
+# 4prange5: 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0.1:
+# wli: 3,4,5无区别 或许改d_fit成log scale更容易收敛?
 
 def lnprior(theta):
     t_life, d_fit, l_cut, a = theta
-    if 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0:
+    if 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0.1:
         return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2
     else:
         return -np.inf

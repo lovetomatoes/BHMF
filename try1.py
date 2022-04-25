@@ -7,6 +7,19 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+# test MLF3p lnlike & models same w/ Phi_easy_l.py
+# (after correction of x0->lambda_0/l_cut)
+from PYmodule.MLF3p import *
+from PYmodule.models import *
+t_life, l_cut, a = 30, 1., -.2 # f_seed = 1., log_prob= -13.88
+x = (t_life, l_cut, a)
+print(lnlike(x))
+print('lambda_0:',lambda_0, 'f_seed:',f_seed)
+print(model(x)['Chi2_M'])
+
+print(-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+exit(0)
+
 # test MLF4p_l lnlike & models_l same w/ Phi_easy_l.py
 from PYmodule.MLF4p_llogd import *
 from PYmodule.models_llogd import *

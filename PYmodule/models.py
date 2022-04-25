@@ -15,12 +15,14 @@ n_base = n_base[0]
 def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
     if len(theta) == 3:
         t_life, l_cut, a = theta
+        d_fit = 0
     elif len(theta) == 4:
         t_life, d_fit, l_cut, a = theta
     else:
         assert 0
     t_life = t_life * Myr # wli: not *=!!!!!! theta changed by this
-    I_toinf = integral_toinf(a)
+    x0 = lambda_0/l_cut
+    I_toinf = integral_toinf(a,x0)
 
 ## --------- Mass Function ---------
     tz = t_from_z(z)
@@ -39,7 +41,7 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
             # z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
             z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
             z_mesh[z_mesh<x0] = x0
-            Ps = integral(a,z_mesh)/I_toinf
+            Ps = integral(a,z_mesh,x0)/I_toinf
             dP_seed = Ps[1:,:] - Ps[:-1,:]
             dP_seed = np.nansum(dP_seed, axis=1)/len(T)
         else:
@@ -48,7 +50,7 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
         # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
         z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
         z_mesh[z_mesh<x0] = x0
-        Ps = integral(a,z_mesh)/I_toinf
+        Ps = integral(a,z_mesh,x0)/I_toinf
         dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
         Nt -= 1
@@ -71,7 +73,7 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
 # # --------- Luminosity Function ---------
     z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
     z_mesh[z_mesh<x0] = x0
-    Ps = integral(a,z_mesh)/I_toinf
+    Ps = integral(a,z_mesh,x0)/I_toinf
     dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
 
     Phi = dPhi_mesh/bin_wid

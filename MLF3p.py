@@ -16,12 +16,8 @@ t1 = time.time()
 # t_life, l_cut, a = 80, 0.5, 0. # x0=0.01, f_seed = 1
 # t_life, l_cut, a = 30, 1.5, 0. # x0=0.001, f_seed = 1
 
-# x0=0.01
-t_life, l_cut, a = 80, 0.5, 0. # f_seed = 1.
-t_life, l_cut, a = 20, 1., 0.2 # f_seed = .1
-t_life, l_cut, a = 20, 1., 0.2 # f_seed = .01
-t_life, l_cut, a = 20, 1., 0.2 # f_seed = .001
-
+# lambda_0=0.01
+t_life, l_cut, a = 30, 1., -.2 # f_seed = 1.
 
 initial = np.array([t_life,l_cut,a])
 
@@ -30,7 +26,7 @@ nwalkers = 100
 nsteps = 10000
 rball = 1e-4
 
-prex='../3p/MLF3prange1_Gs.3_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_x0_{4:.1e}_fseed_{5:.1e}'.format(l_mean,a_mean,sigma_l,sigma_a,x0,f_seed)
+prex='../3p/MLF3prange2_Gs.3_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_x0_{4:.1e}_fseed_{5:.1e}'.format(l_mean,a_mean,sigma_l,sigma_a,x0,f_seed)
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
