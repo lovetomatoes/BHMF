@@ -17,7 +17,7 @@ t_life *= Myr
 
 # table stores the cdf of lambda 
 I_toinf = integral_toinf(a)
-x = np.logspace(np.log10(x0),1.2,num=200)
+x = np.logspace(np.log10(lambda_0),1.2,num=200)
 Pa_x = integral(a,x)/I_toinf
 
 N_BH = int(1e5)
@@ -93,7 +93,7 @@ print('np.max(M1)=%.1e'%np.max(M1))
 
 lbin = np.linspace(-2,1.2,num=20)
 hist, bin_edges = np.histogram(np.log10(ls),bins=lbin,density=False)
-x = np.logspace(np.log10(x0),1.2,num=len(lbin)) # for Pana
+x = np.logspace(np.log10(lambda_0),1.2,num=len(lbin)) # for Pana
 Pana = integral(a,x)/I_toinf
 
 index = np.where(L_limit<L1)

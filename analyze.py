@@ -53,7 +53,10 @@ exit(0)
 
 lbin = np.linspace(-2,1.2,num=20)
 hist, bin_edges = np.histogram(np.log10(ls),bins=lbin,density=False)
-x = np.logspace(np.log10(x0),1.2,num=len(lbin))
+x = np.logspace(np.log10(lambda_0),1.2,num=len(lbin))
+# wli: temporary
+l_cut, a = 1., .1
+I_toinf = integral_toinf(a,lambda_0/l_cut)
 Pana = integral(a,x)/I_toinf
 ascii.write(Table([bin_edges[:-1],hist/len(ls),Pana[1:]-Pana[:-1]]),prex+'hist_tot.dat',
 names=['log_l','hist','ana'],formats={'log_l':'10.2f','hist':'10.2e','ana':'10.2e'},overwrite=True)

@@ -32,7 +32,8 @@ logM0 = 8.
 l_cut = 1. # l_cut=2., l_cut' = l_cut/2; M=M_cut=1e7 grow as Eddington
 a = -.7
 
-x0 = 0.01
+lambda_0 = 0.01 # starting point of lambda; x0 now changable
+x0 = 0.01 # integration of l/l_cut, starting point; previous context
 f_seed = 1
 
 l_mean, a_mean = 0.75, 0.

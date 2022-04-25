@@ -20,14 +20,12 @@ h_seed, bin_edges = np.histogram(M0,bins=abin_mf,density=False)
 Phi_seed = h_seed*n_base/float(Nsite)/dlog10M
 
 t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
-f_seed = 0.01
-t_life, d_fit, l_cut, a = 1.68814272e+01, 7.31406767e-03, 1.02157385e+00, 1.46099557e-01 # f_seed = .01
 
 t_life *= Myr
 
 # table stores the cdf of lambda 
 I_toinf = integral_toinf(a)
-x = np.logspace(np.log10(x0),1.2,num=200)
+x = np.logspace(np.log10(lambda_0),1.2,num=200)
 Pa_x = integral(a,x)/I_toinf
 
 # ascii.write(Table([x,Pa_x]),'../Pa.dat',

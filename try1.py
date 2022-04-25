@@ -7,6 +7,31 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+# test MLF4p_l lnlike & models_l same w/ Phi_easy_l.py
+from PYmodule.MLF4p_llogd import *
+from PYmodule.models_llogd import *
+t_life, logd_fit, l_cut, a = 30, -2, 1., -.2 # f_seed = 1., log_prob= -13.88
+x = (t_life, logd_fit, l_cut, a)
+print(lnlike(x))
+print('lambda_0:',lambda_0, 'f_seed:',f_seed)
+print(model(x)['Chi2_M'])
+
+print(-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+exit(0)
+
+# test MLF4p_l lnlike & models_l same w/ Phi_easy_l.py
+from PYmodule.MLF4p_l import *
+from PYmodule.models_l import *
+t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
+t_life, d_fit, l_cut, a = 47.9, .01, .22, -4.95e-2 # f_seed = 1.
+x = (t_life, d_fit, l_cut, a)
+print(lnlike(x))
+print('lambda_0:',lambda_0, 'f_seed:',f_seed)
+print(model(x)['Chi2_M'])
+
+print(-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+exit(0)
+
 # how many heavy seeds in 1e11 progenitors?
 T = Ts[0][0]
 print(np.max(T['Mstar0']), T['z_col'][np.argmax(T['Mstar0'])])

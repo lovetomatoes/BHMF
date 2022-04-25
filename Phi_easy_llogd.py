@@ -13,19 +13,24 @@ alpha = 1.
 # LF bins same w/ Matsu18
 N_lf = len(bin_cen)
 
-# initial: x0=0.01, logM0 = 8.
+# initial: lambda_0=0.01, logM0 = 8.
 t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
 t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
 t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
 
-# # best:
-# t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
+# best:
+t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
+t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
 t_life, d_fit, l_cut, a = 47.9, .01, .22, -4.95e-2 # f_seed = 1.
 
-I_toinf =  integral_toinf(a)
+t_life, logd_fit, l_cut, a = 30, -2, 1., -.2 # f_seed = 1., log_prob= -13.88
+d_fit = pow(10.,logd_fit)
 
-print('t_life, d_fit, l_cut, a,  f_seed, x0, logM0 = ', 
-t_life,', ',d_fit,', ', l_cut,', ',a,', ', f_seed,', ', x0,', ', logM0,', ')
+print('lambda_0/l_cut',lambda_0/l_cut)
+I_toinf = integral_toinf(a,lambda_0/l_cut)
+
+print('t_life, d_fit, l_cut, a,  f_seed, lambda_0, logM0 = ', 
+t_life,', ',d_fit,', ', l_cut,', ',a,', ', f_seed,', ', lambda_0,', ', logM0,', ')
 
 t_life *= Myr
 T = Ts[0][0]
@@ -53,18 +58,18 @@ while Nt>=0:
     # new seeds (using 2d meshgrids)
     if len(T_seed):
         # z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
-        z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit, logM0)
-        z_mesh[z_mesh<x0] = x0
-        Ps = integral(a,z_mesh)/I_toinf
+        z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)*l_cut
+        z_mesh[z_mesh<lambda_0] = lambda_0
+        Ps = integral(a,z_mesh/l_cut,lambda_0/l_cut)/I_toinf
         dP_seed = Ps[1:,:] - Ps[:-1,:]
         dP_seed = np.nansum(dP_seed, axis=1)/len(T)
     else:
         dP_seed = 0.
     # prev BHMF
     # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
-    z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit, logM0)
-    z_mesh[z_mesh<x0] = x0
-    Ps = integral(a,z_mesh)/I_toinf
+    z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)*l_cut
+    z_mesh[z_mesh<lambda_0] = lambda_0
+    Ps = integral(a,z_mesh/l_cut,lambda_0/l_cut)/I_toinf
     dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
     Nt -= 1
@@ -105,9 +110,10 @@ Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
 Phi = np.zeros(N_lf)
 
 T['dn_MBH'] = T['Phi']*dlog10M
-z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
-z_mesh[z_mesh<x0] = x0
-Ps = integral(a,z_mesh)/I_toinf
+z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)*l_cut
+z_mesh[z_mesh<lambda_0] = lambda_0
+Ps = integral(a,z_mesh/l_cut,lambda_0/l_cut)/I_toinf
+# print(np.any(Ps[:-1,:]-Ps[1:,:]>1.))
 dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
 
 Phi = dPhi_mesh/bin_wid
@@ -133,7 +139,7 @@ if np.nanmin([Chi2, Chi2_min]) == Chi2:
     T_min = T
     LFname_min = LFname
 
-
+print('Chi2_M',Chi2_M,'Chi2_L',Chi2)
 if find_min:
     print('log_prob=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
     #, LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)
