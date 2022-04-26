@@ -1,8 +1,8 @@
 # Gauss prior for parameter l_cut and a;
 
 from PYmodule import *
-from PYmodule.MLF4p import *
-from PYmodule.models import *
+from PYmodule.MLF4p_logd import *
+from PYmodule.models_logd import *
 from emcee import EnsembleSampler as EnsembleSampler
 import corner
 import os
@@ -12,23 +12,24 @@ from schwimmbad import MPIPool
 t1 = time.time()
 
 # initial guess
-t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
-t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
-t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
+# t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
+# t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
+# t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
+t_life, logd_fit, l_cut, a = 30, -3, 1., -.2 # f_seed = 1., log_prob= -13.88
 
-initial = np.array([t_life,d_fit,l_cut,a])
+initial = np.array([t_life,logd_fit,l_cut,a])
 
 ndim = len(initial)
 nwalkers = 100
 nsteps = 5000
 rball = 1e-4
 
-prex='../4p/4plbdr5_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_f{4:.1e}'.format(l_mean,a_mean,sigma_l,sigma_a,f_seed)
+prex='../4p/logd_4pr6_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_f{4:.1e}'.format(l_mean,a_mean,sigma_l,sigma_a,f_seed)
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
 
-# nsteps = 10
+# nsteps = 15000
 # prex += '_xu'
 
 with MPIPool() as pool:
@@ -58,7 +59,7 @@ samples = sampler.get_chain()
 probs = sampler.get_log_prob()
 # print('probs',probs)
 
-labels = ['t_life', 'd_fit', 'l_cut', 'a', 'prob']
+labels = ['t_life', 'logd_fit', 'l_cut', 'a', 'prob']
 for i in range(ndim):
     ax = axes[i]
     ax.plot(samples[:, :, i], "k", alpha=0.3)
@@ -81,7 +82,7 @@ samples = sampler.flatchain
 probs = sampler.flatlnprobability
 print('len of samples:', len(samples))
 theta_max = samples[np.argmax(probs)]
-print('initial paras: t_life={0:.1e}, d_fit={1:.1e}, l_cut={2:.1f}, a={3:.1f}, f_seed{4:.0e}, prob{5:.1e}'.format(t_life,d_fit,l_cut,a,f_seed,probs[0]))
+print('initial paras: t_life={0:.1e}, logd_fit={1:.1e}, l_cut={2:.1f}, a={3:.1f}, f_seed{4:.0e}, prob{5:.1e}'.format(t_life,logd_fit,l_cut,a,f_seed,probs[0]))
 print('Gaussian scatter sigma_l,sigma_a:',sigma_l,sigma_a)
 print('best paras:',labels,theta_max,np.max(probs))
 
@@ -131,7 +132,7 @@ for i in thetas:
     ax.plot(xs, mod, c='grey',label='_',alpha=.2)
 ax.plot(xs, y_best, c='C1', label='_')
 ax.text(-26,10,
-r'$t_{life}=$'+'{0:.1e}Myr\n'.format(theta_max[0])+r'$\delta=$'+'{0:.2f}\n'.format(theta_max[1])\
+r'$t_{life}=$'+'{0:.2e}Myr\n'.format(theta_max[0])+r'$\log\delta=$'+'{0:.2f}\n'.format(theta_max[1])\
 +r'$\lambda_{cut}=$'+'{0:.1e}\n'.format(theta_max[2])+r'$\alpha=$'+'{0:.2f}\n'.format(theta_max[3])
 )
 ax.set_xlim(-22,-29)

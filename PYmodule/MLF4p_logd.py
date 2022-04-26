@@ -93,7 +93,7 @@ def lnlike(theta):
 # #4prange3: 1e1<t_life<200. and 0.<f_seed<1. and l_cut>0:
 # 4prange3: 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0.:
 # 4prange4: 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0.01:
-# 4prange4: 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0.1:
+# 4prange5: 1e1<t_life<200. and 0.001<d_fit<0.5 and l_cut>0.1:
 # wli: 3,4,5无区别 或许改d_fit成log scale更容易收敛?
 # uniform prior of log10(d_fit):
 # 4prange5: 1e1<t_life<200. and 1e-4<d_fit<1e-1 and l_cut>0.1:
@@ -103,7 +103,7 @@ def lnlike(theta):
 def lnprior(theta):
     t_life, logd_fit, l_cut, a = theta
     if 1e1<t_life<200. and -4<=logd_fit<=-1 and l_cut>0.1:
-        return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2
+        return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2 - 0.5*((logd_fit+3.)/.1)**2
     else:
         return -np.inf
 

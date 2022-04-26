@@ -3,22 +3,25 @@ from PYmodule.l_intg import *
 
 t1 = time.time()
 
+l_cut = .5
 a = 0.5
-I_toinf = integral_toinf(a)
-x = np.logspace(np.log10(x0),1.2,num=1000)
-Pa_x = integral(a,x)/I_toinf
+x0 = lambda_0/l_cut
+I_toinf = integral_toinf(a,x0)
+
+x = np.logspace(np.log10(x0),1.2,num=200)
+Pa_x = integral(a,x,x0)/I_toinf
 # print(x,Pa_x)
 
 N_BH = int(1e5)
 
 uniform_a = np.random.uniform(size=N_BH)
 xx,yy = np.meshgrid(uniform_a,Pa_x)
-ls = x[(yy>xx).argmax(axis=0)]
+ls = x[(yy>xx).argmax(axis=0)] * l_cut
 
 print('np.min(ls)',np.min(ls))
 
 abin = np.log10(x)
-hist, bin_edges = np.histogram(np.log10(ls),bins=abin,density=False)
+hist, bin_edges = np.histogram(np.log10(ls/l_cut),bins=abin,density=False)
 
 plt.figure(figsize=(10,8),dpi=400)
 plt.scatter( bin_edges[:-1],hist/len(ls))

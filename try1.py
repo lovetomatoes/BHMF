@@ -23,8 +23,8 @@ print(-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
 exit(0)
 
 # test MLF4p_l lnlike & models_l same w/ Phi_easy_l.py
-from PYmodule.MLF4p_llogd import *
-from PYmodule.models_llogd import *
+from PYmodule.MLF4p_logd import *
+from PYmodule.models_logd import *
 t_life, logd_fit, l_cut, a = 30, -2, 1., -.2 # f_seed = 1., log_prob= -13.88
 x = (t_life, logd_fit, l_cut, a)
 print(lnlike(x))
@@ -34,9 +34,9 @@ print(model(x)['Chi2_M'])
 print(-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
 exit(0)
 
-# test MLF4p_l lnlike & models_l same w/ Phi_easy_l.py
-from PYmodule.MLF4p_l import *
-from PYmodule.models_l import *
+# test MLF4p lnlike & models same w/ Phi_easy.py
+from PYmodule.MLF4p import *
+from PYmodule.models import *
 t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
 t_life, d_fit, l_cut, a = 47.9, .01, .22, -4.95e-2 # f_seed = 1.
 x = (t_life, d_fit, l_cut, a)
