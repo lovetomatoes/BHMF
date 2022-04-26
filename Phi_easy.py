@@ -22,6 +22,9 @@ t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
 t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
 # 3p init:
 t_life, d_fit, l_cut, a = 30, 0, 1., -.2 # f_seed = 1.
+# 3p nan Chi2_M
+t_life, d_fit, l_cut, a = 53, 0, .133, -.09 # f_seed = 1.
+
 
 x0 = lambda_0/l_cut
 I_toinf = integral_toinf(a,x0)
@@ -135,5 +138,6 @@ if np.nanmin([Chi2, Chi2_min]) == Chi2:
     T_min = T
     LFname_min = LFname
 
+print('Chi2_M=',Chi2_M,'Chi2_L=',Chi2)
 print('log_prob=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
 #, LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)

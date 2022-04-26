@@ -9,10 +9,12 @@ from scipy.stats import norm, uniform
 
 # test MLF3p lnlike & models same w/ Phi_easy_l.py
 # (after correction of x0->lambda_0/l_cut)
-from PYmodule.MLF3p import *
-from PYmodule.models import *
+# from PYmodule.MLF3p import *
+
 t_life, l_cut, a = 30, 1., -.2 # f_seed = 1., log_prob= -13.88
-x = (t_life, l_cut, a)
+t_life, l_cut, a = 53.03630906,0.13316385, -0.09330773 # f_seed = 1.
+
+x = (t_life, 0, l_cut, a)
 print(lnlike(x))
 print('lambda_0:',lambda_0, 'f_seed:',f_seed)
 print(model(x)['Chi2_M'])
