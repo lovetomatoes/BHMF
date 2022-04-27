@@ -26,12 +26,12 @@ nwalkers = 100
 nsteps = 10000
 rball = 1e-4
 
-prex='../3p/MLF3prange2_Gs.3_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_x0_{4:.1e}_fseed_{5:.1e}'.format(l_mean,a_mean,sigma_l,sigma_a,x0,f_seed)
+prex='../3p/MLF3prange2_Gs.3_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_fseed_{4:.1e}_ns_{5:.0e}'.format(l_mean,a_mean,sigma_l,sigma_a,f_seed,nsteps)
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
 
-# nsteps = 10
+# nsteps = 10000
 # prex += '_xu'
 
 with MPIPool() as pool:

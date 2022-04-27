@@ -24,12 +24,12 @@ nwalkers = 100
 nsteps = 5000
 rball = 1e-4
 
-prex='../4p/logd_4pr6_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_f{4:.1e}'.format(l_mean,a_mean,sigma_l,sigma_a,f_seed)
+prex='../4p/logd_4pr7_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_f{4:.1e}'.format(l_mean,a_mean,sigma_l,sigma_a,f_seed)
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
 
-# nsteps = 15000
+# nsteps = 10000
 # prex += '_xu'
 
 with MPIPool() as pool:
@@ -55,22 +55,24 @@ with MPIPool() as pool:
 
 fig, axes = plt.subplots(ndim+1, figsize=(10, 7), sharex=True)
 samples = sampler.get_chain()
-# print('samples',samples)
 probs = sampler.get_log_prob()
-# print('probs',probs)
+len_sample = len(samples)
+prex += '_%.0e'%len_sample
+
+print(' len of samples: %e'%len_sample)
 
 labels = ['t_life', 'logd_fit', 'l_cut', 'a', 'prob']
 for i in range(ndim):
     ax = axes[i]
     ax.plot(samples[:, :, i], "k", alpha=0.3)
-    ax.set_xlim(0, len(samples))
+    ax.set_xlim(0, len_sample)
     ax.set_ylabel(labels[i])
     ax.yaxis.set_label_coords(-0.1, 0.5)
 
 i += 1
 ax = axes[i]
 ax.plot(probs[:, :], "k", alpha=0.3)
-ax.set_xlim(0, len(samples))
+ax.set_xlim(0, len_sample)
 ax.set_ylabel(labels[i])
 ax.yaxis.set_label_coords(-0.1, 0.5)
 axes[-1].set_xlabel("step number")
@@ -80,7 +82,6 @@ plt.savefig(prex+'_chain.png')
 
 samples = sampler.flatchain
 probs = sampler.flatlnprobability
-print('len of samples:', len(samples))
 theta_max = samples[np.argmax(probs)]
 print('initial paras: t_life={0:.1e}, logd_fit={1:.1e}, l_cut={2:.1f}, a={3:.1f}, f_seed{4:.0e}, prob{5:.1e}'.format(t_life,logd_fit,l_cut,a,f_seed,probs[0]))
 print('Gaussian scatter sigma_l,sigma_a:',sigma_l,sigma_a)
@@ -103,6 +104,7 @@ print(
 tau = sampler.get_autocorr_time(tol=1)
 print('Autocorrelation timescale: ',tau)
 
+print(prex)
 print('running time: {0:.1f} hrs'.format((time.time()-t1)/3600))
 
 ndraw = 100

@@ -99,11 +99,17 @@ def lnlike(theta):
 # 4prange5: 1e1<t_life<200. and 1e-4<d_fit<1e-1 and l_cut>0.1:
 # Gaussian prior of log10(d_fit): center -3, scatter .1 (dex) ?
 # 4prange6: 1e1<t_life<200. and 1e-4<d_fit<1e-1 and l_cut>0.1:
+# left Gaussian prior of log10(d_fit): center -3, left scatter .1 (dex), right uniform
+# 4prange7: 1e1<t_life<200. and 1e-4<d_fit<1e-1 and l_cut>0.1:
 
 def lnprior(theta):
     t_life, logd_fit, l_cut, a = theta
     if 1e1<t_life<200. and -4<=logd_fit<=-1 and l_cut>0.1:
-        return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2 - 0.5*((logd_fit+3.)/.1)**2
+        # return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2 #- 0.5*((logd_fit+3.)/.1)**2
+        if logd_fit< -3.:
+            return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2 - 0.5*((logd_fit+3.)/.1)**2
+        else:
+            return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2
     else:
         return -np.inf
 

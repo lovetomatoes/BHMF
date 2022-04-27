@@ -36,8 +36,8 @@ lambda_0 = 0.01 # starting point of lambda; x0 now changable
 x0 = 0.01 # integration of l/l_cut, starting point; previous context
 f_seed = 1
 
-l_mean, a_mean = 0.75, 0.
-sigma_l, sigma_a = .45, .3
+l_mean, a_mean = 0.6, 0.
+sigma_l, sigma_a = .4, .3
 
 typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
 lfnames = {'4':'Akiyama_18','5':'Niida_20','6':'Matsuoka_18'}
