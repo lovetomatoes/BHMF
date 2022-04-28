@@ -1,8 +1,8 @@
 from time import sleep
 from PYmodule import *
 from PYmodule.l_intg import *
-from PYmodule.MLF4p import *
-from PYmodule.models import *
+from PYmodule.MLF4p_logd import *
+from PYmodule.models_logd import *
 from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
@@ -11,10 +11,11 @@ from scipy.stats import norm, uniform
 # (after correction of x0->lambda_0/l_cut)
 # from PYmodule.MLF3p import *
 
-t_life, l_cut, a = 30, 1., -.2 # f_seed = 1., log_prob= -13.88
-t_life, l_cut, a = 53.03630906,0.13316385, -0.09330773 # f_seed = 1.
+t_life, logd_fit, l_cut, a = 30, -2, 1., -.2 # f_seed = 1.
+t_life, logd_fit, l_cut, a = 25, -2, 1.2, -0.2 # f_seed = .1
+# t_life, logd_fit, l_cut, a = 20, -2, 1., 0.1 # f_seed = .01
 
-x = (t_life, 0, l_cut, a)
+x = (t_life, logd_fit, l_cut, a)
 print(lnlike(x))
 print('lambda_0:',lambda_0, 'f_seed:',f_seed)
 print(model(x)['Chi2_M'])
