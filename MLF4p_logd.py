@@ -15,7 +15,10 @@ t1 = time.time()
 # t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
 # t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
 # t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
-t_life, logd_fit, l_cut, a = 30, -3, 1., -.2 # f_seed = 1., log_prob= -13.88
+
+t_life, logd_fit, l_cut, a = 30, -2, 1., -.2 # f_seed = 1.
+# t_life, logd_fit, l_cut, a = 25, -2, 1.2, -0.2 # f_seed = .1
+# t_life, logd_fit, l_cut, a = 20, -2, 1., 0.1 # f_seed = .01
 
 initial = np.array([t_life,logd_fit,l_cut,a])
 
@@ -29,8 +32,7 @@ prex='../4p/logd_4pr7_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_f{4:.1e}'.format(l_m
 
 fname =prex+'.h5'
 
-# nsteps = 10000
-# prex += '_xu'
+# nsteps = 5000
 
 with MPIPool() as pool:
     if not pool.is_master():

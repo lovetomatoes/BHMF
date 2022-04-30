@@ -11,18 +11,20 @@ t_end = t_from_z(z1)
 Dt = t_end - t0
 M0 = 1e3
 
-f_seed = 0.01
-t_life, d_fit, l_cut, a = 1.68814272e+01, 7.31406767e-03, 1.02157385e+00, 1.46099557e-01 # f_seed = .01
+# 不同f_seed 不影响BH growth 只是参数不同
+# nsteps=1e4 的 best fits
+f_seed,t_life, logd_fit, l_cut, a = 0.01, 19.49, -2.53, 0.88, 0.22
+f_seed,t_life, logd_fit, l_cut, a = 0.1,  21.87, -3.00, 0.94, 0.04
+f_seed,t_life, logd_fit, l_cut, a = 1,    20.77, -2.98, 1.10, -0.15
+
+d_fit = pow(10.,logd_fit)
 t_life *= Myr
 
 # table stores the cdf of lambda
-I_toinf = integral_toinf(a)
-x = np.logspace(np.log10(lambda_0),1.2,num=200)
-Pa_x = integral(a,x)/I_toinf
-# x0 = lambda_0/l_cut
-# I_toinf = integral_toinf(a,x0)
-# x = np.logspace(np.log10(x0),1.2,num=200)
-# Pa_x = integral(a,x,x0)/I_toinf
+x0 = lambda_0/l_cut
+I_toinf = integral_toinf(a,x0)
+x = np.logspace(np.log10(x0),1.2,num=200)
+Pa_x = integral(a,x,x0)/I_toinf
 
 N_BH = int(1e5)
 # N_BH = int(1e1)
@@ -33,7 +35,7 @@ M1s = [M0*np.ones(N_BH)]
 zs = [z0]
 L1s = [L_M(M0,.01)*np.ones(N_BH)]
 
-# N_bri: count active bright quasar (L>L_limit) numbers from all sample at time t
+# N_bri: count active bright quasar (L>L_bright) numbers from all sample at time t
 # potentially comparable with luminous quasar density Wang+2019b
 N_bri = [0]; ts = [0]; L_bright = 1e47
 
@@ -69,8 +71,10 @@ print('np.min(L1)=%.1e'%np.min(L1))
 print('np.max(L1)=%.1e'%np.max(L1))
 print('np.max(M1)=%.1e'%np.max(M1))
 
-prex = z6datapre+'/f{0:.0e}N{1:d}'.format(f_seed,int(np.log10(N_BH)))
+prex = z6datapre+'/f{0:d}N{1:d}'.format(abs(int(np.log10(f_seed))),int(np.log10(N_BH)))
 prex = '../'
+# prex = '../f{0:d}N{1:d}'.format(abs(int(np.log10(f_seed))),int(np.log10(N_BH)))
+
 # z=6 BH mass, λ, L_bol
 ascii.write(Table([M1, ls, L1]),prex+'BHatz6.dat',
 names=['M1','ls','L1'],formats={'M1':'10.2e','ls':'10.2e','L1':'10.2e'},overwrite=True)
@@ -97,13 +101,8 @@ print('np.max(M1)=%.1e'%np.max(M1))
 
 lbin = np.linspace(-2,1.2,num=20)
 hist, bin_edges = np.histogram(np.log10(ls),bins=lbin,density=False)
-x = np.logspace(np.log10(lambda_0),1.2,num=len(lbin)) # for Pana
-Pana = integral(a,x)/I_toinf
-# xbin = np.linspace(np.log10(x0),1.2,num=20)
-# lbin = xbin * l_cut
-# hist, bin_edges = np.histogram(np.log10(ls),bins=lbin,density=False)
-# x = np.logspace(np.log10(x0),1.2,num=len(lbin)) # for Pana
-# Pana = integral(a,x,x0)/I_toinf
+x = np.logspace(lbin[0]-np.log10(l_cut),lbin[-1]-np.log10(l_cut),num=len(lbin)) # for Pana
+Pana = integral(a,x,x0)/I_toinf
 
 index = np.where(L_limit<L1)
 M1_ = M1[index]; L1_ = L1[index]; ls_ = ls[index]
@@ -111,7 +110,7 @@ print('len(ls) after selection:',len(ls_),' / ',N_BH)
 hist_, bin_edges = np.histogram(np.log10(ls_),bins=lbin,density=False)
 
 strhist_ = 'hist_L%d'%(int(np.log10(L_limit)))
-# histogram file
+# lambda histogram file
 ascii.write(Table([bin_edges[:-1],hist_/len(ls),hist/len(ls),Pana[1:]-Pana[:-1]]), 
 prex+strhist_+'.dat',
 names=['log_l',strhist_,'hist_tot','ana'],

@@ -61,23 +61,33 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
     xs = M_BH[index][::len(index[0])//10]
     ys = np.log10( MF(xs)  ) # Willott 2010 as data
     y_model = np.log10( (dn_MBH/dlog10M)[index][::len(index[0])//10] )
-    y_err = pow(np.log10(xs)-8.5,2)/3. + .2 # from 0.2 to 0.95
-    Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
+    mf_err = pow(np.log10(xs)-8.5,2)/3. + .2 # from 0.2 to 0.95
+    Chi2_M =  np.sum( pow((ys - y_model)/mf_err, 2))
 
 # # --------- Luminosity Function ---------
     z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)*l_cut
     z_mesh[z_mesh<lambda_0] = lambda_0
     Ps = integral(a,z_mesh/l_cut,lambda_0/l_cut)/I_toinf
     dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
-
     Phi = dPhi_mesh/bin_wid
-
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(bin_cen)
     ys = np.log10(Phi_obs)
     y_model = np.log10(Phi_DO)
-    y_err = np.log10(Phi_err)
-    Chi2_L = np.sum( pow((ys - y_model)/y_err, 2))
+    lf_err = np.log10(Phi_err)
+    Chi2_L = np.sum( pow((ys - y_model)/lf_err, 2))
     # print('in model -.5*(Chi2_L+Chi2_M)',-.5*(Chi2_L+Chi2_M))
-    return {'M_BH':M_BH, 'MF':dn_MBH/dlog10M, 'MF_data':MF(M_BH), 'Chi2_M':Chi2_M,
-            'M1450':bin_cen, 'LF':Phi_DO, 'LF_data':Phi_obs, 'Chi2_L':Chi2_L}
+
+    # for spread plot
+    z_mesh = kernelS_M1450_mesh(abin_lf, M_BH, l_cut)*l_cut
+    z_mesh[z_mesh<lambda_0] = lambda_0
+    Ps = integral(a,z_mesh/l_cut,lambda_0/l_cut)/I_toinf
+    dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
+    Phi = dPhi_mesh/dmag
+    Phi *= 1e9
+    Phi_DO = Phi/corr_U14D20(M1450)
+    return {'M_BH':M_BH, 'MF':dn_MBH/dlog10M, 'MF_data':MF(M_BH), 'MF_data_err':mf_err,
+            'Chi2_M':Chi2_M,
+            'M1450_data':bin_cen, 'LF_data':Phi_obs, 'LF_data_err':Phi_err,
+            'Chi2_L':Chi2_L,
+            'M1450':M1450, 'LF':Phi_DO}

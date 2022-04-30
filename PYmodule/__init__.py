@@ -506,12 +506,12 @@ wid_mf = bin_right - bin_left
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 N_mf = len(abin_mf)-1
 
-# # LF bins
-# abin_lf = np.linspace(-29,-22.5,num=30)
-# dmag = abin_lf[1]-abin_lf[0]
-# L_left = abin_lf[:-1]; L_right = abin_lf[1:]
-# M1450  = (L_left+L_right)/2.
-# N_lf = len(M1450)
+# LF bins
+abin_lf = np.linspace(-29,-22.5,num=30)
+dmag = abin_lf[1]-abin_lf[0]
+L_left = abin_lf[:-1]; L_right = abin_lf[1:]
+M1450  = (L_left+L_right)/2.
+N_lf = len(M1450)
 
 # bin_edg = abin_lf
 # bin_wid = dmag
