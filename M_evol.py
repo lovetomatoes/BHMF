@@ -1,5 +1,6 @@
 from PYmodule import *
 from PYmodule.l_intg import *
+from datetime import datetime
 
 t1 = time.time()
 
@@ -13,9 +14,10 @@ M0 = 1e3
 
 # 不同f_seed 不影响BH growth 只是参数不同
 # nsteps=1e4 的 best fits
+# 用f_seed=0.01 相当于1e2*N_BH sample
 f_seed,t_life, logd_fit, l_cut, a = 0.01, 19.49, -2.53, 0.88, 0.22
-f_seed,t_life, logd_fit, l_cut, a = 0.1,  21.87, -3.00, 0.94, 0.04
-f_seed,t_life, logd_fit, l_cut, a = 1,    20.77, -2.98, 1.10, -0.15
+# f_seed,t_life, logd_fit, l_cut, a = 0.1,  21.87, -3.00, 0.94, 0.04
+# f_seed,t_life, logd_fit, l_cut, a = 1,    20.77, -2.98, 1.10, -0.15
 
 d_fit = pow(10.,logd_fit)
 t_life *= Myr
@@ -72,7 +74,7 @@ print('np.max(L1)=%.1e'%np.max(L1))
 print('np.max(M1)=%.1e'%np.max(M1))
 
 prex = z6datapre+'/f{0:d}N{1:d}'.format(abs(int(np.log10(f_seed))),int(np.log10(N_BH)))
-prex = '../'
+prex = '../'+datetime.now().strftime('%Y-%m-%d_%H-%M-%S_')
 # prex = '../f{0:d}N{1:d}'.format(abs(int(np.log10(f_seed))),int(np.log10(N_BH)))
 
 # z=6 BH mass, λ, L_bol

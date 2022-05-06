@@ -76,7 +76,7 @@ y_data = best_model[curve_name+'_data']
 y_data_err = best_model[curve_name+'_data_err']
 y_best = best_model[curve_name]
 ax.scatter(x_data, y_data, label='_')
-plt.errorbar(x_data, y_data, yerr=y_data_err, fmt='o')
+plt.errorbar(x_data, y_data, yerr=y_data_err,fmt='o',capsize=10)
 print('y_data_err',y_data_err)
 mod_list = []
 for i in range(ndraw):

@@ -25,10 +25,10 @@ t_life, d_fit, l_cut, a = 1.68814272e+01, 7.31406767e-03, 1.02157385e+00, 1.4609
 
 t_life *= Myr
 
-# table stores the cdf of lambda 
-I_toinf = integral_toinf(a)
-x = np.logspace(np.log10(x0),1.2,num=200)
-Pa_x = integral(a,x)/I_toinf
+# # table stores the cdf of lambda 
+# I_toinf = integral_toinf(a)
+# x = np.logspace(np.log10(x0),1.2,num=200)
+# Pa_x = integral(a,x)/I_toinf
 
 # ascii.write(Table([x,Pa_x]),'../Pa.dat',
 # names=['x','Pa_x'],
