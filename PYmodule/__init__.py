@@ -64,7 +64,7 @@ fbol_1450 = 4.4
 log10Ms = [11,12,13]
 # n_base = [1.63,1.09e-01,4.02e-03,3.87e-05,1.07e-08]
 n_base = [4.02e-03,3.87e-05,1.07e-08]
-# n_base = [9.87e-4, 6.15e-6, 8.92e-10] # from dNdlnM.ipynb & Jdist.cpp
+n_base = [9.87e-4, 6.15e-6, 8.92e-10] # from dNdlnM.ipynb & Jdist.cpp
 Mhpres = [datapre+'1e11',datapre+'1e12',datapre+'1e13']
 
 f_bsm = [.6,.4]

@@ -85,7 +85,7 @@ T = Table(
     names=('M_BH','Phi','W10_MF')
 )
 
-MFname = z6datapre+'MFIMF_easy'
+MFname = z6datapre+'MFIMF_easy_newnbase'
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
@@ -126,7 +126,7 @@ T = Table(
     names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
 )
 
-LFname = z6datapre+'LFIMF_easy'
+LFname = z6datapre+'LFIMF_easy_newnbase'
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
             overwrite=True)
