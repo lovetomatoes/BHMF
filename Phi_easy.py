@@ -17,7 +17,6 @@ N_lf = len(bin_cen)
 t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
 t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
 t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
-t_life, d_fit, l_cut, a = 5, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
 
 # # best:
 # t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
@@ -33,14 +32,9 @@ print('t_life, d_fit, l_cut, a,  f_seed, x0, logM0 = ',
 t_life,', ',d_fit,', ', l_cut,', ',a,', ', f_seed,', ', x0,', ', logM0,', ')
 
 t_life *= Myr
-T = Ts[0][0].copy()
+T = Ts[0][0]
 f_bsm = 1.
 n_base = n_base[0]
-
-# print(T['z_col'][:2])
-# T.sort('t_col')
-# print(T['z_col'][:2])
-# print(Ts[0][0]['z_col'][:2])
 
 # print('mean Dt:',np.mean((tz-T['t_col']))/Myr)
 
@@ -55,16 +49,9 @@ Nt = np.max((tz-T['t_col'])//t_life)
 Nmax = Nt
 dP_MBH = np.zeros(N_mf)
 # t_tot = np.zeros(len(T))
-T1 = T.copy()
 while Nt>=0:
     t_point = tz - Nt*t_life
-   
-    # index_seed = np.where(T1['t_col']<t_point)
-    # T_seed = T1[index_seed]
-    # T1.remove_rows(index_seed)
-
     T_seed = T[np.logical_and(t_point-t_life<=T['t_col'],T['t_col']<t_point)]
-
     dt_seed = t_point - T_seed['t_col']
     dP_MBH_prev = dP_MBH.copy()
     # new seeds (using 2d meshgrids)
@@ -154,4 +141,4 @@ print('Chi2_M=',Chi2_M,'Chi2_L=',Chi2)
 print('log_prob=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
 #, LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)
 
-print('time=',time.time()-t1)
+# print('time=',time.time()-t1)
