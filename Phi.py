@@ -33,50 +33,49 @@ t_life,', ',d_fit,', ', l_cut,', ',a,', ', f_seed,', ', x0,', ', logM0,', ')
 
 t_life *= Myr
 T = Ts[0][0]
-f_bsm = 1.
-n_base = n_base[0]
 
 # print('mean Dt:',np.mean((tz-T['t_col']))/Myr)
 
 i = 0
 Chi2_min = 1e10; find_min = False
 
-i = i+1
-# continue
 ## --------- Mass Function ---------
 dn_MBH = np.zeros(N_mf)
-Nt = np.max((tz-T['t_col'])//t_life)
-Nmax = Nt
-dP_MBH = np.zeros(N_mf)
-# t_tot = np.zeros(len(T))
-while Nt>=0:
-    t_point = tz - Nt*t_life
-    T_seed = T[np.logical_and(t_point-t_life<=T['t_col'],T['t_col']<t_point)]
-    dt_seed = t_point - T_seed['t_col']
-    dP_MBH_prev = dP_MBH.copy()
-    # new seeds (using 2d meshgrids)
-    if len(T_seed):
-        # z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
-        z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
-        z_mesh[z_mesh<x0] = x0
-        Ps = integral(a,z_mesh,x0)/I_toinf
-        dP_seed = Ps[1:,:] - Ps[:-1,:]
-        dP_seed = np.nansum(dP_seed, axis=1)/len(T)
-    else:
-        dP_seed = 0.
-    # prev BHMF
-    # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
-    z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
-    z_mesh[z_mesh<x0] = x0
-    Ps = integral(a,z_mesh,x0)/I_toinf
-    dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
+for iM in range(N_Mh):
+    for i_bsm in range(Nbsm):
+        T = Ts[iM][i_bsm]
+        Nt = np.max((tz-T['t_col'])//t_life)
+        Nmax = Nt
+        dP_MBH = np.zeros(N_mf)
+        # t_tot = np.zeros(len(T))
+        while Nt>=0:
+            t_point = tz - Nt*t_life
+            T_seed = T[np.logical_and(t_point-t_life<=T['t_col'],T['t_col']<t_point)]
+            dt_seed = t_point - T_seed['t_col']
+            dP_MBH_prev = dP_MBH.copy()
+            # new seeds (using 2d meshgrids)
+            if len(T_seed):
+                # z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
+                z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+                z_mesh[z_mesh<x0] = x0
+                Ps = integral(a,z_mesh,x0)/I_toinf
+                dP_seed = Ps[1:,:] - Ps[:-1,:]
+                dP_seed = np.nansum(dP_seed, axis=1)/len(T)
+            else:
+                dP_seed = 0.
+            # prev BHMF
+            z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+            z_mesh[z_mesh<x0] = x0
+            Ps = integral(a,z_mesh,x0)/I_toinf
+            dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
 
-    Nt -= 1
+            Nt -= 1
+        dn_MBH += dP_MBH*n_base[iM]*f_bsm[i_bsm]
 
-dn_MBH = dP_MBH*n_base*f_bsm*f_seed
+dn_MBH *= f_seed
 
-consv_ratio = np.nansum(dn_MBH)/(n_base*f_seed)
-print('in Phi_easy: MF conserved fraction=%.10f'%consv_ratio)
+consv_ratio = np.nansum(dn_MBH)/np.sum(n_base)/f_seed
+print('in Phi: MF conserved fraction=%.10f'%consv_ratio)
 # if consv_ratio<.9:
 #     print('conserved fraction=%.10f'%consv_ratio)
 
@@ -85,7 +84,7 @@ T = Table(
     names=('M_BH','Phi','W10_MF')
 )
 
-MFname = z6datapre+'MFIMF_easy'
+MFname = z6datapre+'MFIMF'
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
@@ -126,7 +125,7 @@ T = Table(
     names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
 )
 
-LFname = z6datapre+'LFIMF_easy'
+LFname = z6datapre+'LFIMF'
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
             overwrite=True)
