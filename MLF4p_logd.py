@@ -24,14 +24,14 @@ initial = np.array([t_life,logd_fit,l_cut,a])
 
 ndim = len(initial)
 nwalkers = 100
-nsteps = 5000
+nsteps = 10000
 rball = 1e-4
 
-prex='../4p/logd_4pr7_l{0:.2f}_a{1:.2f}_sl{2:.2f}_sa{3:.2f}_f{4:.1e}'.format(l_mean,a_mean,sigma_l,sigma_a,f_seed)
+prex='../4p/nbase{0:.0e}_logd_4pr7_f{1:d}'.format(n_base,int(abs(np.log10(f_seed))))
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
-
+print(prex,fname);exit(0)
 # nsteps = 5000
 
 with MPIPool() as pool:
@@ -59,7 +59,7 @@ fig, axes = plt.subplots(ndim+1, figsize=(10, 7), sharex=True)
 samples = sampler.get_chain()
 probs = sampler.get_log_prob()
 len_sample = len(samples)
-prex += '_%.0e'%len_sample
+prex += '_n%.0e'%len_sample
 
 print(' len of samples: %e'%len_sample)
 
