@@ -34,7 +34,7 @@ a = -.7
 
 lambda_0 = 0.01 # starting point of lambda; x0 now changable
 x0 = 0.01 # integration of l/l_cut, starting point; previous context
-f_seed = 1
+f_seed = .01
 
 l_mean, a_mean = 0.6, 0.
 sigma_l, sigma_a = .4, .3

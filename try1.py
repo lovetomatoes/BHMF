@@ -14,9 +14,10 @@ from scipy.stats import norm, uniform
 t_life, logd_fit, l_cut, a = 30, -2, 1., -.2 # f_seed = 1.
 t_life, logd_fit, l_cut, a = 25, -2, 1.2, -0.2 # f_seed = .1
 # t_life, logd_fit, l_cut, a = 20, -2, 1., 0.1 # f_seed = .01
-
+print('1e8 L_Edd%.1e'%L_M(1e8,1));exit(0)
 x = (t_life, logd_fit, l_cut, a)
 print(lnlike(x))
+print(lnprobab(x))
 print('lambda_0:',lambda_0, 'f_seed:',f_seed)
 print(model(x)['Chi2_M'])
 

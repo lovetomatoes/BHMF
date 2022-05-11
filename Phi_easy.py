@@ -13,17 +13,20 @@ alpha = 1.
 # LF bins same w/ Matsu18
 N_lf = len(bin_cen)
 
-# initial: lambda_0=0.01, logM0 = 8.
-t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
-t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
-t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
+# # initial: lambda_0=0.01, logM0 = 8.
+# t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
+# t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -36.82
+# t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
+# # # best:
+# # t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
 
-# # best:
-# t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
-# # 3p init:
-# t_life, d_fit, l_cut, a = 30, 0, 1., -.2 # f_seed = 1.
-# # 3p nan Chi2_M
-# t_life, d_fit, l_cut, a = 53, 0, .133, -.09 # f_seed = 1.
+# new_nbase initial: lambda_0=0.01, logM0 = 8.
+t_life, d_fit, l_cut, a = 30, .01, 1., 0.1 # f_seed = .01, log_prob= -9.11
+# t_life, d_fit, l_cut, a = 35, .01, 1.2, -0.2 # f_seed = .1, log_prob= -16.37
+# t_life, d_fit, l_cut, a = 40, .01, .9, -.2 # f_seed = 1., log_prob= -11.45
+
+# bests
+t_life, d_fit, l_cut, a = 21.9, .1,  0.87,  0.20 # f_seed = .01, log_prob=-3.16
 
 x0 = lambda_0/l_cut
 I_toinf = integral_toinf(a,x0)

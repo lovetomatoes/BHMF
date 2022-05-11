@@ -16,9 +16,15 @@ t1 = time.time()
 # t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
 # t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
 
-t_life, logd_fit, l_cut, a = 30, -2, 1., -.2 # f_seed = 1.
-# t_life, logd_fit, l_cut, a = 25, -2, 1.2, -0.2 # f_seed = .1
-# t_life, logd_fit, l_cut, a = 20, -2, 1., 0.1 # f_seed = .01
+# new_nbase initial: lambda_0=0.01, logM0 = 8.
+# t_life, d_fit, l_cut, a = 30, .01, 1., 0.1 # f_seed = .01, log_prob= -9.11
+# t_life, d_fit, l_cut, a = 35, .01, 1., -0.05 # f_seed = .1, log_prob= -4.93
+# t_life, d_fit, l_cut, a = 40, .01, .9, -.2 # f_seed = 1., log_prob= -11.45
+
+t_life, logd_fit, l_cut, a = 30, -2, 1., 0.1 # f_seed = .01
+t_life, logd_fit, l_cut, a = 35, -2, 1., -0.05 # f_seed = .1
+t_life, logd_fit, l_cut, a = 40, -2, .9, -.2 # f_seed = 1.
+
 
 initial = np.array([t_life,logd_fit,l_cut,a])
 
@@ -27,12 +33,10 @@ nwalkers = 100
 nsteps = 10000
 rball = 1e-4
 
-prex='../4p/nbase{0:.0e}_logd_4pr7_f{1:d}'.format(n_base,int(abs(np.log10(f_seed))))
+prex='../4p/nbase{0:.0e}_logd_4pr8_f{1:d}'.format(n_base,int(abs(np.log10(f_seed))))
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
-print(prex,fname);exit(0)
-# nsteps = 5000
 
 with MPIPool() as pool:
     if not pool.is_master():
@@ -128,9 +132,10 @@ ax.set_ylim(1e-10,1e-4); ax.set_yscale('log')
 ax.legend()
 ax = axes[1]; curve_name = 'LF'
 xs = best_model['M1450']
+x_data = best_model['M1450_data']
 y_data = best_model[curve_name+'_data']
 y_best = best_model[curve_name]
-ax.scatter(xs, y_data, label='_')
+ax.scatter(x_data, y_data, label='_')
 for i in thetas:
     mod = model(i)[curve_name]
     ax.plot(xs, mod, c='grey',label='_',alpha=.2)

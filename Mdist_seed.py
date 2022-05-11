@@ -22,23 +22,23 @@ figprefix = '../'
 dz = 5
 zs = np.arange(5,51,dz)
 # [ 5 10 15 20 25 30 35 40 45 50]
-dz = 10
-zs = np.arange(10,51,dz)
+dz = -10
+zs = np.arange(50,5,dz)
 # [10 20 30 40 50]
 
 Nz = len(zs)-1
 NM = 3
 Nbsm = 2
 
-# check eta=0.6, 0.3 difference
-for iM in range(NM):
-    for i_bsm in range(Nbsm):
-        for eta in [.6,.3]:
-            T = Ts[iM][i_bsm]
-            for j in range(len(T)):
-                T['Mstar0'][j] = Mdot2M(T['Mdot'][j]*eta)
-            print('eta={0:.1f} iM={1:d} i_bsm={2:d} ;'.format(eta,iM,i_bsm), 'min, max of Mstar0: {0:.1e}, {1:.1e} Msun'.format(np.min(T['Mstar0']),np.max(T['Mstar0'])))
-
+# # check eta=0.6, 0.3 difference
+# for iM in range(NM):
+#     for i_bsm in range(Nbsm):
+#         for eta in [.6,.3]:
+#             T = Ts[iM][i_bsm]
+#             for j in range(len(T)):
+#                 T['Mstar0'][j] = Mdot2M(T['Mdot'][j]*eta)
+#             print('eta={0:.1f} iM={1:d} i_bsm={2:d} ;'.format(eta,iM,i_bsm), 'min, max of Mstar0: {0:.1e}, {1:.1e} Msun'.format(np.min(T['Mstar0']),np.max(T['Mstar0'])))
+# # fiducially eta=0.3
 
 Tzs = [ [[0 for i in range(NM)] for j in range(Nbsm)] for k in range(Nz)]
 
@@ -47,7 +47,7 @@ for iM in range(NM):
     for i_bsm in range(Nbsm):
         T = Ts[iM][i_bsm]
         for iz in range(Nz):
-            Tzs[iz][i_bsm][iM] = T[np.logical_and(zs[iz]<=T['z_col'], T['z_col']<zs[iz+1])]
+            Tzs[iz][i_bsm][iM] = T[np.logical_and(zs[iz+1]<=T['z_col'], T['z_col']<zs[iz])]
             # whole += len(Tzs[iz][i_bsm][iM])
         #  #------------- print check selected table correct ----------------
         #     if Tzs[iz][i_bsm][iM]:
@@ -97,45 +97,30 @@ for i_bsm in range(Nbsm):
     plt.savefig(figprefix+'eta3bsm'+str(i_bsm)+'.png')
 
 # ----------- seperate by z_col ---------------
+# ----------- + cumulative over z ---------------
+h_allz = np.zeros(N_mf)
 for iz in range(Nz):
     h = np.zeros(N_mf)
-    h_0 = np.zeros(N_mf); h_1 = np.zeros(N_mf); h_2 = np.zeros(N_mf)
     for i_bsm in range(Nbsm):
         hh = np.zeros(N_mf)
-        hh_0 = np.zeros(N_mf); hh_1 = np.zeros(N_mf); hh_2 = np.zeros(N_mf)
         for iM in range(NM):
             T = Tzs[iz][i_bsm][iM]
             hist, bin_edges = np.histogram(T['Mstar0'],bins=abin_mf,density=False)
             hh = hh + hist*n_base[iM]/1e4
-
-            T_H2 = T[T['Tg_max']<=T_tell] 
-            T_isofail = T[np.logical_and(T['Tg_max']>T_tell, T['iso_col']==0)]
-            T_isoOK =  T[np.logical_and(T['Tg_max']>T_tell, T['iso_col']==1)]
-            # if T_isoOK:
-            #     print('im,ibsm,itr:',iM,i_bsm)
-            #     print(np.min(T_isoOK['Mstar0']), np.max(T_isoOK['Mstar0']))
-            hist0, bin_edges = np.histogram(T_H2['Mstar0'],bins=abin_mf,density=False)
-            hist1, bin_edges = np.histogram(T_isofail['Mstar0'],bins=abin_mf,density=False)
-            hist2, bin_edges = np.histogram(T_isoOK['Mstar0'],bins=abin_mf,density=False)
-            hh_0 = hh_0 + hist0*n_base[iM]/1e4
-            hh_1 = hh_1 + hist1*n_base[iM]/1e4
-            hh_2 = hh_2 + hist2*n_base[iM]/1e4
-        h_0 = h_0 + hh_0*f_bsm[i_bsm]
-        h_1 = h_1 + hh_1*f_bsm[i_bsm]
-        h_2 = h_2 + hh_2*f_bsm[i_bsm]
         h += hh*f_bsm[i_bsm]
+    h_allz += h
 
     plt.figure(figsize=(10,5),dpi=400)
-    plt.bar(x,h/dlog10M,width=wid_mf,color='black',alpha=1,fill=0,label=typenames[0])
-    plt.bar(x,h_0/dlog10M,width=wid_mf,color='C'+str(0),alpha=0.5,label=typenames[0])
-    plt.bar(x,h_1/dlog10M,width=wid_mf,bottom=h_0/dlog10M,color='C'+str(1),alpha=0.5,label=typenames[1])
-    plt.bar(x,h_2/dlog10M,width=wid_mf,bottom=(h_0+h_1)/dlog10M,color='C'+str(2),alpha=0.5,label=typenames[2])
+    plt.bar(x,h_allz/dlog10M,width=wid_mf,color='C0',alpha=0.5,edgecolor=None,label=typenames[0])
+    plt.bar(x,h/dlog10M, bottom=(h_allz-h)/dlog10M,width=wid_mf,edgecolor=None, hatch="//",alpha=0.5,label=typenames[0])
+    # plt.bar(x,h_allz/dlog10M,width=wid_mf,color='C0',alpha=0.5,label=typenames[0])
+    # plt.bar(x,h/dlog10M, bottom=(h_allz-h)/dlog10M,width=wid_mf,edgecolor='black',hatch="//",alpha=0.5,label=typenames[0])
     plt.tick_params(labelsize=fstick)
     # s=r'$v_{bsm}=$'+str(i_bsm)+r'$\sigma$'
     plt.xlabel(r'$\mathrm{M_{\bullet}}$'+r' $(M_{\odot})$',fontsize=fslabel)
     plt.ylabel(r'$\mathrm{dn/d\logM~[Mpc^{-3}dex^{-1}]}$',fontsize=fslabel)
     plt.xscale('log'); plt.yscale('log')
-    plt.text(1e5,1e-3,r'$\eta=$'+'0.'+str(int(10*eta))+'\nz='+str(int(zs[iz]))+r'$\to$'+str(int(zs[iz]+dz)),fontsize=fslabel)
+    plt.text(1e5,1e-3,'z='+str(int(zs[iz]))+r'$\to$'+str(int(zs[iz+1])),fontsize=fslabel)
     plt.xlim(1e2,1e6); plt.ylim(1.e-8,1e-2)
     if i_bsm==0:
         plt.legend(fontsize=fslegend,loc='best')
@@ -175,7 +160,7 @@ s=r'$v_{bsm}=$'+str(i_bsm)+r'$\sigma$'
 plt.xlabel(r'$\mathrm{M_{\bullet}}$'+r' $(M_{\odot})$',fontsize=fslabel)
 plt.ylabel(r'$\mathrm{dn/d\logM~[Mpc^{-3}dex^{-1}]}$',fontsize=fslabel)
 plt.xscale('log'); plt.yscale('log')
-plt.title(r'$\eta=$'+'0.'+str(int(10*eta)),fontsize=fslabel)
+# plt.title(r'$\eta=$'+'0.'+str(int(10*eta)),fontsize=fslabel)
 plt.xlim(1e2,1e6); plt.ylim(1.e-8,1e-2)
 plt.legend(fontsize=fslegend,loc='best')
 plt.tight_layout()
@@ -185,45 +170,27 @@ ascii.write(Table([x,(h_0+h_1+h_2)/dlog10M]),'../IMFhist.dat',names=['M','Phi'],
 formats={'M':'10.2e','Phi':'10.2e'},overwrite=True)
 
 # ----------- seperate by Mbase ---------------
+h_allM = np.zeros(N_mf)
 for iM in range(NM):
-    h_0 = np.zeros(N_mf)
-    h_1 = np.zeros(N_mf)
-    h_2 = np.zeros(N_mf)
+    h = np.zeros(N_mf)
     for i_bsm in range(Nbsm):
-        # hh_0 = np.zeros(N_mf)
-        # hh_1 = np.zeros(N_mf)
-        # hh_2 = np.zeros(N_mf)
-        
         T = Ts[iM][i_bsm]
+        hist, bin_edges = np.histogram(T['Mstar0'],bins=abin_mf,density=False)
+        h += hist * f_bsm[i_bsm]
+    h *= n_base[iM]/1e4
+    h_allM += h
 
-        T_H2 = T[T['Tg_max']<=T_tell] 
-        T_isofail = T[np.logical_and(T['Tg_max']>T_tell, T['iso_col']==0)]
-        T_isoOK =  T[np.logical_and(T['Tg_max']>T_tell, T['iso_col']==1)]
-        # if T_isoOK:
-        #     print(np.min(T_isoOK['Mstar0']), np.max(T_isoOK['Mstar0']))
-        hist0, bin_edges = np.histogram(T_H2['Mstar0'],bins=abin_mf,density=False)
-        hist1, bin_edges = np.histogram(T_isofail['Mstar0'],bins=abin_mf,density=False)
-        hist2, bin_edges = np.histogram(T_isoOK['Mstar0'],bins=abin_mf,density=False)
-        hh_0 = hh_0 + hist0*f_bsm[i_bsm]
-        hh_1 = hh_1 + hist1*f_bsm[i_bsm]
-        hh_2 = hh_2 + hist2*f_bsm[i_bsm]
-        h_0 += hist0*f_bsm[i_bsm]
-        h_1 += hist1*f_bsm[i_bsm]
-        h_2 += hist2*f_bsm[i_bsm]
-
-    h_0 *= n_base[iM]
-    h_1 *= n_base[iM]
-    h_2 *= n_base[iM]
-    # h_2 = h_2 + hh_2*n_base[iM]
     plt.figure(figsize=(10,8),dpi=400)
-    plt.bar(x,h_0/1.e4,width=wid_mf,color='C'+str(0),alpha=0.5,label=typenames[0])
-    plt.bar(x,h_1/1.e4,width=wid_mf,bottom=h_0/1e4,color='C'+str(1),alpha=0.5,label=typenames[1])
-    plt.bar(x,h_2/1.e4,width=wid_mf,bottom=(h_0+h_1)/1e4,color='C'+str(2),alpha=0.5,label=typenames[2])
+    plt.bar(x,h_allM/dlog10M,width=wid_mf,color='C0',alpha=0.5,edgecolor=None,label=typenames[0])
+    plt.bar(x,h/dlog10M, bottom=(h_allM-h)/dlog10M,width=wid_mf,edgecolor=None, hatch="//",alpha=0.5,label=typenames[0])
+    # plt.bar(x,h_allz/dlog10M,width=wid_mf,color='C0',alpha=0.5,label=typenames[0])
+    # plt.bar(x,h/dlog10M, bottom=(h_allz-h)/dlog10M,width=wid_mf,edgecolor='black',hatch="//",alpha=0.5,label=typenames[0])
     plt.tick_params(labelsize=fstick)
     plt.xlabel(r'$\mathrm{M_{\bullet}}$'+r' $(M_{\odot})$',fontsize=fslabel)
     plt.ylabel(r'$\mathrm{dn/d\logM~[Mpc^{-3}dex^{-1}]}$',fontsize=fslabel)
     plt.xscale('log'); plt.yscale('log')
     plt.title(r'$\mathrm{M_h=1e}$'+str(int(log10Ms[iM])),fontsize=fslabel)
-    plt.xlim(1e2,1e6); plt.ylim(1.e-12,1e-2)
+    plt.xlim(1e2,1e6)
+    plt.ylim(1.e-7,1e-2)
     plt.tight_layout()
-    plt.savefig(figprefix+'eta3M'+str(int(log10Ms[iM]))+'.png')
+    plt.savefig(figprefix+'M'+str(int(log10Ms[iM]))+'.png')
