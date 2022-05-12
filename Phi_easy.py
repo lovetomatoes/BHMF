@@ -22,11 +22,11 @@ N_lf = len(bin_cen)
 
 # new_nbase initial: lambda_0=0.01, logM0 = 8.
 t_life, d_fit, l_cut, a = 30, .01, 1., 0.1 # f_seed = .01, log_prob= -9.11
-# t_life, d_fit, l_cut, a = 35, .01, 1.2, -0.2 # f_seed = .1, log_prob= -16.37
-# t_life, d_fit, l_cut, a = 40, .01, .9, -.2 # f_seed = 1., log_prob= -11.45
+t_life, d_fit, l_cut, a = 35, .01, 1.2, -0.2 # f_seed = .1, log_prob= -16.37
+t_life, d_fit, l_cut, a = 40, .01, .9, -.2 # f_seed = 1., log_prob= -11.45
 
 # bests
-t_life, d_fit, l_cut, a = 21.9, .1,  0.87,  0.20 # f_seed = .01, log_prob=-3.16
+# t_life, d_fit, l_cut, a = 21.9, .1,  0.87,  0.20 # f_seed = .01, log_prob=-3.16
 
 x0 = lambda_0/l_cut
 I_toinf = integral_toinf(a,x0)
@@ -44,8 +44,6 @@ n_base = n_base[0]
 i = 0
 Chi2_min = 1e10; find_min = False
 
-i = i+1
-# continue
 ## --------- Mass Function ---------
 dn_MBH = np.zeros(N_mf)
 Nt = np.max((tz-T['t_col'])//t_life)

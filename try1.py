@@ -1,8 +1,8 @@
 from time import sleep
 from PYmodule import *
 from PYmodule.l_intg import *
-from PYmodule.MLF4p_logd import *
-from PYmodule.models_logd import *
+from PYmodule.MLF4p_logd3n2f import *
+from PYmodule.models_logd3n2f import *
 from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
@@ -14,7 +14,11 @@ from scipy.stats import norm, uniform
 t_life, logd_fit, l_cut, a = 30, -2, 1., -.2 # f_seed = 1.
 t_life, logd_fit, l_cut, a = 25, -2, 1.2, -0.2 # f_seed = .1
 # t_life, logd_fit, l_cut, a = 20, -2, 1., 0.1 # f_seed = .01
-print('1e8 L_Edd%.1e'%L_M(1e8,1));exit(0)
+# print('1e8 L_Edd%.1e'%L_M(1e8,1));exit(0)
+
+t_life, logd_fit, l_cut, a = 30, -2, 1., 0.1 # f_seed = .01, log_prob= -9.11
+t_life, logd_fit, l_cut, a = 40, -2, .9, -.2 # f_seed = 1.
+
 x = (t_life, logd_fit, l_cut, a)
 print(lnlike(x))
 print(lnprobab(x))

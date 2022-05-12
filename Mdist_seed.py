@@ -177,6 +177,7 @@ for iM in range(NM):
         T = Ts[iM][i_bsm]
         hist, bin_edges = np.histogram(T['Mstar0'],bins=abin_mf,density=False)
         h += hist * f_bsm[i_bsm]
+    # h *= 1.e-4
     h *= n_base[iM]/1e4
     h_allM += h
 
@@ -188,9 +189,10 @@ for iM in range(NM):
     plt.tick_params(labelsize=fstick)
     plt.xlabel(r'$\mathrm{M_{\bullet}}$'+r' $(M_{\odot})$',fontsize=fslabel)
     plt.ylabel(r'$\mathrm{dn/d\logM~[Mpc^{-3}dex^{-1}]}$',fontsize=fslabel)
-    plt.xscale('log'); plt.yscale('log')
+    # plt.ylabel('fraction',fontsize=fslabel)
+    plt.xscale('log'); plt.ylim(0,3)
+    plt.yscale('log'); plt.ylim(1.e-7,1e-2)
     plt.title(r'$\mathrm{M_h=1e}$'+str(int(log10Ms[iM])),fontsize=fslabel)
     plt.xlim(1e2,1e6)
-    plt.ylim(1.e-7,1e-2)
     plt.tight_layout()
     plt.savefig(figprefix+'M'+str(int(log10Ms[iM]))+'.png')

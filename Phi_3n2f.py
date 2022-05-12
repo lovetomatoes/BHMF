@@ -13,17 +13,20 @@ alpha = 1.
 # LF bins same w/ Matsu18
 N_lf = len(bin_cen)
 
-# initial: lambda_0=0.01, logM0 = 8.
-t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
-t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -15.35
-t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
+# # initial: lambda_0=0.01, logM0 = 8.
+# t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
+# t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -36.82
+# t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
+# # # best:
+# # t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
 
-# # best:
-# t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
-# # 3p init:
-# t_life, d_fit, l_cut, a = 30, 0, 1., -.2 # f_seed = 1.
-# # 3p nan Chi2_M
-# t_life, d_fit, l_cut, a = 53, 0, .133, -.09 # f_seed = 1.
+# new_nbase initial: lambda_0=0.01, logM0 = 8.
+t_life, d_fit, l_cut, a = 30, .01, 1., 0.1 # f_seed = .01, log_prob= -8.14
+t_life, d_fit, l_cut, a = 35, .01, 1.2, -0.2 # f_seed = .1, log_prob= -14.76
+t_life, d_fit, l_cut, a = 40, .01, .9, -.2 # f_seed = 1., log_prob= -10.33
+
+# # bests
+# t_life, d_fit, l_cut, a = 21.9, .1,  0.87,  0.20 # f_seed = .01, log_prob=-3.16
 
 x0 = lambda_0/l_cut
 I_toinf = integral_toinf(a,x0)
@@ -32,20 +35,19 @@ print('t_life, d_fit, l_cut, a,  f_seed, x0, logM0 = ',
 t_life,', ',d_fit,', ', l_cut,', ',a,', ', f_seed,', ', x0,', ', logM0,', ')
 
 t_life *= Myr
-T = Ts[0][0]
+
 
 # print('mean Dt:',np.mean((tz-T['t_col']))/Myr)
 
-i = 0
 Chi2_min = 1e10; find_min = False
 
+N_Mh = 3
 ## --------- Mass Function ---------
 dn_MBH = np.zeros(N_mf)
 for iM in range(N_Mh):
     for i_bsm in range(Nbsm):
         T = Ts[iM][i_bsm]
         Nt = np.max((tz-T['t_col'])//t_life)
-        Nmax = Nt
         dP_MBH = np.zeros(N_mf)
         # t_tot = np.zeros(len(T))
         while Nt>=0:
@@ -68,13 +70,10 @@ for iM in range(N_Mh):
             z_mesh[z_mesh<x0] = x0
             Ps = integral(a,z_mesh,x0)/I_toinf
             dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-
             Nt -= 1
-        dn_MBH += dP_MBH*n_base[iM]*f_bsm[i_bsm]
+        dn_MBH += dP_MBH*n_base[iM]*f_bsm[i_bsm]*f_seed
 
-dn_MBH *= f_seed
-
-consv_ratio = np.nansum(dn_MBH)/np.sum(n_base)/f_seed
+consv_ratio = np.nansum(dn_MBH)/(np.sum(n_base[:N_Mh]))
 print('in Phi: MF conserved fraction=%.10f'%consv_ratio)
 # if consv_ratio<.9:
 #     print('conserved fraction=%.10f'%consv_ratio)
@@ -84,7 +83,7 @@ T = Table(
     names=('M_BH','Phi','W10_MF')
 )
 
-MFname = z6datapre+'MFIMF'
+MFname = z6datapre+'MFIMF_3n2f'
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
@@ -125,7 +124,7 @@ T = Table(
     names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
 )
 
-LFname = z6datapre+'LFIMF'
+LFname = z6datapre+'LFIMF_3n2f'
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
             overwrite=True)
@@ -137,7 +136,7 @@ if np.nanmin([Chi2, Chi2_min]) == Chi2:
     LFname_min = LFname
 
 print('Chi2_M=',Chi2_M,'Chi2_L=',Chi2)
-print('log_prob=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
+print('log_like=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
 #, LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)
 
 # print('time=',time.time()-t1)
