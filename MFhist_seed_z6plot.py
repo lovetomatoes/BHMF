@@ -2,6 +2,7 @@ from PYmodule import *
 from PYmodule.l_intg import *
 # inherited from sk1:BHMF_prev/plotBHMF.py, dist_grow.py;
 # plot histogram version of seed BHMF, after grow, Willott2010 curve.
+# some files generated from MFhist_seed_z6
 t1 = time.time()
 
 z1 = 6

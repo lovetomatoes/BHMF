@@ -1,5 +1,6 @@
 from PYmodule import *
 from PYmodule.l_intg import *
+from datetime import datetime
 # inherited from sk1:BHMF_prev/plotBHMF.py, dist_grow.py;
 # plot histogram version of seed BHMF, after grow, Willott2010 curve.
 t1 = time.time()
@@ -7,93 +8,133 @@ t1 = time.time()
 z1 = 6
 t_end = t_from_z(z1)
 
-T = Ts[0][0]
-
-Nsite = len(T) # N3 <-> 1e7
-M0 = T['Mstar0']
+T = Ts[0][0][:5]
+Nsite = len(T)
 
 f_bsm = 1.
 n_base = n_base[0]
-N_concatenate = int(1e1)
+N_concatenate = int(2e0) # Nsite * N_concatenate samples
 
-h_seed, bin_edges = np.histogram(M0,bins=abin_mf,density=False)
-Phi_seed = h_seed*n_base/float(Nsite)/dlog10M
+# h_seed, bin_edges = np.histogram(M0,bins=abin_mf,density=False)
+# Phi_seed = h_seed*n_base/float(Nsite)/dlog10M
 
-t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
+# 不同f_seed 不影响BH growth 只是参数不同
+# nbase1e-03,4pr8 nsteps=2e4 的 best fits
+# 用f_seed=0.01 相当于1e2*N_BH sample
+f_seed,t_life, logd_fit, l_cut, a = 0.01, 21.8, -1., 0.88, 0.19
+t_life = 500
 
+d_fit = pow(10.,logd_fit)
 t_life *= Myr
 
-# table stores the cdf of lambda 
-I_toinf = integral_toinf(a)
-x = np.logspace(np.log10(lambda_0),1.2,num=200)
-Pa_x = integral(a,x)/I_toinf
+# table stores the cdf of lambda
+x0 = lambda_0/l_cut
+I_toinf = integral_toinf(a,x0)
+x = np.logspace(np.log10(x0),1.2,num=200)
+Pa_x = integral(a,x,x0)/I_toinf
 
-# ascii.write(Table([x,Pa_x]),'../Pa.dat',
-# names=['x','Pa_x'],
-# formats={'x':'10.5e','Pa_x':'10.5e'},
-# overwrite=True)
+Nt = int(np.max((t_end-T['t_col'])//t_life)+1)
 
-## --------- Mass Function ---------
-hist_mf = np.zeros(N_mf)
-h_mf = np.zeros(N_mf)
+# #暂时不用 暂时只写z=6 Mdist Ldist
+# #应该是 M0 * N_concatenate之类的数组 
+# M1s = [M0*np.ones(N_BH)]
+# zs = [z0]
+# L1s = [L_M(M0,.01)*np.ones(N_BH)]
 
-Nt = int(np.max((t_end-T['t_col'])//t_life))
+# # N_bri: count active bright quasar (L>L_bright) numbers from all sample at time t
+# # potentially comparable with luminous quasar density Wang+2019b
+# N_bri = [0]; ts = [0]; L_bright = 1e47
 
-t = T['t_col']
+# print('Mstar0',T['Mstar0'])
+# print("Nsite",Nsite, )
+
 # print(t/Myr, 't_end:', t_end/Myr, 'Nt:',Nt)
 
-for i_concatenate in range(N_concatenate):
-    for i_ in range(Nt+1):
-        if np.any(t + t_life > t_end): 
-            dt = t_life * np.ones(Nsite)
-            dt[ np.where(t + t_life > t_end) ]  = t_end - t[ np.where(t + t_life > t_end)] 
-            t = t + dt
-        else:
-            t = t + t_life
-            dt = t_life
-        uniform_a = np.random.uniform(size=Nsite)
-        ls = np.zeros(Nsite)
-        for i in range(Nsite):
-            ls[i] = x[np.argmax(Pa_x>uniform_a[i])]
-        ls = ls*l_cut
+prex = '../4p/dist'+datetime.now().strftime('%Y-%m-%d_%H-%M_')
+Mfname = prex+'Mevol.dat'
+Mfname = 'Mevol.txt'
+z6fname = 'z6.txt'
 
-        M1 = M1M0_d(M0,ls,dt,d_fit)
-        M0 = M1
-    # ascii.write(Table([t/Myr,np.ones(Nsite)*t_end/Myr]),'../t_evol.dat',
-    # names=['t','t_end'],
-    # formats={'t':'10.5e','t_end':'10.5e'},
-    # overwrite=True)
+with open(Mfname,'w') as fM, open(z6fname, 'w') as fz6:
+    for i_concatenate in range(N_concatenate):
+        M0 = T['Mstar0']; t = t = T['t_col']; 
+        M1s = [M0]; ts =  [t/Myr]; L1s = [L_M(M0,.01)]
+        for i_ in range(Nt):
+            if np.any(t + t_life > t_end): 
+                dt = t_life * np.ones(Nsite)
+                dt[ np.where(t + t_life > t_end) ]  = t_end - t[ np.where(t + t_life > t_end)] 
+                t = t + dt
+            else:
+                t = t + t_life
+                dt = t_life
+            uniform_a = np.random.uniform(size=Nsite)
+            ls = np.zeros(Nsite)
+            for i in range(Nsite):
+                ls[i] = x[np.argmax(Pa_x>uniform_a[i])]
+            ls = ls*l_cut
 
-    hist_mf, bin_edges = np.histogram(M1,bins=abin_mf,density=False)
+            M1 = M1M0_d(M0,ls,dt,d_fit)
+            M0 = M1
+            L1 = L_M(M1,ls)
+            M1s.append(M1); L1s.append(L1); ts.append(t/Myr)
+            # N_bri.append(len(np.where(L1>=L_bright)[0]))
+        
+        M1s = np.array(M1s); L1s = np.array(L1s)
+        M_low = 1e2
+        index = np.where(M1>M_low)
+        np.savetxt(fM, M1s.transpose()[index], fmt='%10.3e')
+        np.savetxt(fz6, np.array([M1,ls,L1]).transpose(), fmt='%10.3e')
 
+print('time after evol:',time.time()-t1, 'Nt=%d'%Nt)
 
-    h_mf += hist_mf
+print('np.min(L1)=%.1e'%np.min(L1))
+print('np.max(L1)=%.1e'%np.max(L1))
+print('np.max(M1)=%.1e'%np.max(M1))
+# print('Mstar0',T['Mstar0'])
 
-Phi_mf = h_mf*n_base/float(Nsite*N_concatenate)/dlog10M
+exit(0)
+prex = z6datapre+'/f{0:d}N{1:d}'.format(abs(int(np.log10(f_seed))),int(np.log10(N_BH)))
+prex = '../dist'+datetime.now().strftime('%Y-%m-%d_%H-%M_')
+# prex = '../f{0:d}N{1:d}'.format(abs(int(np.log10(f_seed))),int(np.log10(N_BH)))
 
-print('time=',time.time()-t1)
+# z=6 BH mass, λ, L_bol
+ascii.write(Table([M1, ls, L1]),prex+'BHatz6.dat',
+names=['M1','ls','L1'],formats={'M1':'10.2e','ls':'10.2e','L1':'10.2e'},overwrite=True)
 
-plt.figure(figsize=(10,8),dpi=400)
-x = (abin_mf[:-1]+abin_mf[1:])/2.
-plt.bar(x, Phi_mf,width=wid_mf,color='C'+str(0),alpha=0.5,label='z=6')
-plt.bar(x, Phi_seed,width=wid_mf,color='C'+str(1),alpha=0.5,label='seeds')
+# all time samples
+M1s = np.array(M1s)
+L1s = np.array(L1s)
+ascii.write(Table([zs,ts,N_bri]),prex+'tN_evol.dat',names=['zs','ts','N_bri'],
+formats={'zs':'10.2f','ts':'10.2e','N_bri':'10.2e'},overwrite=True)
 
-index = np.logical_and(1e7<x, x<1e10)
-plt.plot(x[index],MF(x)[index], '--',c='black',lw=2, label='Willott+ 2010')
-plt.tick_params(labelsize=fstick)
-plt.xlabel(r'$\mathrm{M_{BH}}$' +' '+ r'$\left(\mathrm{M_\odot}\right)$',fontsize=fslabel)
-plt.ylabel(r'$\mathrm{\Phi}$'+' '+r'$\mathrm{\left(Mpc^{-3}dex^{-1}\right)}$',fontsize=fslabel)
-plt.xscale('log'); plt.yscale('log')
-plt.title('z='+str(z),fontsize=fslabel)
-plt.xlim(1e2,1e10); plt.ylim(1e-10,1e-2)
-# plt.grid(True)
-plt.legend(fontsize=fslegend,loc='best')
-plt.tight_layout()
-# plt.savefig(z6figpre+'test.png')
-plt.savefig('../testN{0:.0e}.png'.format(N_concatenate))
+# BH mass evol. M growth tracks above M_low
+M_low = 1e8
+index = np.where(M1>M_low)
+M1s = M1s.transpose()[index]
+L1s = L1s.transpose()[index]
+print('M1s.shape:',M1s.shape)
+np.savetxt(prex+'Mevol.dat', M1s,fmt='%10.3e')
 
-ascii.write(Table([x,Phi_seed,Phi_mf,MF(x)]),
-'../MFhist{0:.0e}.dat'.format(N_concatenate),#z6datapre+'MFhist.dat',
-names=['M_BH','Phi_seed','Phi_mf','MF10'],
-formats={'M_BH':'10.2e','Phi_seed':'10.2e','Phi_mf':'10.2e','MF10':'10.2e'},
+# M1450=-26, Lbol=1e47; M1450=-22, Lbol=2e45
+L_limit = 1e46
+print('np.min(L1)=%.1e'%np.min(L1))
+print('np.max(L1)=%.1e'%np.max(L1))
+print('np.max(M1)=%.1e'%np.max(M1))
+
+lbin = np.linspace(-2,1.2,num=20)
+hist, bin_edges = np.histogram(np.log10(ls),bins=lbin,density=False)
+x = np.logspace(lbin[0]-np.log10(l_cut),lbin[-1]-np.log10(l_cut),num=len(lbin)) # for Pana
+Pana = integral(a,x,x0)/I_toinf
+
+index = np.where(L_limit<L1)
+M1_ = M1[index]; L1_ = L1[index]; ls_ = ls[index]
+print('len(ls) after selection:',len(ls_),' / ',N_BH)
+hist_, bin_edges = np.histogram(np.log10(ls_),bins=lbin,density=False)
+
+strhist_ = 'hist_L%d'%(int(np.log10(L_limit)))
+# lambda histogram file
+ascii.write(Table([bin_edges[:-1],hist_/len(ls),hist/len(ls),Pana[1:]-Pana[:-1]]), 
+prex+strhist_+'.dat',
+names=['log_l',strhist_,'hist_tot','ana'],
+formats={'log_l':'10.2f',strhist_:'10.2e','hist_tot':'10.2e','ana':'10.2e'},
 overwrite=True)

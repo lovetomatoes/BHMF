@@ -7,6 +7,11 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+# a = np.array([1.2, 2.3, 4.5])
+# with open("test.txt",'w') as f:
+#     for i in range(1):
+#         np.savetxt(f, np.array([a,a]).transpose(), fmt='%10.3f')
+# exit(0)
 # test MLF3p lnlike & models same w/ Phi_easy_l.py
 # (after correction of x0->lambda_0/l_cut)
 # from PYmodule.MLF3p import *
