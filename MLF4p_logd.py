@@ -25,15 +25,20 @@ t_life, logd_fit, l_cut, a = 30, -2, 1., 0.1 # f_seed = .01
 t_life, logd_fit, l_cut, a = 35, -2, 1., -0.05 # f_seed = .1
 t_life, logd_fit, l_cut, a = 40, -2, .9, -.2 # f_seed = 1.
 
+# easycali
+t_life, logd_fit, l_cut, a = 21.8, -1, .88, .19 # f_seed = 0.01
+t_life, logd_fit, l_cut, a = 21.4, -3, .89, .15 # f_seed = 0.1
+t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04 # f_seed = 1
+
 
 initial = np.array([t_life,logd_fit,l_cut,a])
 
 ndim = len(initial)
 nwalkers = 100
-nsteps = 10000
+nsteps = 5000
 rball = 1e-4
 
-prex='../4p/nbase{0:.0e}_logd_4pr8_f{1:d}'.format(n_base,int(abs(np.log10(f_seed))))
+prex='../4p/easycali_logd_4pr8_f{1:d}'.format(n_base,int(abs(np.log10(f_seed))))
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'
@@ -89,9 +94,11 @@ plt.savefig(prex+'_chain.png')
 samples = sampler.flatchain
 probs = sampler.flatlnprobability
 theta_max = samples[np.argmax(probs)]
-print('initial paras: t_life={0:.1e}, logd_fit={1:.1e}, l_cut={2:.1f}, a={3:.1f}, f_seed{4:.0e}, prob{5:.1e}'.format(t_life,logd_fit,l_cut,a,f_seed,probs[0]))
+print('initial paras: t_life={0:.2e}, logd_fit={1:.2e}, l_cut={2:.2f}, a={3:.2f}, f_seed{4:.0e}, prob{5:.2e}'.format(t_life,logd_fit,l_cut,a,f_seed,probs[0]))
 print('Gaussian scatter sigma_l,sigma_a:',sigma_l,sigma_a)
 print('best paras:',labels,theta_max,np.max(probs))
+# print(lnlike(initial),lnprobab(initial));# exit(0)
+# exit(0)
 
 all_samples = np.concatenate(
     (samples, probs[:, None]), axis=1

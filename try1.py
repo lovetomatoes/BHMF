@@ -7,9 +7,57 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+from PYmodule.MLF4p_logd import *
+from PYmodule.models_logd import *
+t_life, d_fit, l_cut, a = 21.4, 0.001, .89, .15 # f_seed = 0.1, M1M0_d
+logd_fit = np.log10(d_fit)
+
+x = (t_life, logd_fit, l_cut, a)
+print('MLF4p_logd',lnlike(x))
+print('MLF4p_logd',lnprobab(x))
+print('modles_logd',-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+exit(0)
+
+a = np.arange(0,6,1)
+a = a.reshape(2,3)
+print(a)
+print(a*np.array([1,2,3]))
+print(np.sum(a*np.array([1,2,3]),axis=1))
+exit(0)
+
+abin_mf = np.logspace(1,3,num=3,base=np.e)
+bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
+M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
+n_mf = np.ones(len(M_BH))
+
+dt = .1*t_Edd
+l_cut = 1.; d_fit=0.
+z_mesh0 = kernelS_MBH_M_mesh(abin_mf, abin_mf, dt, 1., l_cut, d_fit)
+z_mesh1 = kernelS_MBH_M_mesh(bin_left, abin_mf, dt, 1., l_cut, d_fit)
+z_mesh2 = kernelS_MBH_M_mesh(M_BH, abin_mf, dt, 1., l_cut, d_fit)
+z_mesh3 = kernelS_MBH_M_mesh(bin_right, abin_mf, dt, 1., l_cut, d_fit)
+
+z_mesh = z_mesh0
+z_mesh = (z_mesh[:,:-1]+z_mesh[:,1:])/2.
+print(z_mesh3)
+print(z_mesh1)
+
+x0 = 0
+
+z_mesh[z_mesh<x0] = x0
+Ps = z_mesh/2
+n_mfgrow = np.nansum( (Ps[:,:-1]-Ps[:,1:])*n_mf, axis=1)
+
+print(np.nansum(n_mfgrow))
+exit(0)
+M1450_1  = np.linspace(-20,-30)
+with open("../4pevol/LF.txt",'w') as f:
+    np.savetxt(f, np.array([M1450_1,LF_M1450(M1450_1)]).transpose(), fmt='%10.3e')
+exit(0)
 # a = np.array([1.2, 2.3, 4.5])
 # with open("test.txt",'w') as f:
-#     for i in range(1):
+#     f.write('{0:10s}{1:10s}{2:10s}\n'.format('M1','ls','L1'))
+#     for i in range(3):
 #         np.savetxt(f, np.array([a,a]).transpose(), fmt='%10.3f')
 # exit(0)
 # test MLF3p lnlike & models same w/ Phi_easy_l.py

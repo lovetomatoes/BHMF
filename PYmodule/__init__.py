@@ -34,7 +34,7 @@ a = -.7
 
 lambda_0 = 0.01 # starting point of lambda; x0 now changable
 x0 = 0.01 # integration of l/l_cut, starting point; previous context
-f_seed = .01
+f_seed = 1
 
 l_mean, a_mean = 0.6, 0.
 sigma_l, sigma_a = .4, .3
@@ -164,8 +164,8 @@ def M1M0_d(M0, l, dt, delta, M_cut = M_cut):
 
         if np.all(abs(dM1) < .01*M1):
             break
-        if i>5:
-            print('i: %d too much interation'%i)
+        # if i>5:
+        #     print('i: %d too much interation'%i)
     if i==9:
         print('not converge...')
     # print('final match?',np.log(M1/M0) + (pow(M1, delta)-pow(M0, delta))/delta - l*dt/eta_0/t_Edd )
@@ -226,9 +226,9 @@ def kernelS_MBH(Mgrow_ratio, dt, f_duty, l_cut):
 def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
     M_cut = pow(10., logM_0)
     if d_fit:
-        lbd = (np.log(M1/M0) + (pow(M1/M_cut,d_fit)-pow(M0/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*t_Edd) )
+        lbd = .5*(np.log(M1/M0) + (pow(M1/M_cut,d_fit)-pow(M0/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*t_Edd) )
     else:
-        lbd = 2.* np.log(M1/M0)  / ( f_duty*dt/(0.1*t_Edd) )
+        lbd = np.log(M1/M0)  / ( f_duty*dt/(0.1*t_Edd) )
     return lbd/l_cut
 
 def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
@@ -500,7 +500,7 @@ for iM in range(N_Mh):
     Ts.append(TM)
 
 # MF bins
-abin_mf =  np.logspace(2,12,num=100) # default endpoint=True
+abin_mf =  np.logspace(2,12,num=300) # default endpoint=True
 M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
 bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
 wid_mf = bin_right - bin_left

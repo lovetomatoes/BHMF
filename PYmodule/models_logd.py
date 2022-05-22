@@ -16,8 +16,8 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
     t_life, logd_fit, l_cut, a = theta
     d_fit = pow(10.,logd_fit)
     t_life = t_life * Myr # wli: not *=!!!!!! theta changed by this
-    I_toinf = integral_toinf(a,lambda_0/l_cut)
-
+    x0 = lambda_0/l_cut
+    I_toinf = integral_toinf(a,x0)
 ## --------- Mass Function ---------
     tz = t_from_z(z)
     dn_MBH = np.zeros(N_mf)
@@ -33,19 +33,30 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
         # new seeds (using 2d meshgrids)
         if len(T_seed):
             # z_mesh = kernelS_MBHmesh(abin_mf, T_seed['Mstar0'], dt_seed, l_cut)
-            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)*l_cut
-            z_mesh[z_mesh<lambda_0] = lambda_0
-            Ps = integral(a,z_mesh/l_cut,lambda_0/l_cut)/I_toinf
+            z_mesh = kernelS_MBH_M_mesh(abin_mf, T_seed['Mstar0'], dt_seed, 1., l_cut, d_fit)
+            z_mesh[z_mesh<x0] = x0
+            Ps = integral(a,z_mesh,x0)/I_toinf
             dP_seed = Ps[1:,:] - Ps[:-1,:]
             dP_seed = np.nansum(dP_seed, axis=1)/len(T)
         else:
             dP_seed = 0.
         # prev BHMF
         # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
-        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)*l_cut
-        z_mesh[z_mesh<lambda_0] = lambda_0
-        Ps = integral(a,z_mesh/l_cut,lambda_0/l_cut)/I_toinf
+        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh[z_mesh<x0] = x0
+        Ps = integral(a,z_mesh,x0)/I_toinf
         dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
+
+        z_mesh_left = kernelS_MBH_M_mesh(bin_left, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh_left[z_mesh_left<x0] = x0
+        Ps = integral(a,z_mesh_left,x0)/I_toinf
+        dP_MBH_left = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
+        z_mesh_right = kernelS_MBH_M_mesh(bin_right, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh_right[z_mesh_right<x0] = x0
+        Ps = integral(a,z_mesh_right,x0)/I_toinf
+        dP_MBH_right = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
+        
+        dP_MBH = (dP_MBH+dP_MBH_left+dP_MBH_right)/3.
 
         Nt -= 1
 
@@ -65,9 +76,9 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
     Chi2_M =  np.sum( pow((ys - y_model)/mf_err, 2))
 
 # # --------- Luminosity Function ---------
-    z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)*l_cut
-    z_mesh[z_mesh<lambda_0] = lambda_0
-    Ps = integral(a,z_mesh/l_cut,lambda_0/l_cut)/I_toinf
+    z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
+    z_mesh[z_mesh<x0] = x0
+    Ps = integral(a,z_mesh,x0)/I_toinf
     dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
     Phi = dPhi_mesh/bin_wid
     Phi *= 1e9
