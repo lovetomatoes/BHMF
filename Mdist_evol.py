@@ -21,6 +21,11 @@ N = Nsite*N_concatenate
 # 用f_seed=0.01 相当于1e2*N_BH sample
 t_life, logd_fit, l_cut, a = 21.8, -3., 0.88, 0.19 # f_seed = 0.01
 t_life, logd_fit, l_cut, a = 21.4, -3, .89, .15 # f_seed = 0.1
+t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04 # f_seed = 1
+
+# easycali bests; f_seed=0.01 still error, because of logd_fit=-1 not exp growth; debug??
+# t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
+t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
 
 d_fit = pow(10.,logd_fit)
 t_life *= Myr
@@ -40,15 +45,16 @@ Nt = int(np.max((t_end-T['t_col'])//t_life)+1)
 # print('Mstar0',T['Mstar0'])
 # print("Nsite",Nsite, 't:',t/Myr,'t_end:',t_end/Myr, 'Nt:',Nt)
 
-prex = '../4pevol/distN%d_'%(int(np.log10(N)))+datetime.now().strftime('%m%d%H%M_')
+prex = '../4pevol/distf{0:d}N{1:d}_'.format(int(abs(np.log10(f_seed))),int(np.log10(N)))+datetime.now().strftime('%m%d%H%M_')
 Mfname = prex+'Mevol.txt'
+lfname = prex+'levol.txt'
 z6fname = prex+'BHatz6.txt'
 
-with open(Mfname,'w') as fM, open(z6fname, 'w') as fz6:
+with open(Mfname,'w') as fM, open(z6fname, 'w') as fz6, open(lfname, 'w') as fl:
     fz6.write('{0:10s}{1:10s}{2:10s}{3:10s}\n'.format('M1','ls','L1','M1450_1'))
     for i_concatenate in range(N_concatenate):
         M0 = T['Mstar0']; t = T['t_col']; 
-        M1s = [M0]; ts =  [t/Myr]
+        M1s = [M0]; ts =  [t/Myr]; l1s = [.01*np.ones(len(M0))]
         for i_ in range(Nt):
             if np.any(t + t_life > t_end): 
                 dt = t_life * np.ones(Nsite)
@@ -69,13 +75,15 @@ with open(Mfname,'w') as fM, open(z6fname, 'w') as fz6:
             M0 = M1
             L1 = L_M(M1,ls)
             M1450_1 = M1450_Lbol(L1)
-            # M1s.append(M1); ts.append(t/Myr)
-            # # N_bri.append(len(np.where(L1>=L_bright)[0]))
-        print(np.allclose(t_end,t))
-        # M1s = np.array(M1s)
-        # M_low = 1e8
-        # index = np.where(M1>M_low)
-        # np.savetxt(fM, M1s.transpose()[index], fmt='%10.3e')
+            M1s.append(M1); ts.append(t/Myr); l1s.append(ls)
+            # N_bri.append(len(np.where(L1>=L_bright)[0]))
+        # print(np.allclose(t_end,t))
+
+        M1s = np.array(M1s); l1s = np.array(l1s)
+        M_low = 1e8
+        index = np.where(M1>M_low)
+        np.savetxt(fM, M1s.transpose()[index], fmt='%10.3e')
+        np.savetxt(fl, l1s.transpose()[index], fmt='%10.3e')
         np.savetxt(fz6, np.array([M1,ls,L1,M1450_1]).transpose(), fmt='%10.3e')
 
 pyname = sys.argv[0]

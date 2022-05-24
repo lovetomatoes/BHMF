@@ -7,6 +7,18 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+a = np.array([0,1,2,3,4,5]); 
+print(np.sum(a<2))
+i = np.argmax(a)
+print(i,a[:i+1])
+b = np.array([np.nan,1,2,np.nan]); 
+print(linear(a,b,-1))
+print(linear(a,b,0))
+print(linear(a,b,.5))
+print(linear(a,b,[.5,1.5]))
+print(linear(a,b,4))
+print(np.log(np.nan))
+exit(0)
 from PYmodule.MLF4p_logd import *
 from PYmodule.models_logd import *
 t_life, d_fit, l_cut, a = 21.4, 0.001, .89, .15 # f_seed = 0.1, M1M0_d

@@ -34,7 +34,7 @@ a = -.7
 
 lambda_0 = 0.01 # starting point of lambda; x0 now changable
 x0 = 0.01 # integration of l/l_cut, starting point; previous context
-f_seed = 1
+f_seed = .01
 
 l_mean, a_mean = 0.6, 0.
 sigma_l, sigma_a = .4, .3
@@ -141,6 +141,14 @@ eta_max = .5; eta_min = 0.057 # 0.057
 #     # the following exponential formula not continuous
 #     # !!!!!!!! M1[eta.mask] = M0[eta.mask]*np.exp(mu_fit*f_duty*dt/(eta_min*t_Edd))    
 #     return M1
+
+def linear(xs,ys,x):
+    i = np.argmax(xs>x)
+    if i==0:
+        i = 1
+    t = (x-xs[i-1])/(xs[i]-xs[i-1])
+    return ys[i-1]*(1-t)+ys[i]*t
+    # return np.nansum([ys[i]*(1-t), ys[i+1]*t])
 
 def M1M0_e(M0,dt,l):
     M1 = M0*np.exp(l*dt/(.1*t_Edd))

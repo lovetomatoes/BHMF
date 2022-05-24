@@ -2,7 +2,15 @@ from PYmodule import *
 from PYmodule.l_intg import *
 # analyse BHMF, ERDF from sampling in Mdist_evol
 # later plot hist file from Mdist_evol directly 
-prex = '../4pevol/dist05191408_'
+prex = '../4pevol/distf1N5_05232116_'
+# prex = '../4pevol/distf1N7_05232217_'
+
+T_seed = Ts[0][0]
+tz = t_from_z(6.)/Myr
+t_life = 19.6 # f_seed = 0.1
+t0 = np.min(T_seed['t_col']/Myr)
+# print(tz,t_life,t0);exit(0)
+t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
 
 # z=6 BH mass, λ, L_bol
 T_z6 = ascii.read(prex+'BHatz6.txt', guess=False, delimiter=' ')
@@ -19,42 +27,113 @@ hist, bin_edges = np.histogram(np.log10(ls),bins=lbin,density=False)
 x = np.logspace(lbin[0]-np.log10(l_cut),lbin[-1]-np.log10(l_cut),num=len(lbin)) # for Pana
 Pana = integral(a,x,x0)/I_toinf
 
-# SMl1 = ls[M1>1e9] # super-massive BHs >1e9
+SMl1 = ls[M1>1e9] # super-massive BHs >1e9
 
 # T_evol = ascii.read(prex+'tN_evol.dat', guess=False, delimiter=' ')
 # zs, ts, N_bri = T_evol['zs'],T_evol['ts'],T_evol['N_bri']
 
-# T_M = np.loadtxt(prex+'Mevol.dat') # each line a BH growth track; all end with M>1e8
-# plt.figure(figsize=(10,10),dpi=400)
-# # all BHs>1e8
-# for i in range(len(T_M)):
-#     plt.plot(zs,T_M[i], c='grey', alpha=0.5)
+T_M = np.loadtxt(prex+'Mevol.txt') # each line a BH growth track; all end with M>1e8
+T_l = np.loadtxt(prex+'levol.txt') # each line a lambda track; all end with M>1e8
 
-# M1 = T_M.transpose()[-1]
-# # print('M1',M1,T_M.shape,'len zs',len(zs))
-# # i = np.argmax(M1); print('max M1 = %.1e'%M1[i])
-# # plt.plot(zs,T_M[i], '--',c='black',lw=2)
+# growth tracks for all BHs(>1e8)
+plt.figure(figsize=(10,10),dpi=400)
+for i in range(len(T_M)):
+    # T_M[i] finally stay at final mass with dt=0; extract growing tracks
+    len_series = np.argmax(T_M[i]) + 1
+    # checkpoint series, back to t_seed (ideal)
+    ts = np.arange(tz,t0-t_life,-t_life)[:len_series]
+    zs = z_tH(ts)[::-1]
+    plt.plot(zs,T_M[i][:len_series], c='grey', alpha=0.5)
 
-# SMM1 = M1[M1>1e9]
-# print('number of >1e9 MBH:',sum(M1>1e9))
-# for i in range(len(SMM1)):
-#     plt.plot(zs,T_M[M1>1e9][i],c='C%d'%i)
-#     plt.plot(zs,M1M0_e(SMM1[i],-(ts[-1]-ts)*Myr,SMl1[i]),'--',c='C%d'%i)
-#     plt.plot(zs,M1M0_e(SMM1[i],-(ts[-1]-ts)*Myr,1),'.',c='C%d'%i)
-#     plt.scatter(6,SMM1[i],marker='D',s=30,c='C%d'%i)
+M1 = T_M.transpose()[-1]
+# print('M1',M1,T_M.shape,'len zs',len(zs))
+# i = np.argmax(M1); print('max M1 = %.1e'%M1[i])
+# plt.plot(zs,T_M[i], '--',c='black',lw=2)
 
-# plt.yscale('log')
-# plt.xlim(np.max(zs),np.min(zs))
-# plt.xlim(30,5.8)
+SMM1 = M1[M1>1e9]
+print('number of >1e9 MBH:',sum(M1>1e9))
+# same as prev. specially for >1e9 SMBHs
+for i in range(len(SMM1)):
+    len_series = np.argmax(T_M[M1>1e9][i]) + 1
+    ts = np.arange(tz,t0-t_life,-t_life)[:len_series]
+    zs = z_tH(ts)[::-1]
+    ts = ts[::-1]
+    plt.plot(zs,T_M[M1>1e9][i][:len_series],c='C%d'%i)
+    plt.plot(zs,M1M0_e(SMM1[i],-(ts[-1]-ts)*Myr,SMl1[i]),'--',c='C%d'%i)
+    plt.plot(zs,M1M0_e(SMM1[i],-(ts[-1]-ts)*Myr,1),'.',c='C%d'%i)
+    plt.scatter(6,SMM1[i],marker='D',s=30,c='C%d'%i)
+
+plt.yscale('log')
+plt.xlim(np.max(zs),np.min(zs))
+plt.xlim(30,5.8)
+plt.ylim(1e2,1e10)
+plt.grid(True)
+plt.xlabel(r'$\mathrm{z}$',fontsize=fslabel)
+plt.ylabel(r'$\mathrm{M_{BH}~(M_\odot)}$',fontsize=fslabel)
+# plt.legend(loc='best',fontsize=fslabel)
+plt.xticks(fontsize=fstick);plt.yticks(fontsize=fstick)
+plt.savefig(prex+'Mevol.png', dpi=300, bbox_inches='tight')
+
+# f_duty (λ>1) in growth history, v.s. final M_BH
+plt.figure(figsize=(10,10),dpi=400)
+f_duty = np.zeros(len(T_M))
+for i in range(len(T_M)):
+    len_series = np.argmax(T_M[i]) + 1
+    ts = np.arange(tz,t0-t_life,-t_life)[:len_series]
+    l1s = T_l[i][:len_series]
+    # f_duty: Δt of λ>1 cycles, devided by total Δt
+    f_duty[i] = t_life*np.sum(l1s>1.)/(ts[0]-ts[-1])
+plt.scatter(M1,f_duty)
+plt.xscale('log')
 # plt.ylim(1e2,1e10)
-# plt.grid(True)
-# plt.xlabel(r'$\mathrm{z}$',fontsize=fslabel)
-# plt.ylabel(r'$\mathrm{M_{BH}~(M_\odot)}$',fontsize=fslabel)
-# # plt.legend(loc='best',fontsize=fslabel)
-# plt.xticks(fontsize=fstick);plt.yticks(fontsize=fstick)
-# plt.savefig(prex+'Mevol.png', dpi=300, bbox_inches='tight')
+plt.grid(True)
+plt.xlabel(r'$\mathrm{M_{BH}~(M_\odot)}$',fontsize=fslabel)
+plt.ylabel(r'$\mathrm{f_{duty}~(\lambda>1)}$',fontsize=fslabel)
+# plt.legend(loc='best',fontsize=fslabel)
+plt.xticks(fontsize=fstick);plt.yticks(fontsize=fstick)
+plt.savefig(prex+'f_duty.png', dpi=300, bbox_inches='tight')
 
-# exit(0)
+
+# dP/dlnλ, in growth history; selected by final M_BH>1e8, 1e9
+# biased to high λ than Schechter model Pλ 
+plt.figure(figsize=(10,10),dpi=400)
+lbin = np.linspace(-2,1.2,num=20)
+hist_M8 = np.zeros(len(lbin)-1)
+x = np.logspace(lbin[0]-np.log10(l_cut),lbin[-1]-np.log10(l_cut),num=len(lbin)) # for Pana
+Pana = integral(a,x,x0)/I_toinf
+
+for i in range(len(T_M)):
+    len_series = np.argmax(T_M[i]) + 1
+    ts = np.arange(tz,t0-t_life,-t_life)[:len_series]
+    zs = z_tH(ts)[::-1]
+    l1s = T_l[i][:len_series]
+    hist, bin_edges = np.histogram(np.log10(l1s),bins=lbin,density=False)
+    hist_M8 += hist/len_series/len(T_M)
+hist_M9 = np.zeros(len(lbin)-1)
+print(len(SMM1))
+print(T_l[M1>1e9].transpose()[-1])
+for i in range(len(SMM1)):
+    len_series = np.argmax(T_M[M1>1e9][i]) + 1
+    ts = np.arange(tz,t0,-t_life)[:len_series]
+    zs = z_tH(ts)[::-1]
+    l1s = T_l[M1>1e9][i][:len_series]
+    hist, bin_edges = np.histogram(np.log10(l1s),bins=lbin,density=False)
+    hist_M9 += hist/len_series/len(SMM1)
+
+plt.plot(lbin[:-1],Pana[1:]-Pana[:-1],c='black')
+hist, bin_edges = np.histogram(np.log10(ls),bins=lbin,density=False)
+plt.bar(lbin[:-1], hist/len(ls),width=lbin[1]-lbin[0],fill=0,alpha=0.5,label='M9')
+plt.bar(lbin[:-1], hist_M9,width=lbin[1]-lbin[0],color='C'+str(0),alpha=0.5,label='M9')
+plt.bar(lbin[:-1], hist_M8,width=lbin[1]-lbin[0],color='C'+str(1),alpha=0.5,label='M8')
+
+plt.yscale('log')
+plt.xlabel(r'$\mathrm{\log\lambda}$',fontsize=fslabel)
+plt.ylabel(r'$\mathrm{dP/d\log\lambda}$',fontsize=fslabel)
+# plt.legend(loc='best',fontsize=fslabel)
+plt.xticks(fontsize=fstick);plt.yticks(fontsize=fstick)
+plt.savefig(prex+'lambda_hist.png', dpi=300, bbox_inches='tight')
+
+exit(0)
 
 # plot z=6 λ dist.
 L_limit = 1e45
