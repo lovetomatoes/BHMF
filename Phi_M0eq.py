@@ -8,45 +8,24 @@ Ntr = 10000
 eta = 0.3
 z = int(6)
 tz = t_from_z(z)
-alpha = 1.
+tz = 300*Myr
 
-# LF bins same w/ Matsu18
-N_lf = len(bin_cen)
-
-# # initial: lambda_0=0.01, logM0 = 8.
-# t_life, d_fit, l_cut, a = 20, .01, 1., 0.1 # f_seed = .01, log_prob= -9.89
-# t_life, d_fit, l_cut, a = 25, .01, 1.2, -0.2 # f_seed = .1, log_prob= -36.82
-# t_life, d_fit, l_cut, a = 30, .01, 1., -.2 # f_seed = 1., log_prob= -13.88
-# # # best:
-# # t_life, d_fit, l_cut, a = 19.8, 1.2e-3, 1.1557, -1.8e-01 # f_seed = 1.
-
-# new_nbase initial: lambda_0=0.01, logM0 = 8.
-t_life, d_fit, l_cut, a = 30, .01, 1., 0.1 # f_seed = .01, log_prob= -9.11
-t_life, d_fit, l_cut, a = 35, .01, 1.2, -0.2 # f_seed = .1, log_prob= -16.37
-t_life, d_fit, l_cut, a = 40, .01, .9, -.2 # f_seed = 1., log_prob= -11.45
-
-t_life, d_fit, l_cut, a = 21.4, 0., .89, .15 # f_seed = 0.1, M1M0_e
-t_life, d_fit, l_cut, a = 21.4, 0.001, .89, .15 # f_seed = 0.1, M1M0_d
-
-# after more abin_mf bins, after calibration w/ direct sampling; 
-# easycali initial: 
-t_life, logd_fit, l_cut, a = 21.8, -1, .88, .19 # f_seed = 0.01
-t_life, logd_fit, l_cut, a = 21.4, -3, .89, .15 # f_seed = 0.1
-t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04 # f_seed = 1
-# easycali best:
-t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17 # f_seed = 0.01, easycali
-# t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12 # f_seed = 0.1
-
+d_fit = pow(10., -.5)
+l_cut = 1.
+a = .1
+t_life = 15
+tz = 500*Myr
 
 x0 = lambda_0/l_cut
 I_toinf = integral_toinf(a,x0)
 
-d_fit = pow(10.,logd_fit)
 print('t_life, d_fit, l_cut, a,  f_seed, x0, logM0 = ', 
 t_life,', ',d_fit,', ', l_cut,', ',a,', ', f_seed,', ', x0,', ', logM0,', ')
 
 t_life *= Myr
 T = Ts[0][0]
+T['t_col'] = 20*Myr*np.ones(len(T))
+T['Mstar0'] = 1000
 f_bsm = 1.
 n_base = n_base[0]
 
@@ -61,9 +40,13 @@ Nt = np.max((tz-T['t_col'])//t_life)
 Nmax = Nt
 dP_MBH = np.zeros(N_mf)
 # t_tot = np.zeros(len(T))
+DT = 0
+M0s = np.logspace(2,12,num=10000)
+dlog10M0 = np.log10(M0s[1]/M0s[0])
+
 while Nt>=0:
     t_point = tz - Nt*t_life
-    T_seed = T[np.logical_and(t_point-t_life<=T['t_col'],T['t_col']<t_point)]
+    T_seed = T[np.logical_and(t_point-t_life<T['t_col'],T['t_col']<=t_point)]
     dt_seed = t_point - T_seed['t_col']
     dP_MBH_prev = dP_MBH.copy()
     # new seeds (using 2d meshgrids)
@@ -74,29 +57,34 @@ while Nt>=0:
         Ps = integral(a,z_mesh,x0)/I_toinf
         dP_seed = Ps[1:,:] - Ps[:-1,:]
         dP_seed = np.nansum(dP_seed, axis=1)/len(T)
+        DT+=dt_seed
     else:
         dP_seed = np.zeros(N_mf)
     # prev BHMF
-    # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
-    z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
-    z_mesh[z_mesh<x0] = x0
-    Ps = integral(a,z_mesh,x0)/I_toinf
-    dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
+    DT+= t_life
+    dP_MBH_prev = np.exp(np.interp(np.log(M0s),np.log(M_BH),np.log(dP_MBH))) # M0 grow, consv_ratio=0
+    dP_MBH_prev = np.interp(np.log(M0s),np.log(M_BH),dP_MBH)
+    # print(dP_MBH_prev)
+    eps = 1e-5
+    for iM1 in range(N_mf):
+        # kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
+        l1 = kernelS_MBH_M(M_BH[iM1],         M0s,t_life,1.,l_cut,d_fit)
+        l2 = kernelS_MBH_M(M_BH[iM1]*(1.+eps),M0s,t_life,1.,l_cut,d_fit)
+        dlnldlogM1 = np.log(l2/l1)/np.log10(1.+eps)
+        klbd = dlnldlogM1 * pow(l1,a)*np.exp(-l1)/I_toinf
+        # dP = (integral(a,l2,x0)-integral(a,l1,x0))/I_toinf
+        # klbd = dP/np.log10(1.+eps)
+        # klbd[np.logical_and(l1<x0, l2<x0)] = 0
+        klbd[l1<x0] = 0
+        # print( 'sum of Plambda',np.nansum(klbd/dlnldlogM1),dlog10M )
+        dP_MBH[iM1] = np.nansum(klbd*dP_MBH_prev*dlog10M0) + dP_seed[iM1]/dlog10M
 
-    z_mesh_left = kernelS_MBH_M_mesh(bin_left, abin_mf, t_life, 1., l_cut, d_fit)
-    z_mesh_left[z_mesh_left<x0] = x0
-    Ps = integral(a,z_mesh_left,x0)/I_toinf
-    dP_MBH_left = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-    z_mesh_right = kernelS_MBH_M_mesh(bin_right, abin_mf, t_life, 1., l_cut, d_fit)
-    z_mesh_right[z_mesh_right<x0] = x0
-    Ps = integral(a,z_mesh_right,x0)/I_toinf
-    dP_MBH_right = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-    
-    dP_MBH = (dP_MBH+dP_MBH_left+dP_MBH_right)/3.
+    # print('each cycle: consv_ratio =',np.nansum(dP_MBH*dlog10M))
 
     Nt -= 1
-
+print('DT=',np.mean((DT-t_life)/Myr))
 dn_MBH = dP_MBH*n_base*f_bsm*f_seed
+dn_MBH = dP_MBH*n_base*f_bsm*f_seed*dlog10M
 
 consv_ratio = np.nansum(dn_MBH)/(n_base*f_seed)
 print('in Phi_easy: MF conserved fraction=%.10f'%consv_ratio)
@@ -108,7 +96,7 @@ T = Table(
     names=('M_BH','Phi','W10_MF')
 )
 
-MFname = z6datapre+'Phi_easyMF'
+MFname = z6datapre+'Phi_M0convMF'
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
@@ -128,6 +116,15 @@ y_model = np.log10( (dn_MBH/dlog10M)[index][::len(index[0])//10] )
 y_err = pow(np.log10(xs)-8.5,2)/3. + .2 # from 0.2 to 0.95
 Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
 
+lbin = np.arange(-3,3,0.1)
+x = np.logspace(lbin[0]-np.log10(l_cut),lbin[-1]-np.log10(l_cut),num=len(lbin)) # for Pana
+Pana = integral(a,x,x0)/I_toinf
+with open(z6datapre+"Phi_M0convERDFz6.txt",'w') as f:
+    np.savetxt(f, np.array([lbin[:-1],Pana[1:]-Pana[:-1]]).transpose(), fmt='%10.3e')
+
+print('time=',time.time()-t1)
+exit(0)
+
 # # --------- Luminosity Function ---------
 z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
 z_mesh[z_mesh<x0] = x0
@@ -146,11 +143,11 @@ Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(l
 off_L = np.nanmax(abs( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err)))
 
 T = Table(
-    [bin_cen,Phi_obs,Phi_DO,Phi,Chi2*np.ones(N_lf)],
-    names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
+    [bin_cen,Phi_obs,Phi_DO,Phi],
+    names=('bin_cen','Phi_obs','Phi_DO','Phi')
 )
 
-LFname = z6datapre+'Phi_easyLF'
+LFname = z6datapre+'Phi_M0convLF'
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
             overwrite=True)
@@ -165,4 +162,4 @@ print('Chi2_M=',Chi2_M,'Chi2_L=',Chi2)
 print('log_prob=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
 #, LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)
 
-print('time=',time.time()-t1)
+# print('time=',time.time()-t1)

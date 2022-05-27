@@ -30,6 +30,7 @@ print('MLF4p_logd',lnprobab(x))
 print('modles_logd',-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
 exit(0)
 
+# 2d times 1d array
 a = np.arange(0,6,1)
 a = a.reshape(2,3)
 print(a)

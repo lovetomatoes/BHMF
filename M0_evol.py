@@ -13,18 +13,19 @@ T['t_col'] = 20*Myr*np.ones(len(T))
 T['Mstar0'] = 1000
 
 Nsite = len(T)
-N_concatenate = int(3e0) # Nsite * N_concatenate samples
+N_concatenate = int(3e1) # Nsite * N_concatenate samples
 N = Nsite*N_concatenate
 
 f_bsm = 1.
 n_base = n_base[0]
 
-logd_fit = -3
+d_fit = pow(10., -.5)
 l_cut = 1.
-a = .5
-t_life = 5
+a = .1
+t_life = 15
+tz = 500*Myr
 
-d_fit = pow(10.,logd_fit)
+t_end = tz
 t_life *= Myr
 
 # table stores the cdf of lambda

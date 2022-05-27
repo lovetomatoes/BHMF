@@ -63,7 +63,7 @@ dP_MBH = np.zeros(N_mf)
 # t_tot = np.zeros(len(T))
 while Nt>=0:
     t_point = tz - Nt*t_life
-    T_seed = T[np.logical_and(t_point-t_life<=T['t_col'],T['t_col']<t_point)]
+    T_seed = T[np.logical_and(t_point-t_life<T['t_col'],T['t_col']<=t_point)]
     dt_seed = t_point - T_seed['t_col']
     dP_MBH_prev = dP_MBH.copy()
     # new seeds (using 2d meshgrids)
@@ -77,29 +77,25 @@ while Nt>=0:
     else:
         dP_seed = np.zeros(N_mf)
     # prev BHMF
-    # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
-    z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
-    z_mesh[z_mesh<x0] = x0
-    Ps = integral(a,z_mesh,x0)/I_toinf
-    dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-
-    z_mesh_left = kernelS_MBH_M_mesh(bin_left, abin_mf, t_life, 1., l_cut, d_fit)
-    z_mesh_left[z_mesh_left<x0] = x0
-    Ps = integral(a,z_mesh_left,x0)/I_toinf
-    dP_MBH_left = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-    z_mesh_right = kernelS_MBH_M_mesh(bin_right, abin_mf, t_life, 1., l_cut, d_fit)
-    z_mesh_right[z_mesh_right<x0] = x0
-    Ps = integral(a,z_mesh_right,x0)/I_toinf
-    dP_MBH_right = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-    
-    dP_MBH = (dP_MBH+dP_MBH_left+dP_MBH_right)/3.
+    dP_MBH_prev = np.exp(np.interp(np.log(M0s),np.log(M_BH),np.log(dP_MBH))) # M0 grow, consv_ratio=0
+    # print(dP_MBH_prev)
+    for iM1 in range(N_mf):
+        # kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
+        l1 = kernelS_MBH_M(M_BH[iM1],         M0s,t_life,1.,l_cut,d_fit)
+        l2 = kernelS_MBH_M(M_BH[iM1]*(1.+eps),M0s,t_life,1.,l_cut,d_fit)
+        dlnldlogM1 = np.log(l2/l1)/np.log10(1.+eps)
+        klbd = dlnldlogM1 * pow(l1,a)*np.exp(-l1)/I_toinf
+        klbd[l1<x0] = 0
+        # print( 'sum of Plambda',np.nansum(klbd/dlnldlogM1),dlog10M )
+        dP_MBH[iM1] = np.nansum(klbd*dP_MBH_prev*dlog10M0) + dP_seed[iM1]/dlog10M
+    # print('each cycle: consv_ratio =',np.nansum(dP_MBH*dlog10M))
 
     Nt -= 1
 
-dn_MBH = dP_MBH*n_base*f_bsm*f_seed
+dn_MBH = dP_MBH*n_base*f_bsm*f_seed*dlog10M
 
 consv_ratio = np.nansum(dn_MBH)/(n_base*f_seed)
-print('in Phi_easy: MF conserved fraction=%.10f'%consv_ratio)
+print('in Phi_easyconv: MF conserved fraction=%.10f'%consv_ratio)
 # if consv_ratio<.9:
 #     print('conserved fraction=%.10f'%consv_ratio)
 
@@ -108,7 +104,7 @@ T = Table(
     names=('M_BH','Phi','W10_MF')
 )
 
-MFname = z6datapre+'Phi_easyMF'
+MFname = z6datapre+'Phi_easyconvMF'
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
@@ -150,7 +146,7 @@ T = Table(
     names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
 )
 
-LFname = z6datapre+'Phi_easyLF'
+LFname = z6datapre+'Phi_easyconvLF'
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
             overwrite=True)

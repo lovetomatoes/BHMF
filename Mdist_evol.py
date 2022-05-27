@@ -24,8 +24,8 @@ t_life, logd_fit, l_cut, a = 21.4, -3, .89, .15 # f_seed = 0.1
 t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04 # f_seed = 1
 
 # easycali bests; f_seed=0.01 still error, because of logd_fit=-1 not exp growth; debug??
-# t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
-t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
+t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
+# t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
 
 d_fit = pow(10.,logd_fit)
 t_life *= Myr

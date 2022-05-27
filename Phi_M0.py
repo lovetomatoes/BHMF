@@ -10,10 +10,11 @@ z = int(6)
 tz = t_from_z(z)
 tz = 300*Myr
 
-d_fit = 1e-3
+d_fit = pow(10., -.5)
 l_cut = 1.
-a = .5
-t_life = 5
+a = .1
+t_life = 15
+tz = 500*Myr
 
 
 x0 = lambda_0/l_cut
@@ -56,7 +57,7 @@ while Nt>=0:
         dP_seed = np.nansum(dP_seed, axis=1)/len(T)
         DT+=dt_seed
     else:
-        dP_seed = 0.
+        dP_seed = np.zeros(N_mf)
     # prev BHMF
     # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
     DT+= t_life
@@ -75,6 +76,8 @@ while Nt>=0:
     dP_MBH_right = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
     # 3 points averaging; tried 5 points -> dP_MBH, no use
     dP_MBH = (dP_MBH+dP_MBH_left+dP_MBH_right)/3.
+
+    # print('each cycle: consv_ratio =',np.nansum(dP_MBH))
 
     Nt -= 1
 print('DT=',np.mean((DT-t_life)/Myr))

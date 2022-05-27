@@ -162,8 +162,8 @@ def M1M0_d(M0, l, dt, delta, M_cut = M_cut):
     M0 = M0/M_cut
     M1 = M0
     # print('M0={0:e}\n'.format(M0))
-    
-    for i in range(10):
+    niter = 20
+    for i in range(niter):
         fM1 = np.log(M1/M0) + (pow(M1, delta)-pow(M0, delta))/delta - l*dt/(.5*eta_0*t_Edd)
         dfdM1 = 1./M1 + pow(M1, delta-1)
         dM1 = - fM1/dfdM1
@@ -172,9 +172,7 @@ def M1M0_d(M0, l, dt, delta, M_cut = M_cut):
 
         if np.all(abs(dM1) < .01*M1):
             break
-        # if i>5:
-        #     print('i: %d too much interation'%i)
-    if i==9:
+    if i==niter-1:
         print('not converge...')
     # print('final match?',np.log(M1/M0) + (pow(M1, delta)-pow(M0, delta))/delta - l*dt/eta_0/t_Edd )
     M1 *= M_cut
@@ -514,6 +512,10 @@ bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
 wid_mf = bin_right - bin_left
 dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
 N_mf = len(abin_mf)-1
+
+M0s = np.logspace(2,12,num=10000)
+dlog10M0 = np.log10(M0s[1]/M0s[0])
+eps = 1e-5
 
 # LF bins
 abin_lf = np.linspace(-29,-22.5,num=30)
