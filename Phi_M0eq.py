@@ -11,7 +11,7 @@ tz = t_from_z(z)
 tz = 300*Myr
 
 d_fit = pow(10., -.5)
-l_cut = 1.
+l_cut = .1
 a = .1
 t_life = 15
 tz = 500*Myr
@@ -69,8 +69,8 @@ while Nt>=0:
     for iM1 in range(N_mf):
         # kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
         l1 = kernelS_MBH_M(M_BH[iM1],         M0s,t_life,1.,l_cut,d_fit)
-        l2 = kernelS_MBH_M(M_BH[iM1]*(1.+eps),M0s,t_life,1.,l_cut,d_fit)
-        dlnldlogM1 = np.log(l2/l1)/np.log10(1.+eps)
+        dlnldlogM1 = np.log(10.) * M_BH[iM1]/1e8/(l1*l_cut) * .5/(t_life/(0.1*t_Edd)) * (1.e8/M_BH[iM1] + pow(M_BH[iM1]/1.e8,d_fit-1.))
+
         klbd = dlnldlogM1 * pow(l1,a)*np.exp(-l1)/I_toinf
         # dP = (integral(a,l2,x0)-integral(a,l1,x0))/I_toinf
         # klbd = dP/np.log10(1.+eps)
@@ -96,7 +96,7 @@ T = Table(
     names=('M_BH','Phi','W10_MF')
 )
 
-MFname = z6datapre+'Phi_M0convMF'
+MFname = z6datapre+'Phi_M0eqMF'
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
@@ -119,7 +119,7 @@ Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
 lbin = np.arange(-3,3,0.1)
 x = np.logspace(lbin[0]-np.log10(l_cut),lbin[-1]-np.log10(l_cut),num=len(lbin)) # for Pana
 Pana = integral(a,x,x0)/I_toinf
-with open(z6datapre+"Phi_M0convERDFz6.txt",'w') as f:
+with open(z6datapre+"Phi_M0eqERDFz6.txt",'w') as f:
     np.savetxt(f, np.array([lbin[:-1],Pana[1:]-Pana[:-1]]).transpose(), fmt='%10.3e')
 
 print('time=',time.time()-t1)
@@ -147,7 +147,7 @@ T = Table(
     names=('bin_cen','Phi_obs','Phi_DO','Phi')
 )
 
-LFname = z6datapre+'Phi_M0convLF'
+LFname = z6datapre+'Phi_M0eqLF'
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
             overwrite=True)

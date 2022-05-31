@@ -30,15 +30,20 @@ t_life, logd_fit, l_cut, a = 21.8, -1, .88, .19 # f_seed = 0.01
 t_life, logd_fit, l_cut, a = 21.4, -3, .89, .15 # f_seed = 0.1
 t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04 # f_seed = 1
 
+# eq
+t_life, logd_fit, l_cut, a = 20, -2, .8, 0.1; f_seed = 1 # log_prob= -24.8
+# t_life, logd_fit, l_cut, a = 35, -2, 1., -0.05; f_seed = .1 # log_prob= -13.2
+t_life, logd_fit, l_cut, a = 20, -1., .87, .17; f_seed = 0.01 # log_like=-7.0
+
 
 initial = np.array([t_life,logd_fit,l_cut,a])
 
 ndim = len(initial)
 nwalkers = 100
-nsteps = 5000
+nsteps = 1000
 rball = 1e-4
 
-prex='../4p/easycali_logd_4pr8_f{1:d}'.format(n_base,int(abs(np.log10(f_seed))))
+prex='../4p/eq_logd_4pr8_f{1:d}'.format(n_base,int(abs(np.log10(f_seed))))
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'

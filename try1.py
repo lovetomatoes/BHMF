@@ -7,27 +7,85 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
-a = np.array([0,1,2,3,4,5]); 
-print(np.sum(a<2))
-i = np.argmax(a)
-print(i,a[:i+1])
-b = np.array([np.nan,1,2,np.nan]); 
-print(linear(a,b,-1))
-print(linear(a,b,0))
-print(linear(a,b,.5))
-print(linear(a,b,[.5,1.5]))
-print(linear(a,b,4))
-print(np.log(np.nan))
+index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
+xs = M_BH[index][::len(index[0])//10]
+print(np.log10(xs));exit(0)
+
+fig, ax = plt.subplots()
+index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
+xs = M_BH[index][::len(index[0])//15]
+ys = np.log10( MF(xs)  ) # Willott 2010 as data
+mf_err = pow(np.log10(xs)-8.5,2)/3. + .2 # from 0.2 to 0.95
+ax.fill_between(xs, ys + mf_err/2, ys - mf_err/2, alpha=0.2)
+
+ax.plot(xs,ys)
+ax.set_xscale('log')
+plt.savefig('../err_range.png')
 exit(0)
+
+Lbols = np.logspace(44,48,num=100)
+M1450s= M1450_Lbol(Lbols)
+print(M1450s)
+x = Lbols; #y = M1450s
+f_U = 1 - 1./corr_U14D20(M1450s)
+Lxs = Lbols/K_AVE20(Lbols)
+f_M = 0.56+1/np.pi*np.arctan((43.89-np.log10(Lxs))/0.46)
+f_M[Lxs<1e43] = f_M[np.argmax(Lxs>1e43)]
+
+fig, ax = plt.subplots(figsize=(10,10),dpi=400)
+ax.plot(x,f_M)
+ax.plot(x,f_U)
+ax.set_xscale('log')
+ax.set_xlim(np.min(Lbols),np.max(Lbols))
+ax2 = ax.twiny()
+ax2.plot(M1450s, f_M); ax2.plot(M1450s, f_U)
+ax2.plot(M1450s, f_M/f_U)
+ax2.set_xlim(np.max(M1450s),np.min(M1450s))
+ax2.set_xlabel('M1450')
+plt.savefig('../fobsc.png')
+
+ratio = np.array([(f_M/f_U)[i] if (f_M/f_U)[i]>1 else (f_U/f_M)[i]for i in range(len(f_M))])
+print(np.max(ratio))
+print('-20',f_U[np.argmax(M1450s<-20)])
+print('-24',f_U[np.argmax(M1450s<-24)])
+print('-28',f_U[np.argmax(M1450s<-28)])
+
+fig, ax = plt.subplots(figsize=(10,10),dpi=400)
+ax.plot(x,1./(1-f_M))
+ax.plot(x,1./(1-f_U))
+ax.set_xscale('log')
+ax.set_xlim(np.min(Lbols),np.max(Lbols))
+ax2 = ax.twiny()
+ax2.plot(M1450s,1./(1-f_M)); ax2.plot(M1450s, 1./(1-f_U))
+ax2.set_xlim(np.max(M1450s),np.min(M1450s))
+ax2.set_xlabel('M1450')
+plt.savefig('../corr.png')
+
+fig, ax = plt.subplots(constrained_layout=True)
+x = np.arange(0, 360, 1)
+y = np.sin(2 * x * np.pi / 180)
+ax.plot(x, y)
+ax.set_xlabel('angle [degrees]')
+ax.set_ylabel('signal')
+ax.set_title('Sine wave')
+def deg2rad(x):
+    return x * np.pi / 180
+def rad2deg(x):
+    return x * 180 / np.pi
+secax = ax.secondary_xaxis('top', functions=(deg2rad, rad2deg))
+secax.set_xlabel('angle [rad]')
+plt.savefig('../angle.png')
+
+print(M1450_Lbol(1e45));exit(0)
+
 from PYmodule.MLF4p_logd import *
 from PYmodule.models_logd import *
-t_life, d_fit, l_cut, a = 21.4, 0.001, .89, .15 # f_seed = 0.1, M1M0_d
-logd_fit = np.log10(d_fit)
+t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17 # f_seed = 0.01, easycali
 
 x = (t_life, logd_fit, l_cut, a)
-print('MLF4p_logd',lnlike(x))
-print('MLF4p_logd',lnprobab(x))
-print('modles_logd',-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+print('MLF4p_logd lnlike',lnlike(x))
+print('MLF4p_logd lnprobab',lnprobab(x))
+print('modles_logd lnlike',-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
 exit(0)
 
 # 2d times 1d array

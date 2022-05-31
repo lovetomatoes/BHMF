@@ -40,25 +40,30 @@ print('best paras:',theta_max,np.max(probs))
 # exit(0)
 
 
-ndraw = 40
+ndraw = 2
 fig, ax = plt.subplots(figsize=(10, 10))
 curve_name = 'MF'
 best_model = model(theta_max)
-xs = best_model['M_BH']
-y_data = best_model[curve_name+'_data']
-y_best = best_model[curve_name]
-ax.plot(xs, y_data, label='data')
+xs = best_model['M_BH'][::int(N_mf/100)] # ~100 points
+y_data = best_model[curve_name+'_data'][::int(N_mf/100)]
+y_logdata = np.log10(y_data)
+y_best = best_model[curve_name][::int(N_mf/100)]
+y_err = best_model[curve_name+'_data_err'][::int(N_mf/100)]
+ax.plot(xs, y_data, c='C0',label='data')
+# error band of W10
+plt.fill_between(xs,pow(10.,y_logdata-y_err/2.),pow(10.,y_logdata+y_err/2.),color='C0',alpha=0.5,label='_')
+
 draw = np.floor(np.random.uniform(0,len(samples),size=ndraw)).astype(int)
 thetas = samples[draw]
 model_thetas = [model(theta_i) for theta_i in thetas]
 mod_list = []
 for i in range(ndraw):
-    mod = model_thetas[i][curve_name]
+    mod = model_thetas[i][curve_name][::int(N_mf/100)]
     mod_list.append(mod)
     # ax.plot(xs, mod, c='grey',label='_',alpha=.2)
 spread = np.std(mod_list,axis=0)
 med_model = np.median(mod_list,axis=0)
-plt.fill_between(xs,med_model-spread,med_model+spread,color='orange',alpha=0.5,label=r'$1\sigma$ Posterior Spread')
+plt.fill_between(xs,med_model-spread,med_model+spread,color='C1',alpha=0.5,label=r'$1\sigma$ Posterior Spread')
 ax.plot(xs, y_best, c='C1', label='Highest Likelihood Model')
 ax.set_xlim(1e7,1e10); ax.set_xscale('log')
 ax.set_ylim(1e-10,1e-4); ax.set_yscale('log')

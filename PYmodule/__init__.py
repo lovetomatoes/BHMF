@@ -229,12 +229,17 @@ def kernelS_MBH(Mgrow_ratio, dt, f_duty, l_cut):
     lbd = np.log(Mgrow_ratio)/( f_duty*dt/(0.1*t_Edd) )
     return lbd/l_cut
 
+# def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
+#     M_cut = pow(10., logM_0)
+#     if d_fit:
+#         lbd = .5*(np.log(M1/M0) + (pow(M1/M_cut,d_fit)-pow(M0/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*t_Edd) )
+#     else:
+#         lbd = np.log(M1/M0)  / ( f_duty*dt/(0.1*t_Edd) )
+#     return lbd/l_cut
+
 def kernelS_MBH_M(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
-    M_cut = pow(10., logM_0)
-    if d_fit:
-        lbd = .5*(np.log(M1/M0) + (pow(M1/M_cut,d_fit)-pow(M0/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*t_Edd) )
-    else:
-        lbd = np.log(M1/M0)  / ( f_duty*dt/(0.1*t_Edd) )
+    M_cut = 1e8
+    lbd = .5*(np.log(M1/M0) + (pow(M1/M_cut,d_fit)-pow(M0/M_cut,d_fit))/d_fit) / ( f_duty*dt/(0.1*t_Edd) )
     return lbd/l_cut
 
 def kernelS_MBH_M_mesh(M1, M0, dt, f_duty, l_cut, d_fit, logM_0=logM0):
