@@ -28,14 +28,15 @@ t_life, d_fit, l_cut, a = 40, .01, .9, -.2 # f_seed = 1., log_prob= -11.45
 t_life, d_fit, l_cut, a = 21.4, 0., .89, .15 # f_seed = 0.1, M1M0_e
 t_life, d_fit, l_cut, a = 21.4, 0.001, .89, .15 # f_seed = 0.1, M1M0_d
 
-# after more abin_mf bins, after calibration w/ direct sampling; 
-# easycali initial: 
-t_life, logd_fit, l_cut, a = 21.8, -1, .88, .19 # f_seed = 0.01
-t_life, logd_fit, l_cut, a = 21.4, -3, .89, .15 # f_seed = 0.1
-t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04 # f_seed = 1
+# 300 abin_mf bins, 3 points,  calibration w/ direct sampling; 
+# # easycali initial: 
+# t_life, logd_fit, l_cut, a = 21.8, -1, .88, .19; f_seed = 0.01
+# t_life, logd_fit, l_cut, a = 21.4, -3, .89, .15; f_seed = 0.1
+# t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04; f_seed = 1
 # easycali best:
-t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17 # f_seed = 0.01, easycali
-# t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12 # f_seed = 0.1
+t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
+t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
+t_life, logd_fit, l_cut, a = 26.1, -2.59, .88, -0.05; f_seed = 1
 
 
 x0 = lambda_0/l_cut
@@ -93,6 +94,8 @@ while Nt>=0:
     dP_MBH_right = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
     
     dP_MBH = (dP_MBH+dP_MBH_left+dP_MBH_right)/3.
+    # renormalization!
+    dP_MBH *= 1/np.nansum(dP_MBH)
 
     Nt -= 1
 
@@ -108,7 +111,7 @@ T = Table(
     names=('M_BH','Phi','W10_MF')
 )
 
-MFname = z6datapre+'Phi_easyMF'
+MFname = z6datapre+'Phi_easyMF_corrected'
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
