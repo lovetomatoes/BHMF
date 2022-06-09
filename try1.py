@@ -7,6 +7,16 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+from PYmodule.MLF4p_logd import *
+from PYmodule.models_logd import *
+t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01 # easycali
+
+x = (t_life, logd_fit, l_cut, a)
+print('MLF4p_logd lnlike',lnlike(x))
+print('MLF4p_logd lnprobab',lnprobab(x))
+print('modles_logd lnlike',-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+exit(0)
+
 index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
 xs = M_BH[index][::len(index[0])//10]
 print(np.log10(xs));exit(0)

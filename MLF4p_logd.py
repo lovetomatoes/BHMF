@@ -45,10 +45,10 @@ initial = np.array([t_life,logd_fit,l_cut,a])
 
 ndim = len(initial)
 nwalkers = 100
-nsteps = 1000
+nsteps = 5000
 rball = 1e-4
 
-prex='../4p/3prenorm_logd_4pr8_f{1:d}'.format(n_base,int(abs(np.log10(f_seed))))
+prex='../4p/M0r8_f{1:d}'.format(n_base,int(abs(np.log10(f_seed))))
 # LFbin, LFcur, MF1e8 
 
 fname =prex+'.h5'

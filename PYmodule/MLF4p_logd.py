@@ -39,23 +39,10 @@ def lnlike(theta):
             dP_seed = np.zeros(N_mf)
         # prev BHMF
         dP_MBH_prev = dP_MBH.copy()
-        z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+        z_mesh = kernelS_MBH_M_mesh(abin_mf, M_BH, t_life, 1., l_cut, d_fit)
         z_mesh[z_mesh<x0] = x0
         Ps = integral(a,z_mesh,x0)/I_toinf
-        dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-
-        z_mesh_left = kernelS_MBH_M_mesh(bin_left, abin_mf, t_life, 1., l_cut, d_fit)
-        z_mesh_left[z_mesh_left<x0] = x0
-        Ps = integral(a,z_mesh_left,x0)/I_toinf
-        dP_MBH_left = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-        z_mesh_right = kernelS_MBH_M_mesh(bin_right, abin_mf, t_life, 1., l_cut, d_fit)
-        z_mesh_right[z_mesh_right<x0] = x0
-        Ps = integral(a,z_mesh_right,x0)/I_toinf
-        dP_MBH_right = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-        
-        dP_MBH = (dP_MBH+dP_MBH_left+dP_MBH_right)/3.
-        dP_MBH *= 1/np.nansum(dP_MBH)
-
+        dP_MBH = np.nansum( (Ps[1:,:]-Ps[:-1,:])*dP_MBH_prev, axis=1) + dP_seed
         Nt -= 1
     dn_MBH = dP_MBH*n_base*f_bsm*f_seed
 

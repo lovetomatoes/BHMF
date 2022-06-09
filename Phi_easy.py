@@ -28,7 +28,7 @@ t_life, d_fit, l_cut, a = 40, .01, .9, -.2 # f_seed = 1., log_prob= -11.45
 t_life, d_fit, l_cut, a = 21.4, 0., .89, .15 # f_seed = 0.1, M1M0_e
 t_life, d_fit, l_cut, a = 21.4, 0.001, .89, .15 # f_seed = 0.1, M1M0_d
 
-# 300 abin_mf bins, 3 points,  calibration w/ direct sampling; 
+# # 300 abin_mf bins, 3 points,  calibration w/ direct sampling; 
 # # easycali initial: 
 # t_life, logd_fit, l_cut, a = 21.8, -1, .88, .19; f_seed = 0.01
 # t_life, logd_fit, l_cut, a = 21.4, -3, .89, .15; f_seed = 0.1
@@ -78,25 +78,11 @@ while Nt>=0:
     else:
         dP_seed = np.zeros(N_mf)
     # prev BHMF
-    # z_mesh = kernelS_MBHmesh(M_BH, abin_mf, t_life, l_cut)
-    z_mesh = kernelS_MBH_M_mesh(M_BH, abin_mf, t_life, 1., l_cut, d_fit)
+    z_mesh = kernelS_MBH_M_mesh(abin_mf, M_BH, t_life, 1., l_cut, d_fit)
     z_mesh[z_mesh<x0] = x0
     Ps = integral(a,z_mesh,x0)/I_toinf
-    dP_MBH = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-
-    z_mesh_left = kernelS_MBH_M_mesh(bin_left, abin_mf, t_life, 1., l_cut, d_fit)
-    z_mesh_left[z_mesh_left<x0] = x0
-    Ps = integral(a,z_mesh_left,x0)/I_toinf
-    dP_MBH_left = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-    z_mesh_right = kernelS_MBH_M_mesh(bin_right, abin_mf, t_life, 1., l_cut, d_fit)
-    z_mesh_right[z_mesh_right<x0] = x0
-    Ps = integral(a,z_mesh_right,x0)/I_toinf
-    dP_MBH_right = np.nansum( (Ps[:,:-1]-Ps[:,1:])*dP_MBH_prev, axis=1) + dP_seed
-    
-    dP_MBH = (dP_MBH+dP_MBH_left+dP_MBH_right)/3.
-    # renormalization!
-    dP_MBH *= 1/np.nansum(dP_MBH)
-
+    dP_MBH = np.nansum( (Ps[1:,:]-Ps[:-1,:])*dP_MBH_prev, axis=1) + dP_seed
+    # print(np.nansum((Ps[1:,:]-Ps[:-1,:]),axis=0))
     Nt -= 1
 
 dn_MBH = dP_MBH*n_base*f_bsm*f_seed
@@ -111,7 +97,7 @@ T = Table(
     names=('M_BH','Phi','W10_MF')
 )
 
-MFname = z6datapre+'Phi_easyMF_corrected'
+MFname = z6datapre+'Phi_easyMF_%d'%len(abin_mf)
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,

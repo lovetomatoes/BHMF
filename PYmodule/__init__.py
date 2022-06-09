@@ -511,7 +511,7 @@ for iM in range(N_Mh):
     Ts.append(TM)
 
 # MF bins
-abin_mf =  np.logspace(2,12,num=300) # default endpoint=True
+abin_mf =  np.logspace(2,12,num=800) # default endpoint=True
 M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
 bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
 wid_mf = bin_right - bin_left
