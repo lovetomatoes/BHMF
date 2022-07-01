@@ -5,6 +5,18 @@ from scipy.stats import norm, uniform
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
 
+# for M1450 in np.arange(-29,-21,1):
+#     print('%.0e'%Lbol_M1450(M1450))
+# # P(>lambda_0) v.s. f_seed
+# x0 = lambda_0/l_cut
+# I_toinf = integral_toinf(a,x0)
+# l1 = 1.
+# Ps = integral(a,l1/l_cut,x0)/I_toinf
+# print('f_seed=%.2f, above Edd:'%f_seed,1-Ps)
+# Ps = integral(a,1.,x0)/I_toinf
+# print('above l_cut:',1-Ps)
+# exit(0)
+
 from PYmodule.MLF4p_logd import *
 from PYmodule.models_logd import *
 t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01 # easycali
@@ -13,19 +25,12 @@ t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823;
 t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
 t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
 
-for M1450 in np.arange(-29,-21,1):
-    print('%.0e'%Lbol_M1450(M1450))
-# P(>lambda_0) v.s. f_seed
-x0 = lambda_0/l_cut
-I_toinf = integral_toinf(a,x0)
-l1 = 1.
-Ps = integral(a,l1/l_cut,x0)/I_toinf
-print('f_seed=%.2f, above Edd:'%f_seed,1-Ps)
-Ps = integral(a,1.,x0)/I_toinf
-print('above l_cut:',1-Ps)
-exit(0)
+t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
+t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
+t_life, logd_fit, l_cut, a = 26.1, -2.59, .88, -0.05; f_seed = 1
 
 x = (t_life, logd_fit, l_cut, a)
+print('f_seed:', f_seed)
 print('MLF4p_logd lnlike',lnlike(x))
 print('MLF4p_logd lnprobab',lnprobab(x))
 print('modles_logd lnlike',-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])

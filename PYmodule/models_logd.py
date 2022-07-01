@@ -68,6 +68,7 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
     Phi = dPhi_mesh/bin_wid
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(bin_cen)
+    Phi_DO = Phi/corr_M14D20(bin_cen)
     ys = np.log10(Phi_obs)
     y_model = np.log10(Phi_DO)
     lf_err = np.log10(Phi_err)
@@ -82,6 +83,7 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
     Phi = dPhi_mesh/dmag
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(M1450)
+    Phi_DO = Phi/corr_M14D20(M1450)
     return {'M_BH':M_BH, 'MF':dn_MBH/dlog10M, 'MF_data':MF(M_BH), 
     'MF_data_err':pow(np.log10(M_BH)-8.5,2)/3. + .2,
     'Chi2_M':Chi2_M,

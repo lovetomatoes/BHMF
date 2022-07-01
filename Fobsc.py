@@ -26,6 +26,22 @@ def phi(Lx):
     else:
         return np.array([min( phi_max, max(phi_4375_z - beta*(np.log10(Lx[i])-43.75), phi_min)) for i in range(len(Lx))])
 
+fig, ax = plt.subplots(figsize=(10,10),dpi=400)
+c_M = corr_M14D20(M1450s)
+c_U = corr_U14D20(M1450s)
+ax.plot(Lbols,c_M)
+ax.plot(Lbols,c_U)
+ax.set_xscale('log')
+ax.set_yticks(np.arange(0,5,.5))
+ax.set_xlim(np.min(Lbols),np.max(Lbols))
+ax.grid(True)
+ax2 = ax.twiny()
+ax2.plot(M1450s, c_M); ax2.plot(M1450s, c_U)
+ax2.plot(M1450s, c_M/c_U)
+ax2.set_xlim(np.max(M1450s),np.min(M1450s))
+ax2.set_xlabel('M1450')
+fig.savefig('../corr_M1450.png')
+
 
 fig, ax = plt.subplots(figsize=(10,10),dpi=400)
 ax.plot(Lbols,f_M)

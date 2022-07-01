@@ -72,9 +72,8 @@ def lnlike(theta):
     Phi = dPhi_mesh/bin_wid
 
     Phi *= 1e9
-    Phi_DO = Phi/corr_U14D20(bin_cen)
-    # Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
-    # print('Chi2=%.2e'%Chi2)
+    # Phi_DO = Phi/corr_U14D20(bin_cen)
+    Phi_DO = Phi/corr_M14D20(bin_cen)
     ys = np.log10(Phi_obs)
     y_model = np.log10(Phi_DO)
     y_err = np.log10(Phi_err)

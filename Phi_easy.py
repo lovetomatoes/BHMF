@@ -96,7 +96,7 @@ while Nt>=0:
 dn_MBH = dP_MBH*n_base*f_bsm*f_seed
 
 consv_ratio = np.nansum(dn_MBH)/(n_base*f_seed)
-print('in Phi_easy: MF conserved fraction=%.10f'%consv_ratio)
+# print('in Phi_easy: MF conserved fraction=%.10f'%consv_ratio)
 # if consv_ratio<.9:
 #     print('conserved fraction=%.10f'%consv_ratio)
 
@@ -139,6 +139,7 @@ Phi = dPhi_mesh/bin_wid
 
 Phi *= 1e9
 Phi_DO = Phi/corr_U14D20(bin_cen)
+Phi_DO = Phi/corr_M14D20(bin_cen)
 Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
 off_L = np.nanmax(abs( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err)))
 
@@ -158,8 +159,8 @@ if np.nanmin([Chi2, Chi2_min]) == Chi2:
     T_min = T
     LFname_min = LFname
 
-print('Chi2_M=',Chi2_M,'Chi2_L=',Chi2)
+# print('Chi2_M=',Chi2_M,'Chi2_L=',Chi2)
 print('log_prob=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
 #, LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)
 
-print('time=',time.time()-t1)
+# print('time=',time.time()-t1)

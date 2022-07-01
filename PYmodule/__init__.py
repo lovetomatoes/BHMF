@@ -413,6 +413,13 @@ def corr_U14D20(M1450): # Ueda 14
     f_CTK = phi/2.
     return 1./(1-f_obsc_sum)
 
+def corr_M14D20(M1450): # Merloni 14
+    L_bol = Lbol_M1450(M1450)
+    f_bol = K_AVE20(L_bol)
+    Lx = L_bol/f_bol
+    f_M = 0.56+1/np.pi*np.arctan((43.89-np.log10(Lx))/0.46)
+    return 1./(1-f_M)
+
 def LF_M1450_CO(M,z): # dn/dmag in Mpc^-3 mag^-1
     # Matsuoka 2018
     return LF_M1450(M,z)/(1-f_obsc_const)
