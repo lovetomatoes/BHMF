@@ -17,8 +17,9 @@ N_concatenate = int(1e1) # Nsite * N_concatenate samples
 N = Nsite*N_concatenate
 
 # 不同f_seed 不影响BH growth 只是参数不同
-# nbase1e-03,4pr8 nsteps=2e4 的 best fits
 # 用f_seed=0.01 相当于1e2*N_BH sample
+
+# nbase1e-03,4pr8 nsteps=2e4 的 best fits
 t_life, logd_fit, l_cut, a = 21.8, -3., 0.88, 0.19 # f_seed = 0.01
 t_life, logd_fit, l_cut, a = 21.4, -3, .89, .15 # f_seed = 0.1
 t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04 # f_seed = 1
@@ -32,6 +33,12 @@ t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04; f_seed = 1
 t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
 t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
 t_life, logd_fit, l_cut, a = 26.1, -2.59, .88, -0.05; f_seed = 1
+
+# using above as init; bests:
+# f1 [20.07157851 -2.98140382  0.89453609  0.12195823] -4.137038049964094
+t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
+# f2 [18.7555167  -1.2574505   0.87372563  0.20389703] -3.1054538991409824
+t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
 
 d_fit = pow(10.,logd_fit)
 t_life *= Myr
@@ -51,7 +58,7 @@ Nt = int(np.max((t_end-T['t_col'])//t_life)+1)
 # print('Mstar0',T['Mstar0'])
 # print("Nsite",Nsite, 't:',t/Myr,'t_end:',t_end/Myr, 'Nt:',Nt)
 
-prex = '../4pevol/distf{0:d}N{1:d}_'.format(int(abs(np.log10(f_seed))),int(np.log10(N)))+datetime.now().strftime('%m%d%H%M_')
+prex = '../4p/distf{0:d}N{1:d}_'.format(int(abs(np.log10(f_seed))),int(np.log10(N)))+datetime.now().strftime('%m%d%H%M_')
 Mfname = prex+'Mevol.txt'
 lfname = prex+'levol.txt'
 z6fname = prex+'BHatz6.txt'

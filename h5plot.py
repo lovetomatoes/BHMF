@@ -1,10 +1,9 @@
 from PYmodule import *
 from PYmodule.models_logd import *
 
-fname = '../4p/logd_4pr7_l0.60_a0.00_sl0.40_sa0.30_f1.0e+00.h5'
-fname = '../4p/logd_4pr7_l0.60_a0.00_sl0.40_sa0.30_f1.0e-01.h5'
-fname = '../4p/logd_4pr7_l0.60_a0.00_sl0.40_sa0.30_f1.0e-02.h5'
-prex = '../f2'
+f_seedlabel = 'f%d'%abs(int(np.log10(f_seed)))
+fname = '../M0r8_'+f_seedlabel+'.h5'
+prex = '../' + f_seedlabel
 
 labels = [r'$\mathrm{t_{life}}$', r'$\log \delta$', r'$\lambda_0$', r'$\alpha$']
 
@@ -40,7 +39,7 @@ print('best paras:',theta_max,np.max(probs))
 # exit(0)
 
 
-ndraw = 2
+ndraw = 60
 fig, ax = plt.subplots(figsize=(10, 10))
 curve_name = 'MF'
 best_model = model(theta_max)
@@ -49,9 +48,9 @@ y_data = best_model[curve_name+'_data'][::int(N_mf/100)]
 y_logdata = np.log10(y_data)
 y_best = best_model[curve_name][::int(N_mf/100)]
 y_err = best_model[curve_name+'_data_err'][::int(N_mf/100)]
-ax.plot(xs, y_data, c='C0',label='data')
+ax.plot(xs, y_data, c='C0',label='W10')
 # error band of W10
-plt.fill_between(xs,pow(10.,y_logdata-y_err/2.),pow(10.,y_logdata+y_err/2.),color='C0',alpha=0.5,label='_')
+ax.fill_between(xs,pow(10.,y_logdata-y_err/2.),pow(10.,y_logdata+y_err/2.),color='C0',alpha=0.3,label='data error')
 
 draw = np.floor(np.random.uniform(0,len(samples),size=ndraw)).astype(int)
 thetas = samples[draw]
@@ -63,8 +62,8 @@ for i in range(ndraw):
     # ax.plot(xs, mod, c='grey',label='_',alpha=.2)
 spread = np.std(mod_list,axis=0)
 med_model = np.median(mod_list,axis=0)
-plt.fill_between(xs,med_model-spread,med_model+spread,color='C1',alpha=0.5,label=r'$1\sigma$ Posterior Spread')
-ax.plot(xs, y_best, c='C1', label='Highest Likelihood Model')
+ax.fill_between(xs,med_model-spread,med_model+spread,color='purple',alpha=0.3,label=r'$1\sigma$ Posterior Spread')
+ax.plot(xs, y_best, c='purple', label='Highest Likelihood Model')
 ax.set_xlim(1e7,1e10); ax.set_xscale('log')
 ax.set_ylim(1e-10,1e-4); ax.set_yscale('log')
 ax.legend(fontsize=fslegend)
@@ -82,7 +81,7 @@ y_data_err = best_model[curve_name+'_data_err']
 y_best = best_model[curve_name]
 ax.scatter(x_data, y_data, label='_')
 plt.errorbar(x_data, y_data, yerr=y_data_err,fmt='o',capsize=10)
-print('y_data_err',y_data_err)
+# print('y_data_err',y_data_err)
 mod_list = []
 for i in range(ndraw):
     mod = model_thetas[i][curve_name]
@@ -90,14 +89,14 @@ for i in range(ndraw):
     # ax.plot(xs, mod, c='grey',label='_',alpha=.2)
 spread = np.std(mod_list,axis=0)
 med_model = np.median(mod_list,axis=0)
-plt.fill_between(xs,med_model-spread,med_model+spread,color='orange',alpha=0.5,label='_')
-ax.plot(xs, y_best, c='C1', label='_')
-ax.text(-26,10, 'f2\n'+ \
+plt.fill_between(xs,med_model-spread,med_model+spread,color='purple',alpha=0.3,label='_')
+ax.plot(xs, y_best, c='purple', label='_')
+ax.text(-26,5, f_seedlabel+'\n'+ \
 labels[0]+' = %.2f Myr\n'%(theta_max[0])+labels[1]+' = %.2f\n'%(theta_max[1])\
 +labels[2]+' = %.2f\n'%(theta_max[2])+labels[3]+' = %.2f\n'%(theta_max[3])
 , fontsize=20)
-ax.set_xlim(-22,-29)
-ax.set_ylim(1e-2,1e2)
+ax.set_xlim(np.max(xs),np.min(xs))
+ax.set_ylim(5e-3,1e2)
 ax.set_yscale('log')
 plt.xlabel(r'$\mathrm{M_{1450}}$',fontsize=fslabel)
 plt.ylabel(r'$\mathrm{\Phi~(Gpc^{-3}mag^{-1})}$',fontsize=fslabel)
@@ -140,7 +139,7 @@ plt.savefig(prex+'MF_spread.png',dpi=300,bbox_inches='tight')
 #     med_model = np.median(models,axis=0)
 #     return med_model,spread
 # med_model, spread = sample_walkers(100,)
-# plt.fill_between(xs,med_model-spread,med_model+spread,color='grey',alpha=0.5,label=r'$1\sigma$ Posterior Spread')
+# plt.fill_between(xs,med_model-spread,med_model+spread,color='grey',alpha=0.3,label=r'$1\sigma$ Posterior Spread')
 
 fig, ax = plt.subplots(figsize=(10, 10))
 curve_name = 'LF'

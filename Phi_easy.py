@@ -38,6 +38,14 @@ t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
 t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
 t_life, logd_fit, l_cut, a = 26.1, -2.59, .88, -0.05; f_seed = 1
 
+# M0 best
+t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
+# t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
+# t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
+
+# tests for t_life=1Myr, not matching
+# t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .4; f_seed = 1
+# t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .0; f_seed = 1
 
 x0 = lambda_0/l_cut
 I_toinf = integral_toinf(a,x0)
@@ -97,7 +105,7 @@ T = Table(
     names=('M_BH','Phi','W10_MF')
 )
 
-MFname = z6datapre+'Phi_easyMF_%d'%len(abin_mf)
+MFname = z6datapre+'f{0:d}Phi_easyMF_z{1:d}'.format(int(abs(np.log10(f_seed))),z)
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
@@ -139,7 +147,7 @@ T = Table(
     names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
 )
 
-LFname = z6datapre+'Phi_easyLF'
+LFname = z6datapre+'f{0:d}Phi_easyLF_z{1:d}'.format(int(abs(np.log10(f_seed))),z)
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
             overwrite=True)

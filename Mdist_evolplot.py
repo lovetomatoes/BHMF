@@ -4,13 +4,19 @@ from PYmodule.l_intg import *
 # later plot hist file from Mdist_evol directly 
 prex = '../4pevol/distf1N5_05232116_'
 # prex = '../4pevol/distf1N7_05232217_'
+# prex = '../4pevol/distf1N7_05232217_'
+prex = '../4p/distf2N4_06221827_'
 
 T_seed = Ts[0][0]
 tz = t_from_z(6.)/Myr
 t_life = 19.6 # f_seed = 0.1
 t0 = np.min(T_seed['t_col']/Myr)
 # print(tz,t_life,t0);exit(0)
+
+# wli: paras must set the same as Mdist_evol
 t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
+
+t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
 
 # z=6 BH mass, λ, L_bol
 T_z6 = ascii.read(prex+'BHatz6.txt', guess=False, delimiter=' ')
@@ -77,12 +83,17 @@ plt.savefig(prex+'Mevol.png', dpi=300, bbox_inches='tight')
 # f_duty (λ>1) in growth history, v.s. final M_BH
 plt.figure(figsize=(10,10),dpi=400)
 f_duty = np.zeros(len(T_M))
+f_2 = 0
+t_start = t_from_z(10.)/Myr
 for i in range(len(T_M)):
     len_series = np.argmax(T_M[i]) + 1
     ts = np.arange(tz,t0-t_life,-t_life)[:len_series]
     l1s = T_l[i][:len_series]
     # f_duty: Δt of λ>1 cycles, devided by total Δt
     f_duty[i] = t_life*np.sum(l1s>1.)/(ts[0]-ts[-1])
+    f_2 += t_life * np.sum(l1s[ts>t_start]>1.)/(tz-t_start)
+print('duty cycle from z=10:',f_2/len(T_M))
+
 plt.scatter(M1,f_duty)
 plt.xscale('log')
 # plt.ylim(1e2,1e10)
