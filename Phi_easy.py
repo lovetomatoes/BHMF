@@ -35,11 +35,14 @@ t_life, d_fit, l_cut, a = 21.4, 0.001, .89, .15 # f_seed = 0.1, M1M0_d
 # t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04; f_seed = 1
 # easycali best:
 t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
-t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
-t_life, logd_fit, l_cut, a = 26.1, -2.59, .88, -0.05; f_seed = 1
+# t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
+# t_life, logd_fit, l_cut, a = 26.1, -2.59, .88, -0.05; f_seed = 1
+
+# # 3p
+# t_life = 100
 
 # M0 best
-t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
+# t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
 # t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
 # t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
 

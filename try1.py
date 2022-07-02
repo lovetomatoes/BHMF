@@ -17,6 +17,20 @@ from scipy.stats import norm, uniform
 # print('above l_cut:',1-Ps)
 # exit(0)
 
+# # 3p for fixed t_life defined in PY/init
+# from PYmodule.MLF3p_logd import *
+# from PYmodule.models_3p import *
+# logd_fit, l_cut, a = -1.08, .87, .17; f_seed = 0.01
+# # logd_fit, l_cut, a = -2.96, .87, .12; f_seed = 0.1
+# # logd_fit, l_cut, a = -2.59, .88, -0.05; f_seed = 1
+
+# x = (logd_fit, l_cut, a)
+# print('f_seed:', f_seed)
+# print('MLF3p_logd lnlike',lnlike(x))
+# print('MLF3p_logd lnprobab',lnprobab(x))
+# print('modles_3p lnlike',-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+# exit(0)
+
 from PYmodule.MLF4p_logd import *
 from PYmodule.models_logd import *
 t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01 # easycali
@@ -26,8 +40,8 @@ t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703;
 t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
 
 t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
-t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
-t_life, logd_fit, l_cut, a = 26.1, -2.59, .88, -0.05; f_seed = 1
+# t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
+# t_life, logd_fit, l_cut, a = 26.1, -2.59, .88, -0.05; f_seed = 1
 
 x = (t_life, logd_fit, l_cut, a)
 print('f_seed:', f_seed)
