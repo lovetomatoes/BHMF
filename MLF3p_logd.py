@@ -11,10 +11,10 @@ from schwimmbad import MPIPool
 
 t1 = time.time()
 
-# easycali; prev best as initial
-logd_fit, l_cut, a = -1.08, .87, .17; f_seed = 0.01
-logd_fit, l_cut, a = -2.96, .87, .12; f_seed = 0.1
-logd_fit, l_cut, a = -2.59, .88, -0.05; f_seed = 1
+# fixing t_life=50, ok initials after tried
+logd_fit, l_cut, a = -2, .87, .1; f_seed = 0.01
+# logd_fit, l_cut, a = -2.96, .87, .01; f_seed = 0.1
+# logd_fit, l_cut, a = -2.59, .88, -0.2; f_seed = 1
 
 initial = np.array([logd_fit,l_cut,a])
 
@@ -133,8 +133,8 @@ for i in thetas:
     ax.plot(xs, mod, c='grey',label='_',alpha=.2)
 ax.plot(xs, y_best, c='C1', label='_')
 ax.text(-26,10,
-r'$t_{life}=$'+'{0:.2e}Myr\n'.format(theta_max[0])+r'$\log\delta=$'+'{0:.2f}\n'.format(theta_max[1])\
-+r'$\lambda_{cut}=$'+'{0:.1e}\n'.format(theta_max[2])+r'$\alpha=$'+'{0:.2f}\n'.format(theta_max[3])
+r'$t_{life}=$'+'{0:.2e}Myr\n'.format(t_life)+r'$\log\delta=$'+'{0:.2f}\n'.format(theta_max[0])\
++r'$\lambda_{cut}=$'+'{0:.1e}\n'.format(theta_max[1])+r'$\alpha=$'+'{0:.2f}\n'.format(theta_max[2])
 )
 ax.set_xlim(-22,-29)
 ax.set_ylim(1e-2,1e2)

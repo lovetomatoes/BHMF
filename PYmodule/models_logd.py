@@ -12,7 +12,7 @@ f_bsm = 1.
 n_base = n_base[0]
 
 
-def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
+def model(theta, z = int(6), f_seed=f_seed, corr='U',l_cut= l_cut, a=a):
     t_life, logd_fit, l_cut, a = theta
     d_fit = pow(10.,logd_fit)
     t_life = t_life * Myr # wli: not *=!!!!!! theta changed by this
@@ -83,7 +83,8 @@ def model(theta, z = int(6), f_seed=f_seed, l_cut= l_cut, a=a):
     Phi = dPhi_mesh/dmag
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(M1450)
-    Phi_DO = Phi/corr_M14D20(M1450)
+    if corr=='M':
+        Phi_DO = Phi/corr_M14D20(M1450)
     return {'M_BH':M_BH, 'MF':dn_MBH/dlog10M, 'MF_data':MF(M_BH), 
     'MF_data_err':pow(np.log10(M_BH)-8.5,2)/3. + .2,
     'Chi2_M':Chi2_M,

@@ -1,10 +1,9 @@
-from time import sleep
 from PYmodule import *
 from PYmodule.l_intg import *
 from scipy.stats import norm, uniform
 
-for M1450 in np.arange(-29,-21,1):
-    print('%.0e'%Lbol_M1450(M1450))
+for m in np.arange(-29,-21,1):
+    print('%.0e'%Lbol_M1450(m))
 
 Lbols = np.logspace(44,50,num=100)
 M1450s= M1450_Lbol(Lbols)
@@ -20,7 +19,7 @@ def phi(Lx):
     phi_min, phi_max, beta, a1 = .2, .84, .24, .48
     phi_4375_0 = .43
     phi_4375_z = phi_4375_0*pow(1+2.,a1)
-    print('phi_4375_z=%.2f',phi_4375_z)
+    print('phi_4375_z=%.2f'%phi_4375_z)
     if isinstance(Lx,float):
         return min( phi_max, max(phi_4375_z - beta*(np.log10(Lx)-43.75), phi_min))
     else:
@@ -66,6 +65,18 @@ ax.set_xlabel('logLxs')
 ax.set_ylim(0,1)
 ax.grid(True)
 fig.savefig('../fobsc_Lx.png')
+
+# see difference of U14, M14; correct Matsu18
+fig, ax = plt.subplots(figsize=(10,10),dpi=400)
+ax.scatter(bin_cen,Phi_obs)
+ax.plot(M1450,1e9*LF_M1450(M1450),label='obs fit')
+ax.plot(M1450,1e9*LF_M1450(M1450)*corr_M14D20(M1450),label='M14 corr')
+ax.plot(M1450,1e9*LF_M1450(M1450)*corr_U14D20(M1450),label='U14 corr')
+ax.set_xlim(-21,-30)
+ax.set_yscale('log')
+ax.grid(True)
+ax.legend(loc='best',fontsize=25)
+fig.savefig('../LF_fUfM.png')
 
 exit(0)
 

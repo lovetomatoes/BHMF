@@ -77,7 +77,7 @@ alpha_T = 2.324e4
 
 fstick = 20
 fstxt = 20
-fslabel = 23
+fslabel = 25
 fstitle = 20
 fslegend = 20
 
@@ -531,7 +531,7 @@ dlog10M0 = np.log10(M0s[1]/M0s[0])
 eps = 1e-5
 
 # LF bins
-abin_lf = np.linspace(-30,-21.5,num=30)
+abin_lf = np.linspace(-30,-21.5,num=100)
 dmag = abin_lf[1]-abin_lf[0]
 L_left = abin_lf[:-1]; L_right = abin_lf[1:]
 M1450  = (L_left+L_right)/2.

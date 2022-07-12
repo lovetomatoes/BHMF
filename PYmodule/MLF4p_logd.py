@@ -11,7 +11,7 @@ f_bsm = 1.
 n_base = n_base[0]
 
 
-def lnlike(theta):
+def lnlike(theta,corr='U'):
     t_life, logd_fit, l_cut, a = theta
     d_fit = pow(10., logd_fit)
     t_life *= Myr
@@ -72,8 +72,9 @@ def lnlike(theta):
     Phi = dPhi_mesh/bin_wid
 
     Phi *= 1e9
-    # Phi_DO = Phi/corr_U14D20(bin_cen)
-    Phi_DO = Phi/corr_M14D20(bin_cen)
+    Phi_DO = Phi/corr_U14D20(bin_cen)
+    if corr=='M':
+        Phi_DO = Phi/corr_M14D20(bin_cen)
     ys = np.log10(Phi_obs)
     y_model = np.log10(Phi_DO)
     y_err = np.log10(Phi_err)

@@ -7,15 +7,61 @@ from scipy.stats import norm, uniform
 
 # for M1450 in np.arange(-29,-21,1):
 #     print('%.0e'%Lbol_M1450(M1450))
-# # P(>lambda_0) v.s. f_seed
-# x0 = lambda_0/l_cut
-# I_toinf = integral_toinf(a,x0)
-# l1 = 1.
-# Ps = integral(a,l1/l_cut,x0)/I_toinf
-# print('f_seed=%.2f, above Edd:'%f_seed,1-Ps)
+
+# P(>lambda_0) v.s. f_seed
+f_seed = .1; l_cut=0.89; a=.12
+x0 = lambda_0/l_cut
+I_toinf = integral_toinf(a,x0)
+l1 = 1.
+Ps = integral(a,l1/l_cut,x0)/I_toinf
+print('f_seed={:.2f}, above Edd:{:.1e}'.format(f_seed,1-Ps))
 # Ps = integral(a,1.,x0)/I_toinf
-# print('above l_cut:',1-Ps)
-# exit(0)
+# print('f_seed={:.2f}, above l0:{:.1e}'.format(f_seed,1-Ps))
+
+f_seed = 0.01; l_cut=.87; a=.2
+x0 = lambda_0/l_cut
+I_toinf = integral_toinf(a,x0)
+l1 = 1.
+Ps = integral(a,l1/l_cut,x0)/I_toinf
+print('f_seed={:.2f}, above Edd:{:.1e}'.format(f_seed,1-Ps))
+exit(0)
+
+# difference of P(l) best fits of f_seed
+f_seed = .1; l_cut=.89; a=.12
+x0 = lambda_0/l_cut
+ls = np.logspace(-2,1)
+logl = np.log10(ls)
+P = integral(a,ls/l_cut,x0)/integral_toinf(a,x0)
+plt.figure(dpi=300)
+# plt.plot(logl,pow(ls,a)*np.exp(-ls)/gamma(a))
+plt.plot(logl[:-1],(P[1:]-P[:-1])/(logl[1:]-logl[:-1]))
+# plt.scatter(np.log10(a),1)
+
+f_seed = 1; l_cut=.96; a=-.07
+f_seed = 0.01; l_cut=.87; a=.2
+x0 = lambda_0/l_cut
+P = integral(a,ls/l_cut,x0)/integral_toinf(a,x0)
+# plt.plot(logl,pow(ls,a)*np.exp(-ls)/gamma(a))
+plt.plot(logl[:-1],(P[1:]-P[:-1])/(logl[1:]-logl[:-1]))
+# plt.scatter(np.log10(a),1)
+# plt.yscale('log')
+plt.savefig('../Pl.png')
+exit(0)
+
+# z = 6
+# np.exp(z)
+# print('a={:d}\tb={:.2f}\tc={:.2e}'.format(z,z,z))
+
+# def afunc(a,b=f_seed,c=l_mean,corr='U'):
+#     if corr=='U':
+#         print(corr)
+#     else:
+#         print('U',corr)
+#     print('a={:.2f}\tb={:.2f}\tc={:.2f}'.format(a,b,c))
+# afunc(100,c=1,corr='M');exit(0)
+
+# a = np.array([1,2,3])
+# print(np.sum(a[a>1])); exit(0)
 
 # # 3p for fixed t_life defined in PY/init
 # from PYmodule.MLF3p_logd import *
