@@ -13,10 +13,10 @@ L_up  = -26
 ndraw = 3
 
 f_seedlabel = 'f%d'%abs(int(np.log10(f_seed)))
-readprex = '../4p/M0r8_' + f_seedlabel
-readprex = '../M0r8_' + f_seedlabel
+readprex = '../4p/M0r8_' + f_seedlabel # on sk1
+readprex = '../M0r8_' + f_seedlabel # local
 fname = readprex + '.h5'
-prex = readprex + 'ln'
+prex = readprex + 'lin'
 # fname = '../4p/3n2f_logd_4pr8_f2.h5'
 
 labels = [r'$\mathrm{t_{life}}$', r'$\log \delta$', r'$\lambda_0$', r'$\alpha$']
@@ -44,7 +44,7 @@ print('best paras:',theta_max,np.max(probs))
 
 figm, axm = plt.subplots(num='MF',figsize=(10, 10))
 figl, axl = plt.subplots(num='LF',figsize=(10, 10))
-curve_name = 'MF'
+
 zs = np.arange(z,zmax,1)
 rhoM = []; rhoM_min = []; rhoM_max = []
 nL = []; nL_min = []; nL_max = []
@@ -61,27 +61,33 @@ for z in zs:
         mod = model_thetas[i]['MF'][::int(N_mf/100)]
         mod_list.append(mod)
         # axm.plot(Mx, mod, c='grey',label='_',alpha=.2)
-    lnspread = np.std(np.log(mod_list),axis=0)
-    lnmed = np.median(np.log(mod_list),axis=0)
-    print('where lnspread nan?',Mx[np.isnan(lnspread)])
-    print('where lnmed nan?',Mx[np.isnan(lnmed)])
-    print('where lnspread inf?',Mx[np.isinf(lnspread)])
-    print('where lnmed inf?',Mx[np.isinf(lnmed)])
-
-    axm.fill_between(Mx,np.exp(lnmed-lnspread),np.exp(lnmed+lnspread),color='C%d'%(z%10),alpha=0.3,label=r'_$1\sigma$ Posterior Spread')
+    spread = np.std(mod_list,axis=0)
+    med = np.median(mod_list,axis=0)
+    axm.fill_between(Mx,med-spread,med+spread,color='C%d'%(z%10),alpha=0.3,label=r'_$1\sigma$ Posterior Spread')
     #--- bestfit curve
     best_model = model(theta_max,z,f_seed,corr)
     y_best = best_model['MF'][::int(N_mf/100)]
     axm.plot(Mx, y_best, color='C%d'%(z%10), label='z=%d'%z)
+    #--- output 3 curves: best, med, std
+    T_ = Table(
+            [Mx, y_best, med, spread],
+            names=('Mx','y_best','med','spread')
+        )
+    MFname = prex+'BHMFz{:d}'.format(z)
+    ascii.write(T_,
+                # names=('Mx','y_best','med','spread')
+                MFname,
+                formats={'Mx':'4.2e','y_best':'4.2e','med':'4.2e','spread':'4.2e'},
+                overwrite=True)
     #--- mass integration above M_up
     dn_best = y_best*dlog10Mx
     index = np.where(Mx>M_up)
-    rhoM.append(np.nansum(dn_best[index]*Mx[index]))
-    dn_min = np.exp(lnmed-lnspread) *dlog10Mx
-    rhoM_min.append(np.nansum(dn_min[index]*Mx[index]))
-    dn_max = np.exp(lnmed+lnspread) *dlog10Mx
-    rhoM_max.append(np.nansum(dn_max[index]*Mx[index]))
-    # print(dlog10Mx*np.nansum((lnmed-lnspread)[Mx>M_up]),dlog10Mx*np.nansum(np.exp(lnmed+lnspread)[xs>M_up]))
+    rhoM.append(np.sum(dn_best[index]*Mx[index]))
+    dn_min = (med-spread) *dlog10Mx
+    rhoM_min.append(np.sum(dn_min[index]*Mx[index]))
+    dn_max = (med+spread) *dlog10Mx
+    rhoM_max.append(np.sum(dn_max[index]*Mx[index]))
+    # print(dlog10Mx*np.sum((med-spread)[Mx>M_up]),dlog10Mx*np.sum((med+spread)[xs>M_up]))
 
     #-------   LF   -------#
     mod_list = []
@@ -89,22 +95,31 @@ for z in zs:
         mod = model_thetas[i]['LF']
         mod_list.append(mod)
         # axl.plot(M1450, mod, c='grey',label='_',alpha=.2)
-    lnspread = np.std(np.log(mod_list),axis=0)
-    lnmed = np.median(np.log(mod_list),axis=0)
-    axl.fill_between(M1450,np.exp(lnmed-lnspread),np.exp(lnmed+lnspread),color='C%d'%(z%10),alpha=0.3,label=r'_$1\sigma$ Posterior Spread')
+    spread = np.std(mod_list,axis=0)
+    med = np.median(mod_list,axis=0)
+    axl.fill_between(M1450,med-spread,med+spread,color='C%d'%(z%10),alpha=0.3,label=r'_$1\sigma$ Posterior Spread')
     #--- bestfit curve
     y_best = best_model['LF']
     axl.plot(M1450, y_best, color='C%d'%(z%10), label='z=%d'%z)
+    #--- output 3 curves: best, med, std
+    T_ = Table(
+            [M1450, y_best, med, spread],
+            names=('M1450','y_best','med','spread')
+        )
+    MFname = prex+'QLFz{:d}'.format(z)
+    ascii.write(T_,
+                MFname,
+                formats={'M1450':'5.2f','y_best':'4.2e','med':'4.2e','spread':'4.2e'},
+                overwrite=True)
     #--- integration brighter than L_up
     dn_best = y_best*dmag
     index = np.where(M1450<L_up)
-    nL.append(np.nansum(dn_best[index]))
-    dn_min = np.exp(lnmed-lnspread)*dmag
-    nL_min.append(np.nansum(dn_min[index]))
-    dn_max = np.exp(lnmed+lnspread)*dmag
-    nL_max.append(np.nansum(dn_max[index]))
+    nL.append(np.sum(dn_best[index]))
+    dn_min = (med-spread)*dmag
+    nL_min.append(np.sum(dn_min[index]))
+    dn_max = (med+spread)*dmag
+    nL_max.append(np.sum(dn_max[index]))
     print('after z{:d}, running time: {:.1f} min'.format(z,(time.time()-t1)/60))
-# print(nL_min,nL_max)
 
 axl.set_xlim(np.max(M1450),np.min(M1450))
 axl.set_ylim(5e-3,1e2)
@@ -123,6 +138,7 @@ axm.legend(fontsize=fslegend)
 axm.tick_params(labelsize=fstick)
 figm.savefig(prex+'ndraw{:d}MF_spread.png'.format(ndraw),dpi=300,bbox_inches='tight')
 
+exit(0) # in h5rhozintplot.py do integration of y_min, y_max
 # rhoM_min=rhoM; rhoM_max=rhoM
 # fname = prex+'rhoM_evol.txt'
 fname = prex+'ndraw{:d}rhoM_evol.txt'.format(ndraw)

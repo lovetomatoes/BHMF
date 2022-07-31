@@ -40,9 +40,11 @@ t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823;
 # f2 [18.7555167  -1.2574505   0.87372563  0.20389703] -3.1054538991409824
 t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
 
+# t_life = 10
 d_fit = pow(10.,logd_fit)
 t_life *= Myr
 
+f_seedlabel = 'f%d'%abs(int(np.log10(f_seed)))
 # table stores the cdf of lambda
 x0 = lambda_0/l_cut
 I_toinf = integral_toinf(a,x0)
@@ -112,7 +114,7 @@ M1, ls, L1, M1450_1 = T_z6['M1'], T_z6['ls'], T_z6['L1'], T_z6['M1450_1']
 hist, bin_edges = np.histogram(M1,bins=abin_mf,density=False)
 hist = hist*n_base*f_bsm*f_seed/N/dlog10M
 ascii.write(Table([np.log10(M_BH),hist,MF(M_BH)]), 
-z6datapre+'Mdist_evolMFz6.txt',
+z6datapre+f_seedlabel+'Mdist_evolMFz{:d}_t{:d}_d{:d}'.format(int(z1),int(t_life/Myr),int(abs(logd_fit))),
 names=['M_BH','hist','W10'],
 formats={'M_BH':'10.2e','hist':'10.2e','W10':'10.2e'},
 overwrite=True)
@@ -122,7 +124,7 @@ hist, bin_edges = np.histogram(M1450_1,bins=bin_edg,density=False)
 hist = hist*n_base*f_bsm*f_seed/N/bin_wid*1e9
 hist_DO = hist/corr_U14D20(bin_cen)
 ascii.write(Table([bin_cen,Phi_obs,hist_DO,hist]), 
-z6datapre+'Mdist_evolLFz6.txt',
+z6datapre+f_seedlabel+'Mdist_evolLFz{:d}_t{:d}_d{:d}'.format(int(z1),int(t_life/Myr),int(abs(logd_fit))),
 names=['M1450','Phi_obs','hist_DO','hist'],
 formats={'M1450':'10.2f','hist':'10.2e','hist_DO':'10.2e','Phi_obs':'10.2e'},
 overwrite=True)

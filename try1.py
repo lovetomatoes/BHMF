@@ -2,8 +2,72 @@ from time import sleep
 from PYmodule import *
 from PYmodule.l_intg import *
 from scipy.stats import norm, uniform
+
+print((t_from_z(6)-t_from_z(10))/Myr)
+print(M1450_Lbol(1e46))
+print(Lbol_M1450(-26))
+
+# 对于二项分布 superEddington 在总N次中实现Nc次 概率的讨论
+def P(N,Nc,p,f):
+    return pow(1-p,N-Nc) * pow(p,Nc) *f
+p,f = 0.075, 0.01
+N = 40
+Nc = 26
+print(P(N,Nc,p,f))
+
+p,f = 0.064, 0.1
+N = 40
+Nc = 26
+print(P(N,Nc,p,f)); exit(0)
+
 # N1 = 1; N2 = 2; N3 = 3; N4 = 4; N5 = 5
 # a = np.ones((N1,N2,N3,N4,N5))
+# M0 = 1e3
+# delta = pow(10, -3)
+# M1 = M1M0_d(M0, 1., t_Edd, delta, M_cut = 1e8)
+# print('%.1e'%M1)
+for z in np.arange(6,10):
+    print(z, (t_from_z(z)/Myr))
+exit(0)
+
+# from astropy import units as u
+# from astropy.coordinates import SkyCoord
+# RA, DEC = 110.7858540, -73.4673608
+# RA, DEC = 110.7993408, -73.4552684
+# RA, DEC = 110.8045713, -73.4514239
+# c = SkyCoord(ra=RA*u.degree, dec=DEC*u.degree)
+# c = SkyCoord(RA, DEC, frame='icrs', unit='deg')
+# print(c.to_string('hmsdms')); exit(0)
+# print(c.ra.hms, (DEC-DEC//1)*60); exit(0)
+
+# def RA2deg(h,m,s):
+#     return (h + m/60. + s/3600.)*15 
+# def DEC2deg(d,m):
+#     if d>0:
+#         return d + m/60.
+#     else:
+#         return d - m/60.
+# def deg2RA(deg):
+#     h=deg//15; m=
+#     return (h + m/60. + s/3600.)*15 
+# print(DEC2deg(-73,29), DEC2deg(-73,26))
+# print(RA2deg(7,23,0), RA2deg(7,23,35)); exit(0)
+
+# fig = plt.figure()
+# pl = fig.add_subplot(1, 1, 1)
+# x = 1
+# y = 2
+# yerr = 0.5
+# pl.errorbar(x, y, yerr=[[yerr], [2*yerr]],fmt='o')
+# plt.savefig('../t.png')
+
+# plt.figure(dpi=300)
+# x = np.arange(10)
+# x = 40
+# plt.errorbar(x,x,[x,x/2])
+# plt.grid(1)
+# plt.savefig('../err.png'); exit(0)
+
 
 # for M1450 in np.arange(-29,-21,1):
 #     print('%.0e'%Lbol_M1450(M1450))
@@ -15,8 +79,8 @@ I_toinf = integral_toinf(a,x0)
 l1 = 1.
 Ps = integral(a,l1/l_cut,x0)/I_toinf
 print('f_seed={:.2f}, above Edd:{:.1e}'.format(f_seed,1-Ps))
-# Ps = integral(a,1.,x0)/I_toinf
-# print('f_seed={:.2f}, above l0:{:.1e}'.format(f_seed,1-Ps))
+Ps = integral(a,1.,x0)/I_toinf
+print('f_seed={:.2f}, above l0:{:.1e}'.format(f_seed,1-Ps))
 
 f_seed = 0.01; l_cut=.87; a=.2
 x0 = lambda_0/l_cut
@@ -24,6 +88,9 @@ I_toinf = integral_toinf(a,x0)
 l1 = 1.
 Ps = integral(a,l1/l_cut,x0)/I_toinf
 print('f_seed={:.2f}, above Edd:{:.1e}'.format(f_seed,1-Ps))
+Ps = integral(a,1.,x0)/I_toinf
+print('f_seed={:.2f}, above l0:{:.1e}'.format(f_seed,1-Ps))
+
 exit(0)
 
 # difference of P(l) best fits of f_seed

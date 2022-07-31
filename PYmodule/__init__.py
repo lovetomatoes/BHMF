@@ -81,6 +81,7 @@ fslabel = 25
 fstitle = 20
 fslegend = 20
 
+# color map
 my_cmap = plt.get_cmap("viridis")
 rescale = lambda y: (y - np.min(y)) / (np.max(y) - np.min(y))
 

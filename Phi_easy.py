@@ -7,6 +7,7 @@ N_Mh = 3 # 3 base halos: 1e11, 1e12, 1e13
 Ntr = 10000
 eta = 0.3
 z = int(6)
+corr = 'U'
 tz = t_from_z(z)
 alpha = 1.
 
@@ -35,17 +36,25 @@ t_life, d_fit, l_cut, a = 21.4, 0.001, .89, .15 # f_seed = 0.1, M1M0_d
 # t_life, logd_fit, l_cut, a = 22.2, -2.98, .99, -.04; f_seed = 1
 # easycali best:
 t_life, logd_fit, l_cut, a = 19.9, -1.08, .87, .17; f_seed = 0.01
-# t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
+t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
 # t_life, logd_fit, l_cut, a = 26.1, -2.59, .88, -0.05; f_seed = 1
 
-# # 3p
-# t_life = 100
+# # 3p init
+# logd_fit, l_cut, a = -2, .87, .1; f_seed = 0.01
+# logd_fit, l_cut, a = -2.96, .87, .01; f_seed = 0.1
+# logd_fit, l_cut, a = -2.59, .88, -0.2; f_seed = 1
 
-# M0 best
-# t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
+# t_life = 50
+
+# # t_life << Dt, 找近似
+# t_life, logd_fit, l_cut, a = 1., -3, 1, .1; f_seed = 0.01
+
+# # M0 best
+t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
 # t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
 # t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
 
+t_life = 50
 # tests for t_life=1Myr, not matching
 # t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .4; f_seed = 1
 # t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .0; f_seed = 1
@@ -62,7 +71,10 @@ T = Ts[0][0]
 f_bsm = 1.
 n_base = n_base[0]
 
-# print('mean Dt:',np.mean((tz-T['t_col']))/Myr)
+print(np.median(T['z_col']))
+print('mean t_seed:',np.mean(T['t_col'])/Myr)
+print('mean Dt:',np.mean((tz-T['t_col']))/Myr)
+print('mean Dt:',np.mean((tz-t_from_z(35)))/Myr)
 
 i = 0
 Chi2_min = 1e10; find_min = False
@@ -109,6 +121,7 @@ T = Table(
 )
 
 MFname = z6datapre+'f{0:d}Phi_easyMF_z{1:d}'.format(int(abs(np.log10(f_seed))),z)
+MFname = z6datapre+'f{:d}Phi_easyMFt{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
@@ -142,7 +155,8 @@ Phi = dPhi_mesh/bin_wid
 
 Phi *= 1e9
 Phi_DO = Phi/corr_U14D20(bin_cen)
-Phi_DO = Phi/corr_M14D20(bin_cen)
+if corr=='M':
+    Phi_DO = Phi/corr_M14D20(bin_cen)
 Chi2 = np.nansum(pow( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err), 2))/(len(Phi_obs)-1)
 off_L = np.nanmax(abs( (np.log(Phi_DO) - np.log(Phi_obs))/np.log(Phi_err)))
 
@@ -151,9 +165,31 @@ T = Table(
     names=('bin_cen','Phi_obs','Phi_DO','Phi','Chi2')
 )
 
-LFname = z6datapre+'f{0:d}Phi_easyLF_z{1:d}'.format(int(abs(np.log10(f_seed))),z)
+LFname = z6datapre+'f{0:d}Phi_easyLFdot_z{1:d}'.format(int(abs(np.log10(f_seed))),z)
+LFname = z6datapre+'f{:d}Phi_easyLFdot_t{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
+            overwrite=True)
+
+
+# for spread plot
+z_mesh = kernelS_M1450_mesh(abin_lf, M_BH, l_cut)*l_cut
+z_mesh[z_mesh<lambda_0] = lambda_0
+Ps = integral(a,z_mesh/l_cut,lambda_0/l_cut)/I_toinf
+dPhi_mesh = np.nansum((Ps[:-1,:]-Ps[1:,:])*dn_MBH,axis=1)
+Phi = dPhi_mesh/dmag
+Phi *= 1e9
+Phi_DO = Phi/corr_U14D20(M1450)
+if corr=='M':
+    Phi_DO = Phi/corr_M14D20(bin_cen)
+
+T = Table(
+    [M1450,Phi_DO],
+    names=('M1450','Phi_DO')
+)
+LFname = z6datapre+'f{:d}Phi_easyLFt{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
+ascii.write(T, LFname,
+            formats={'M1450':'6.2f','Phi_DO':'4.2e'},
             overwrite=True)
 
 if np.nanmin([Chi2, Chi2_min]) == Chi2:

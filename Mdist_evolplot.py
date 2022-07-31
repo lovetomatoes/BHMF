@@ -2,24 +2,21 @@ from PYmodule import *
 from PYmodule.l_intg import *
 # analyse BHMF, ERDF from sampling in Mdist_evol
 # later plot hist file from Mdist_evol directly 
-prex = '../4pevol/distf1N5_05232116_'
-# prex = '../4pevol/distf1N7_05232217_'
-# prex = '../4pevol/distf1N7_05232217_'
-prex = '../4p/distf2N4_06221827_'
 
 T_seed = Ts[0][0]
 tz = t_from_z(6.)/Myr
-t_life = 19.6 # f_seed = 0.1
 t0 = np.min(T_seed['t_col']/Myr)
 # print(tz,t_life,t0);exit(0)
 
 # wli: paras must set the same as Mdist_evol
-t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
-
+prex = '../4p/distf1N5_07241632_'
+t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
+prex = '../4p/distf2N4_06221827_'
 t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
 
 # z=6 BH mass, λ, L_bol
 T_z6 = ascii.read(prex+'BHatz6.txt', guess=False, delimiter=' ')
+f_seedlabel = 'f%d'%abs(int(np.log10(f_seed)))
 
 M1, ls, L1 = T_z6['M1'], T_z6['ls'], T_z6['L1']
 
@@ -57,7 +54,7 @@ M1 = T_M.transpose()[-1]
 # plt.plot(zs,T_M[i], '--',c='black',lw=2)
 
 SMM1 = M1[M1>1e9]
-print('number of >1e9 MBH:',sum(M1>1e9))
+# print('number of >1e9 MBH:',sum(M1>1e9))
 # same as prev. specially for >1e9 SMBHs
 for i in range(len(SMM1)):
     len_series = np.argmax(T_M[M1>1e9][i]) + 1
@@ -90,9 +87,11 @@ for i in range(len(T_M)):
     ts = np.arange(tz,t0-t_life,-t_life)[:len_series]
     l1s = T_l[i][:len_series]
     # f_duty: Δt of λ>1 cycles, devided by total Δt
-    f_duty[i] = t_life*np.sum(l1s>1.)/(ts[0]-ts[-1])
-    f_2 += t_life * np.sum(l1s[ts>t_start]>1.)/(tz-t_start)
-print('duty cycle from z=10:',f_2/len(T_M))
+    l_crit = 1.
+    # l_crit = l_cut
+    f_duty[i] = t_life*np.sum(l1s>l_crit)/(ts[0]-ts[-1])
+    f_2 += t_life * np.sum(l1s[ts>t_start]>l_crit)/(tz-t_start)
+print(f_seedlabel+' duty cycle l>{:.2f} from z=10: {:.3f}'.format(l_crit,f_2/len(T_M)))
 
 plt.scatter(M1,f_duty)
 plt.xscale('log')
@@ -121,7 +120,7 @@ for i in range(len(T_M)):
     hist, bin_edges = np.histogram(np.log10(l1s),bins=lbin,density=False)
     hist_M8 += hist/len_series/len(T_M)
 hist_M9 = np.zeros(len(lbin)-1)
-print(len(SMM1))
+print('SMBHs>1e9, #=%d with l at z=6:'%len(SMM1))
 print(T_l[M1>1e9].transpose()[-1])
 for i in range(len(SMM1)):
     len_series = np.argmax(T_M[M1>1e9][i]) + 1
