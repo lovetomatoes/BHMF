@@ -3,6 +3,41 @@ from PYmodule import *
 from PYmodule.l_intg import *
 from scipy.stats import norm, uniform
 
+for i in range(10):
+    print(i)
+    if i>5:
+        break
+    #     continue
+    print('carried')
+   
+print(i)
+
+# Wangg 2021 quasar grow to z=6?
+dt = (t_from_z(6)-t_from_z(7.642))/Myr
+print("dt = %.1f"%dt)
+for l in [.01, .1, 1]:
+    print("M=%.1e"%(np.exp(l*dt/45)*1.6e9))
+exit(0)
+
+print("{:.2e} {:.2e} {:.2e}".format(t_from_z(7.5)/20/Myr,t_from_z(7.4)/20/Myr,t_from_z(7.6)/20/Myr))
+exit(0)
+#Depth = {'NIRCam_deep':30.6,'NIRCam_med':29.7,'Roman_deep':29,'Roman_wide':27,'Euclid_deep':26,'Euclid_wide':24}
+z = 13
+print('NIRCam_deep: depth mag={:.1f},  number density limit = {:.1e}'.format(M_absolute(Depth['NIRCam_deep'],z), 1e9/Vc(Area['NIRCam_deep'],z,1)))
+exit(0)
+
+for z in np.arange(6,11):
+    print('z: ',z)
+    # print('depth mag: ', M_absolute(Depth['NIRCam_deep'],z))
+    # print('number density limit: ', 1e9/Vc(Area['NIRCam_deep'],z,1))
+    for label in ['NIRCam_deep','NIRCam_med','Roman_deep','Roman_wide','Euclid_deep','Euclid_wide']:
+        print('{:s}: depth mag={:.1f},  number density limit = {:.1e}'.format(label,M_absolute(Depth[label],z), 1e9/Vc(Area[label],z,1)))
+exit(0)
+
+A,N = 0.013, 11
+n = 1/Vc(A,13,1)
+print(n); exit(0)
+
 print((t_from_z(6)-t_from_z(10))/Myr)
 print(M1450_Lbol(1e46))
 print(Lbol_M1450(-26))

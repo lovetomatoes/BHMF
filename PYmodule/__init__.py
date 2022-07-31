@@ -59,6 +59,24 @@ Omega_L0 = 1 - Omega_m0
 h0 = .677
 H0 = h0*100*km/Mpc
 
+
+from astropy.cosmology import FlatLambdaCDM
+import astropy.units as u
+cosmo = FlatLambdaCDM(H0=h0*100 * u.km / u.s / u.Mpc, Tcmb0=2.725 * u.K, Om0=Omega_m0)
+
+def M_absolute(m_apparent,z):
+    dl = cosmo.luminosity_distance(z)
+    return m_apparent+2.5*np.log10((10/(dl.value*(10**6)))**2*(1+z))
+
+# comoving volumes
+def Vc(A_deg2,z,dz):
+    dp = cosmo.comoving_distance(z+dz/2.)
+    dm = cosmo.comoving_distance(z-dz/2.)
+    return 4*np.pi/3. * A_deg2/41253.* ( pow(dp.value,3) - pow(dm.value,3) )
+
+Area = {'NIRCam_deep':0.013,'NIRCam_med':0.053,'Roman_deep':40,'Roman_wide':2000,'Euclid_deep':40,'Euclid_wide':15000}
+Depth = {'NIRCam_deep':30.6,'NIRCam_med':29.7,'Roman_deep':29,'Roman_wide':27,'Euclid_deep':26,'Euclid_wide':24}
+
 t_Edd = 1./(4*pi*G/.4/c)
 fbol_1450 = 4.4
 

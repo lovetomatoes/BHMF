@@ -26,12 +26,26 @@ for z in zs:
     TM = ascii.read(fMname, guess=False, delimiter=' ')
     TL = ascii.read(fLname, guess=False, delimiter=' ')
 
+#   plot best and spread for BHMF/QLF at z
     y_best, med, spread = TM['y_best'], TM['med'], TM['spread']
     axm.fill_between(TM['Mx'],med-spread,med+spread,color='C%d'%(z%10),alpha=0.3,label=r'_$1\sigma$ Posterior Spread')
     axm.plot(TM['Mx'], y_best, color='C%d'%(z%10), label='z=%d'%z)
     y_best, med, spread = TL['y_best'], TL['med'], TL['spread']
     axl.fill_between(TL['M1450'],med-spread,med+spread,color='C%d'%(z%10),alpha=0.3,label=r'_$1\sigma$ Posterior Spread')
     axl.plot(TL['M1450'], y_best, color='C%d'%(z%10), label='z=%d'%z)
+    # QLF add detection limit
+    # labels = {'NIRCam_deep','NIRCam_med','Roman_deep','Roman_wide','Euclid_deep','Euclid_wide'}
+    styles = ['-','--','-.','.']
+    labels = ['Roman_wide','Euclid_wide','Roman_deep','Euclid_deep']
+    # area same, Roman_deep deeper than Euclid_deep
+    for ilabel in range(3):
+        label = labels[ilabel]
+        detection = [np.linspace(-30,M_absolute(Depth[label],z),num=50),np.linspace(1e9/Vc(Area[label],z,1),1e2,num=50)]
+        print('depth mag and number density limit: ',np.max(detection[0]),np.min(detection[1]))
+        # horizontal
+        axl.plot(detection[0],np.min(detection[1])*np.ones(50),styles[ilabel],color='C%d'%(z%10),)
+        # vertical
+        axl.plot(np.max(detection[0])*np.ones(50),detection[1],styles[ilabel],color='C%d'%(z%10))
 
     index = np.where(TM['Mx']>Mmin)
     My_best,My_med,My_std = TM['y_best'][index],TM['med'][index],TM['spread'][index]
