@@ -3,6 +3,8 @@ from PYmodule import *
 from PYmodule.l_intg import *
 from scipy.stats import norm, uniform
 
+print(Vc(2000,9.5,1)/1e9); exit(0)
+
 for i in range(10):
     print(i)
     if i>5:

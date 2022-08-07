@@ -51,10 +51,10 @@ t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
 
 # # M0 best
 t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
-# t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
+t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
 # t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
 
-t_life = 50
+# t_life = 50
 # tests for t_life=1Myr, not matching
 # t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .4; f_seed = 1
 # t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .0; f_seed = 1
@@ -181,15 +181,15 @@ Phi = dPhi_mesh/dmag
 Phi *= 1e9
 Phi_DO = Phi/corr_U14D20(M1450)
 if corr=='M':
-    Phi_DO = Phi/corr_M14D20(bin_cen)
+    Phi_DO = Phi/corr_M14D20(M1450)
 
 T = Table(
-    [M1450,Phi_DO],
-    names=('M1450','Phi_DO')
+    [M1450,Phi,Phi/corr_U14D20(M1450),Phi/corr_M14D20(M1450)],
+    names=('M1450','Phi','Phi_U','Phi_M')
 )
 LFname = z6datapre+'f{:d}Phi_easyLFt{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
 ascii.write(T, LFname,
-            formats={'M1450':'6.2f','Phi_DO':'4.2e'},
+            formats={'M1450':'6.2f','Phi':'4.2e','Phi_U':'4.2e','Phi_M':'4.2e'},
             overwrite=True)
 
 if np.nanmin([Chi2, Chi2_min]) == Chi2:

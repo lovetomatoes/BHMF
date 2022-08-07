@@ -4,11 +4,19 @@ from PYmodule import *
 # current plot directly, better write hist file later
 log10Ms = [11,12,13]
 typenames = ['H'+r'$_2$', 'H-H'+r'$_2$', 'H-H']
-
+matplotlib.rcParams['hatch.linewidth'] = .5 
+from matplotlib.ticker import LogLocator
 
 print('z:35, t_Hubble: ', t_from_z(35)/Myr)
 print('z:20, t_Hubble: ', t_from_z(25)/Myr)
 print('t_edd: ', t_Edd/Myr)
+
+abin_mf =  np.logspace(2,12,num=100) # default endpoint=True
+M_BH = abin_mf[:-1]*np.sqrt(abin_mf[1]/abin_mf[0])
+bin_left = abin_mf[:-1]; bin_right = abin_mf[1:]
+wid_mf = bin_right - bin_left
+dlog10M = np.log10(abin_mf[1]/abin_mf[0]) # print('Mbin ratio',abin_mf[1]/abin_mf[0])
+N_mf = len(abin_mf)-1
 
 # print(len(Ts[0])); exit(0)
 # Ts shape: [3][2]
@@ -70,7 +78,7 @@ for i_bsm in range(Nbsm):
     h_2 = np.zeros(N_mf)
     for iM in range(NM):
         T = Ts[iM][i_bsm]
-
+        # print(np.min(T['z_col']))
         T_H2 = T[T['Tg_max']<=T_tell] 
         T_isofail = T[np.logical_and(T['Tg_max']>T_tell, T['iso_col']==0)]
         T_isoOK =  T[np.logical_and(T['Tg_max']>T_tell, T['iso_col']==1)]
@@ -98,6 +106,7 @@ for i_bsm in range(Nbsm):
 
 # ----------- seperate by z_col ---------------
 # ----------- + cumulative over z ---------------
+fig, axs = plt.subplots(2, 2, sharex=True, sharey=True)
 h_allz = np.zeros(N_mf)
 for iz in range(Nz):
     h = np.zeros(N_mf)
@@ -109,23 +118,33 @@ for iz in range(Nz):
             hh = hh + hist*n_base[iM]/1e4
         h += hh*f_bsm[i_bsm]
     h_allz += h
+    # try colors: darkturquoise, hatched region not good
+    # axs[iz//2,iz%2].bar(x,h_allz/dlog10M,width=wid_mf,color='darkturquoise',alpha=.6,edgecolor=None,label=typenames[0])
+    # axs[iz//2,iz%2].bar(x,h/dlog10M, bottom=(h_allz-h)/dlog10M,width=wid_mf,edgecolor=None, hatch="//",alpha=0.0,label=typenames[0], linewidth=.5)
+    axs[iz//2,iz%2].bar(x,h/dlog10M, bottom=(h_allz-h)/dlog10M,width=wid_mf,edgecolor='k', color='darkorchid',alpha=0.6,label=typenames[0], linewidth=.5)
+    axs[iz//2,iz%2].bar(x,(h_allz-h)/dlog10M,width=wid_mf,color='lightseagreen',edgecolor='k',alpha=0.6,label=typenames[0],linewidth=.5)
+    # order matters!
+    # ax.yaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(10))
+    # ax.set_yscale('log')
+    axs[iz//2,iz%2].set_xscale('log'); axs[iz//2,iz%2].set_yscale('log')
+    axs[iz//2,iz%2].set_xlim(1e2,1e6); axs[iz//2,iz%2].set_ylim(1.e-8,1e-2)
+    axs[iz//2,iz%2].text(3e4,1e-3,'z='+str(int(zs[iz]))+r'$\to$'+str(int(zs[iz+1])),fontsize=10)
 
-    plt.figure(figsize=(10,5),dpi=400)
-    plt.bar(x,h_allz/dlog10M,width=wid_mf,color='C0',alpha=0.5,edgecolor=None,label=typenames[0])
-    plt.bar(x,h/dlog10M, bottom=(h_allz-h)/dlog10M,width=wid_mf,edgecolor=None, hatch="//",alpha=0.5,label=typenames[0])
-    # plt.bar(x,h_allz/dlog10M,width=wid_mf,color='C0',alpha=0.5,label=typenames[0])
-    # plt.bar(x,h/dlog10M, bottom=(h_allz-h)/dlog10M,width=wid_mf,edgecolor='black',hatch="//",alpha=0.5,label=typenames[0])
-    plt.tick_params(labelsize=fstick)
-    # s=r'$v_{bsm}=$'+str(i_bsm)+r'$\sigma$'
-    plt.xlabel(r'$\mathrm{M_{\bullet}}$'+r' $(M_{\odot})$',fontsize=fslabel)
-    plt.ylabel(r'$\mathrm{dn/d\logM~[Mpc^{-3}dex^{-1}]}$',fontsize=fslabel)
-    plt.xscale('log'); plt.yscale('log')
-    plt.text(1e5,1e-3,'z='+str(int(zs[iz]))+r'$\to$'+str(int(zs[iz+1])),fontsize=fslabel)
-    plt.xlim(1e2,1e6); plt.ylim(1.e-8,1e-2)
-    if i_bsm==0:
-        plt.legend(fontsize=fslegend,loc='best')
-    plt.tight_layout()
-    plt.savefig(figprefix+'eta'+str(int(10*eta))+'z'+str(int(zs[iz]))+'.png')
+
+    # axs[iz//2,iz%2].tick_params(which='minor', length=4, color='r')
+    locmajx = LogLocator(base=10,numticks=100) 
+    locminx = LogLocator(base=10,subs=np.arange(2, 10) * .1,numticks=100) # subs=(0.2,0.4,0.6,0.8)
+    locmajy = LogLocator(base=100,numticks=100) 
+    locminy = LogLocator(base=10,subs=np.arange(2, 10) * .1,numticks=100) # subs=(0.2,0.4,0.6,0.8)
+    axs[iz//2,iz%2].xaxis.set_major_locator(locmajx)
+    axs[iz//2,iz%2].xaxis.set_minor_locator(locminx)
+    axs[iz//2,iz%2].xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    axs[iz//2,iz%2].yaxis.set_major_locator(locmajy)
+    axs[iz//2,iz%2].yaxis.set_minor_locator(locminy)
+    axs[iz//2,iz%2].yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+
+fig.savefig('../seed.png',dpi=300,bbox_inches='tight')
+exit(0)
 
 # ----------- all z_col sample ---------------
 h_0 = np.zeros(N_mf)

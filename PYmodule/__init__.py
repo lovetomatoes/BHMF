@@ -76,6 +76,8 @@ def Vc(A_deg2,z,dz):
 
 Area = {'NIRCam_deep':0.013,'NIRCam_med':0.053,'Roman_deep':40,'Roman_wide':2000,'Euclid_deep':40,'Euclid_wide':15000}
 Depth = {'NIRCam_deep':30.6,'NIRCam_med':29.7,'Roman_deep':29,'Roman_wide':27,'Euclid_deep':26,'Euclid_wide':24}
+Area['LSST_deep'] = 18000
+Depth['LSST_deep'] = 27.5
 
 t_Edd = 1./(4*pi*G/.4/c)
 fbol_1450 = 4.4
@@ -98,6 +100,7 @@ fstxt = 20
 fslabel = 25
 fstitle = 20
 fslegend = 20
+lw = 2
 
 # color map
 my_cmap = plt.get_cmap("viridis")
@@ -329,6 +332,57 @@ def LF(l): # dn/dlogL in Mpc^-3 dex^-1
     t = (np.log10(l) - np.log10(L_1)) / (np.log10(L_2) - np.log10(L_1))
     return Phi_L_star/( pow(l/L_star,-(alpha+1)) + pow(l/L_star,-(beta+1)) ) * (2*(1-t)+3*t) 
 
+def LF_Gal(x,z,mod='Schechter'): # dn/dmag in Gpc^-3 mag^-1
+    if z==7:
+        if mod == 'Schechter':     
+            M=-20.49
+            phi = 10**(-3.14)
+            a=-1.88
+            return np.log(10)/2.5*phi*(10**(0.4*(M-x)))**(a+1.0)*np.exp(-10**(0.4*(M-x)))*1e9
+        if mod == 'DPL':
+            Phi = 10**(-3.05)
+            A=-1.89
+            B=-3.81
+            MM=-20.12
+            return np.log(10)/2.5*Phi/(10**(0.4*(A+1)*(x-MM)) + 10**(0.4*(B+1)*(x-MM))) * 1e9
+    if z==8:
+        if mod == 'Schechter':
+            M=-20.12
+            phi = 10**(-3.35)
+            a=-2.02
+            return np.log(10)/2.5*phi*(10**(0.4*(M-x)))**(a+1.0)*np.exp(-10**(0.4*(M-x)))*1e9
+        if mod == 'DPL':
+            Phi = 3.3e-4
+            A=-2.04
+            B=-4.26
+            MM=-20.02
+            return np.log(10)/2.5*Phi/(10**(0.4*(A+1)*(x-MM)) + 10**(0.4*(B+1)*(x-MM))) * 1e9
+    if z==9:
+        if mod == 'Schechter':
+            M = -21.29
+            Phi = 10**(-4.88)
+            a = -2.35
+            return np.log(10)/2.5*Phi*(10**(0.4*(M-x)))**(a+1.0)*np.exp(-10**(0.4*(M-x)))*1e9
+        if mod == 'DPL':
+            Phi = 10**(-3.7)
+            A=-2.1
+            B=-3.34
+            M=-19.62
+            return np.log(10)/2.5*Phi/(10**(0.4*(A+1)*(x-M)) + 10**(0.4*(B+1)*(x-M))) * 1e9
+    if z==10:
+        if mod == 'Schechter':     
+            M=-22.81
+            phi = 10**(-6.56)
+            a=-2.35
+            return np.log(10)/2.5*phi*(10**(0.4*(M-x)))**(a+1.0)*np.exp(-10**(0.4*(M-x)))*1e9
+        if mod == 'DPL':
+            Phi = 10**(-4.44)
+            A=-2.1
+            B=-2.74
+            MM=-19.60
+            return np.log(10)/2.5*Phi/(10**(0.4*(A+1)*(x-MM)) + 10**(0.4*(B+1)*(x-MM))) * 1e9
+
+
 def LF_M1450(M,z=6,W10=False): # dn/dmag in Mpc^-3 mag^-1
     if z==6: 
         # Matsuoka 2018
@@ -550,7 +604,7 @@ dlog10M0 = np.log10(M0s[1]/M0s[0])
 eps = 1e-5
 
 # LF bins
-abin_lf = np.linspace(-30,-21.5,num=100)
+abin_lf = np.linspace(-32,-15,num=171)
 dmag = abin_lf[1]-abin_lf[0]
 L_left = abin_lf[:-1]; L_right = abin_lf[1:]
 M1450  = (L_left+L_right)/2.
