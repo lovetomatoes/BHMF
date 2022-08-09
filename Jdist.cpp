@@ -129,7 +129,7 @@ void set_cosmo(double z, int i_cosmo=0){
     string line, k_str, Pk_str, name;
     // name = (i_cosmo==0)?"./hmf_Pk.dat":"./Power_EH99.dat"; 
     // Nk = (i_cosmo==0)?567:1001;
-    name = "../data/hmf_Pk.dat";
+    name = "../data/hmf_Pk_Planck15.dat";
     Nk = 567;
     ifstream inFile(name); if (!inFile) cout<<"read error\n";
     int j = 0;
@@ -142,30 +142,6 @@ void set_cosmo(double z, int i_cosmo=0){
     }
     inFile.close();
 
-
-    if (i_cosmo ==0 or i_cosmo==3){
-        double krat, dk, dk_vol, Power, xk, sigma_M, sigma_M_0, xx, radius;
-        radius = 8*Mpc/h;
-        xk           =    1e-8/Mpc;
-        krat         =    1.001;
-        sigma_M      =    0.;
-        sigma_M_0    =    1e-99;
-        while (abs(sigma_M/sigma_M_0-1.)>1.0e-12){
-            dk = xk*(krat-1.);
-            xk += dk;
-            dk_vol = xk * xk * dk / (2.*pi*pi);
-            xx = xk * radius;
-            linear(xk_a,Pk_a,Nk,xk,Power);
-            Power=Power/pow(xk,3)*2.*pi*pi;
-        // mass variance 1
-            sigma_M_0 = sigma_M;
-            sigma_M   += Power * W(xx) * W(xx) * dk_vol;
-        }
-        // normalized to sigma_8; no need already consistent
-        // for (j=0;j<Nk;j++){
-            // Pk_a[j] *= sigma_8/sigma_M ; 
-        // }
-    }
     if (i_cosmo==0){
         double krat, dk, dk_vol, Power, xk, sigma_M, sigma_M_0, xx, radius;
         radius = 8*Mpc/h;
@@ -184,6 +160,9 @@ void set_cosmo(double z, int i_cosmo=0){
             sigma_M_0 = sigma_M;
             sigma_M   += Power * W(xx) * W(xx) * dk_vol;
         }
+        // normalized to sigma_8; no need already consistent
+        for (j=0;j<Nk;j++) Pk_a[j] *= sigma_8/sigma_M;
+        // consistent with cosmo para sigma8= 0.8159
         printf("sigma8 for icosmo=0 is :%4.3e\n", sqrt(sigma_M));
     }
 }
