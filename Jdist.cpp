@@ -21,7 +21,7 @@ double pi = 3.14159265358979, G=6.67e-8, c=2.9979245e10,
         pc=3.0856775e18, kpc = 1.e3*pc, Mpc=1.e6*pc;
 
 double xk_a[2000], Pk_a[2000];
-static double h, Om, OL, Ob, sigma_8, Tcmb0, z_eq, rho_0, rho_m, 
+static double h, Om, OL, Ob, sigma_8, Tcmb0, z_eq, rho_0, rho_m,
     z1, Om_z, OL_z, D_z, d_c, d, ratio_d, nu, nu_p, tff_6, M_ac,
     // rho_0=1.9e-29*(h*h),
     // rho_m=8.534251287809294e10*Ms*(h*h)/pow(Mpc,3),
@@ -97,8 +97,8 @@ void linear(double* xa, double* ya, int m, double x, double& y){
 
 void set_cosmo(double z, int i_cosmo=0){
     //****************** cosmo paras ******************
-    // i_cosmo=0 : Planck 2015 (cosmo paras & normalized Pk from hmf package)
-    // i_cosmo=1 : Iliev 2003 default paras ( (ns, sigma8)/power spectrum are not specified...)
+    // i_cosmo=0 : Planck 2015 EH98 Carroll 92
+    // i_cosmo=1 : Planck 2020 CAMB Carroll 92
     if (i_cosmo==0) {
         h=0.677;
         Om=0.307;
@@ -106,6 +106,12 @@ void set_cosmo(double z, int i_cosmo=0){
         Tcmb0=2.725;
         z_eq = 2.5e4*Om*h*h/pow(Tcmb0/2.7,4);
         sigma_8 = 0.8159;
+    }
+    if (i_cosmo==1) {
+        h=0.6732;
+        Om=0.3158;
+        Ob = 0.156*Om;
+        sigma_8 = 0.8120;
     }
     OL=1.0-Om;
     rho_0 = 3*pow(100.*h*km/Mpc,2)/(8.*pi*G);
@@ -127,10 +133,10 @@ void set_cosmo(double z, int i_cosmo=0){
     nu_p = nu * sqrt(0.707);
     //**************** store Power Spectrum array ***************
     string line, k_str, Pk_str, name;
-    // name = (i_cosmo==0)?"./hmf_Pk.dat":"./Power_EH99.dat"; 
-    // Nk = (i_cosmo==0)?567:1001;
-    name = "../data/hmf_Pk_Planck15.dat";
+    // i_cosmo==0
+    name = "../data/hmf_Pk_Planck15_EH98.dat";
     Nk = 567;
+    if (i_cosmo==1) name = "../data/hmf_Pk_Planck20_CAMB.dat";
     ifstream inFile(name); if (!inFile) cout<<"read error\n";
     int j = 0;
     getline(inFile,line); //skipping 1st row in case it is column name line
@@ -142,29 +148,28 @@ void set_cosmo(double z, int i_cosmo=0){
     }
     inFile.close();
 
-    if (i_cosmo==0){
-        double krat, dk, dk_vol, Power, xk, sigma_M, sigma_M_0, xx, radius;
-        radius = 8*Mpc/h;
-        xk           =    1e-8/Mpc;
-        krat         =    1.001;
-        sigma_M      =    0.;
-        sigma_M_0    =    1e-99;
-        while (abs(sigma_M/sigma_M_0-1.)>1.0e-12){
-            dk = xk*(krat-1.);
-            xk += dk;
-            dk_vol = xk * xk * dk / (2.*pi*pi);
-            xx = xk * radius;
-            linear(xk_a,Pk_a,Nk,xk,Power);
-            Power=Power/pow(xk,3)*2.*pi*pi;
-        // mass variance 1
-            sigma_M_0 = sigma_M;
-            sigma_M   += Power * W(xx) * W(xx) * dk_vol;
-        }
-        // normalized to sigma_8; no need already consistent
-        for (j=0;j<Nk;j++) Pk_a[j] *= sigma_8/sigma_M;
-        // consistent with cosmo para sigma8= 0.8159
-        printf("sigma8 for icosmo=0 is :%4.3e\n", sqrt(sigma_M));
+    double krat, dk, dk_vol, Power, xk, sigma_M, sigma_M_0, xx, radius;
+    radius = 8*Mpc/h;
+    xk           =    1e-8/Mpc;
+    krat         =    1.001;
+    sigma_M      =    0.;
+    sigma_M_0    =    1e-99;
+    while (abs(sigma_M/sigma_M_0-1.)>1.0e-12){
+        dk = xk*(krat-1.);
+        xk += dk;
+        dk_vol = xk * xk * dk / (2.*pi*pi);
+        xx = xk * radius;
+        linear(xk_a,Pk_a,Nk,xk,Power);
+        Power=Power/pow(xk,3)*2.*pi*pi;
+    // mass variance 1
+        sigma_M_0 = sigma_M;
+        sigma_M   += Power * W(xx) * W(xx) * dk_vol;
     }
+    // // normalized to sigma_8; no need already consistent
+    // for (j=0;j<Nk;j++) Pk_a[j] *= sigma_8/sigma_M;
+    // // consistent with cosmo para sigma8= 0.8159
+    printf("sigma8 for icosmo=0 is :%10.4f\n", sqrt(sigma_M));
+
 }
 
 // return Sigma_M = sigma(M)^2
@@ -283,13 +288,13 @@ int main(){
     //********** use file hmf_Pk.dat to compare w/ hmf ***************//
     double n_ST;
     double sigma_M_1, sigma_M_2, d_sigma_M_2, fsigma;
-    double z = 6;
-    set_cosmo(z);
+    double z = 17;
+    set_cosmo(z,1);
     double nu_p = nu * sqrt(0.707);
     // 只看Mass_2
-    double Mass_2 = 1e11*Ms; 
+    double Mass_2 = 1e6*Ms; 
     int Nrat = 1000;
-    double qrat = pow(10., 1./double(Nrat));
+    double qrat = pow(1e7, 1./double(Nrat));
     double dlog10M = log10(qrat), n_tot=0.;
     file.open("./dnSTdM_z"+to_string(int(z))+"cpp.txt", ios::out | ios::trunc);
     file<<setw(15)<<"M"<<setw(15)<<"n_ST"<<endl;
