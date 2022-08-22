@@ -34,8 +34,10 @@ a = -.7
 
 lambda_0 = 0.01 # starting point of lambda; x0 now changable
 x0 = 0.01 # integration of l/l_cut, starting point; previous context
-f_seed = .01
 t_life = 50
+
+f_seed = .01
+corr = 'U'
 
 l_mean, a_mean = 0.6, 0.
 sigma_l, sigma_a = .4, .3
@@ -97,7 +99,7 @@ alpha_T = 2.324e4
 
 fstick = 20
 fstxt = 20
-fslabel = 25
+fslabel = 23
 fstitle = 20
 fslegend = 20
 lw = 2

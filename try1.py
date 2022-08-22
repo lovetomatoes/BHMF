@@ -3,16 +3,25 @@ from PYmodule import *
 from PYmodule.l_intg import *
 from scipy.stats import norm, uniform
 
-print(Vc(2000,9.5,1)/1e9); exit(0)
+# np.logical_and: only 2 array as input
+a = np.arange(10)
+b = np.arange(10)*2
+c = np.arange(10)*3
+print(np.logical_and(1<a,a<3))
+print(np.logical_and(1<b,b<5))
+print(np.logical_and(1<a,a<3,a>5))
+print(np.logical_and(1<a,a<3))
+exit(0)
+# print(Vc(2000,9.5,1)/1e9); exit(0)
 
 for i in range(10):
     print(i)
-    if i>5:
+    if i>8:
         break
     #     continue
     print('carried')
    
-print(i)
+print(i); exit(0)
 
 # Wangg 2021 quasar grow to z=6?
 dt = (t_from_z(6)-t_from_z(7.642))/Myr

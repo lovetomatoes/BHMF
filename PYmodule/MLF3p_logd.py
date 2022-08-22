@@ -11,7 +11,7 @@ f_bsm = 1.
 n_base = n_base[0]
 
 
-def lnlike(theta,t_life=t_life,corr='U'):
+def lnlike(theta,t_life=t_life):
     logd_fit, l_cut, a = theta
     d_fit = pow(10., logd_fit)
     t_life *= Myr
