@@ -7,6 +7,7 @@ from astropy.io import ascii
 from astropy.table import Table, vstack
 import os
 import sys
+from matplotlib.ticker import LogLocator,LinearLocator,MultipleLocator,AutoLocator,FixedLocator
 
 from scipy.stats import *
 import time
