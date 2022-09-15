@@ -77,8 +77,8 @@ def Vc(A_deg2,z,dz):
     dm = cosmo.comoving_distance(z-dz/2.)
     return 4*np.pi/3. * A_deg2/41253.* ( pow(dp.value,3) - pow(dm.value,3) )
 
-Area = {'NIRCam_deep':0.013,'NIRCam_med':0.053,'Roman_deep':40,'Roman_wide':2000,'Euclid_deep':40,'Euclid_wide':15000}
-Depth = {'NIRCam_deep':30.6,'NIRCam_med':29.7,'Roman_deep':29,'Roman_wide':27,'Euclid_deep':26,'Euclid_wide':24}
+Area = {'NIRCam_deep':0.013,'NIRCam_med':0.053,'Roman_deep':40,'Roman wide':2000,'Euclid_deep':40,'Euclid wide':15000}
+Depth = {'NIRCam_deep':30.6,'NIRCam_med':29.7,'Roman_deep':29,'Roman wide':27,'Euclid_deep':26,'Euclid wide':24}
 Area['LSST_deep'] = 18000
 Depth['LSST_deep'] = 27.5
 

@@ -51,10 +51,10 @@ t_life, logd_fit, l_cut, a = 19.6, -2.96, .87, .12; f_seed = 0.1
 
 # # M0 best
 t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
-t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
+# t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
 # t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
 
-# t_life = 50
+t_life = 14
 # tests for t_life=1Myr, not matching
 # t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .4; f_seed = 1
 # t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .0; f_seed = 1
