@@ -8,6 +8,7 @@ from astropy.table import Table, vstack
 import os
 import sys
 from matplotlib.ticker import LogLocator,LinearLocator,MultipleLocator,AutoLocator,FixedLocator
+from matplotlib.legend_handler import HandlerLine2D, HandlerTuple
 
 from scipy.stats import *
 import time
@@ -71,6 +72,10 @@ def M_absolute(m_apparent,z):
     dl = cosmo.luminosity_distance(z)
     return m_apparent+2.5*np.log10((10/(dl.value*(10**6)))**2*(1+z))
 
+def m_apparent(M_absolute,z):
+    dl = cosmo.luminosity_distance(z)
+    return M_absolute-2.5*np.log10((10/(dl.value*(10**6)))**2*(1+z))
+
 # comoving volumes
 def Vc(A_deg2,z,dz):
     dp = cosmo.comoving_distance(z+dz/2.)
@@ -78,7 +83,7 @@ def Vc(A_deg2,z,dz):
     return 4*np.pi/3. * A_deg2/41253.* ( pow(dp.value,3) - pow(dm.value,3) )
 
 Area = {'NIRCam_deep':0.013,'NIRCam_med':0.053,'Roman_deep':40,'Roman wide':2000,'Euclid_deep':40,'Euclid wide':15000}
-Depth = {'NIRCam_deep':30.6,'NIRCam_med':29.7,'Roman_deep':29,'Roman wide':27,'Euclid_deep':26,'Euclid wide':24}
+Depth = {'NIRCam_deep':30.6,'NIRCam_med':29.7,'Roman_deep':29,'Roman wide':27,'Euclid_deep':26,'Euclid wide':23}
 Area['LSST_deep'] = 18000
 Depth['LSST_deep'] = 27.5
 
@@ -306,6 +311,8 @@ def L_M(M,Edd_ratio): # L_bol from M_BH in Msun
     return 1.25e38*Edd_ratio*M
 def M_L(L,Edd_ratio): # M_BH in Msun from L_bol
     return L/(1.25e38*Edd_ratio)
+def E_ML(M,L):
+    return L/(1.25e38*M)
 
 def Mdot2M(Mdot):
     eta = 1

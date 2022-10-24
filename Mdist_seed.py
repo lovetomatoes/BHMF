@@ -143,7 +143,13 @@ for iz in range(Nz):
     axs[iz//2,iz%2].yaxis.set_minor_locator(locminy)
     axs[iz//2,iz%2].yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 
-fig.savefig('../seed.png',dpi=300,bbox_inches='tight')
+
+# axs[0,0].set_ylabel(r'$\mathrm{\Phi_{M_\bullet}^{seed}~(Mpc^{-3}dex^{-1})}$',fontsize=11)
+# axs[1,0].set_ylabel(r'$\mathrm{\Phi_{M_\bullet}^{seed}~(Mpc^{-3}dex^{-1})}$',fontsize=11)
+# axs[1,0].set_xlabel(r'$\mathrm{{M_\bullet}~(M_\odot)}$',fontsize=11)
+# axs[1,1].set_xlabel(r'$\mathrm{{M_\bullet}~(M_\odot)}$',fontsize=11)
+
+fig.savefig(figpre+'seed.pdf',dpi=300,bbox_inches='tight')
 exit(0)
 
 # ----------- all z_col sample ---------------
