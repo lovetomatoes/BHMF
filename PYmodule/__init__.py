@@ -37,6 +37,7 @@ a = -.7
 lambda_0 = 0.01 # starting point of lambda; x0 now changable
 x0 = 0.01 # integration of l/l_cut, starting point; previous context
 t_life = 50
+t_life = 1000
 
 f_seed = .01
 corr = 'U'
@@ -296,6 +297,10 @@ def kernel_M1450(M1450, MBH, mu, sigma_dex):
     lbd = Lbol_M1450(M1450)/(1.25e38*MBH)
     return np.log(lbd/mu) / (sigma_dex*np.log(10.)*math.sqrt(2.))
 
+def ave_over(arr,n):
+    # -1: value inferred from the length of the array and remaining dimensions.
+    return np.mean(arr[:(len(arr)//n)*n].reshape(-1,n), axis=1)
+
 # Willot+ 2010
 def MF(M,z=6):
     alpha = -1.03
@@ -303,8 +308,8 @@ def MF(M,z=6):
     M_star = 2.24e9
     if z==6:
         return Phi_star*pow(M/M_star,alpha)*np.exp(-M/M_star)
-    if z==4:
-        M_star *= 10
+    else:
+        M_star *= pow(10,.5*(6-z))
         return Phi_star*pow(M/M_star,alpha)*np.exp(-M/M_star)
 
 def L_M(M,Edd_ratio): # L_bol from M_BH in Msun
@@ -455,6 +460,7 @@ def f_obsc_U14(logLx,z): # Ueda 14; 22< log NH < 24 fraction; as a func of Lx
     beta = .24
     phi = min( phimax, max(phi4375_z - beta*(logLx-43.75), phimin))
     f_obsc_sum = phi # sum over 22< log NH < 24 range
+    print(0.72,phi4375_z)
     return f_obsc_sum
 
 # constant obscured fraction; motivated by Vito+ 2018

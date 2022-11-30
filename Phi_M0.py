@@ -15,7 +15,7 @@ t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703;
 # t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
 # t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
 
-# t_life = 10
+t_life = 10
 
 x0 = lambda_0/l_cut
 I_toinf = integral_toinf(a,x0)
@@ -156,4 +156,4 @@ ascii.write(T, LFname,
             formats={'M1450':'6.2f','Phi_DO':'4.2e'},
             overwrite=True)
 
-# print('time=',time.time()-t1)
+print('time=',time.time()-t1)

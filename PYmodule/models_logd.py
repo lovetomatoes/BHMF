@@ -57,8 +57,8 @@ def model(theta, z = int(6), f_seed=f_seed, corr='U',l_cut= l_cut, a=a):
     xs = M_BH[index][::len(index[0])//10]
     ys = np.log10( MF(xs)  ) # Willott 2010 as data
     y_model = np.log10( (dn_MBH/dlog10M)[index][::len(index[0])//10] )
-    mf_err = pow(np.log10(xs)-8.5,2)/3. + .2 # from 0.2 to 0.95
-    Chi2_M =  np.sum( pow((ys - y_model)/mf_err, 2))
+    y_err = pow(np.log10(xs)-8.5,2)/3. + .2 # from 0.2 to 0.95
+    Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
 
 # # --------- Luminosity Function ---------
     z_mesh = kernelS_M1450_mesh(bin_edg, M_BH, l_cut)
@@ -68,11 +68,12 @@ def model(theta, z = int(6), f_seed=f_seed, corr='U',l_cut= l_cut, a=a):
     Phi = dPhi_mesh/bin_wid
     Phi *= 1e9
     Phi_DO = Phi/corr_U14D20(bin_cen)
-    Phi_DO = Phi/corr_M14D20(bin_cen)
+    if corr=='M':
+        Phi_DO = Phi/corr_M14D20(bin_cen)
     ys = np.log10(Phi_obs)
     y_model = np.log10(Phi_DO)
-    lf_err = np.log10(Phi_err)
-    Chi2_L = np.sum( pow((ys - y_model)/lf_err, 2))
+    y_err = np.log10(Phi_err)
+    Chi2_L = np.sum( pow((ys - y_model)/y_err, 2))
     # print('in model -.5*(Chi2_L+Chi2_M)',-.5*(Chi2_L+Chi2_M))
 
     # for spread plot

@@ -3,6 +3,69 @@ from PYmodule import *
 from PYmodule.l_intg import *
 from scipy.stats import norm, uniform
 
+logds = np.arange(-3.,-.2,0.1)
+ls = np.arange(0.3,1.4,0.05)
+aas = np.arange(-0.3,0.31,.03)
+ts = np.array([3,5,10])
+N1=len(ts); N2=len(logds); N3=len(ls); N4=len(aas)
+N_tot=N1*N2*N3*N4
+print(N_tot); exit(0)
+
+# N1=N2=N3=N4=3
+# N = N1*N2*N3*N4
+# i = 0
+# b = []
+# for i1 in range(N1):
+#     for i2 in range(N2):
+#         for i3 in range(N3):
+#             for i4 in range(N4):
+#                     b.append(i-1)
+#                     print(i//N4//N3%N2, 'i2=',i2)
+#                     print(i//N4//N3//N2%N1, 'i1=',i1)
+#                     i += 1
+# exit(0)
+
+# # 3p for fixed t_life defined in PY/init
+# from PYmodule.MLF3p_logd import *
+# from PYmodule.models_3p import *
+# logd_fit, l_cut, a = -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
+# logd_fit, l_cut, a = -2, .87, .1; f_seed = 0.01
+# logd_fit, l_cut, a = -2, 1.5, .1; f_seed = 0.01
+# # best for t=10Myr, 2000 steps:
+# logd_fit, l_cut, a = -2.1950384,   0.97846296,  0.26561549
+# # t_life try ini:
+# logd_fit, l_cut, a = -2.,   1.,  0.3; f_seed = 0.01
+
+# print('t_life, d_fit, l_cut, a,  f_seed, x0, logM0 = ', 
+#        t_life,', ',10**logd_fit,', ', l_cut,', ',a,', ', f_seed,', ', x0,', ', logM0,', ')
+# x = (logd_fit, l_cut, a)
+# print('f_seed:', f_seed,'t_life:',t_life)
+# print('MLF3p_logd lnlike',lnlike(x))
+# print('MLF3p_logd lnprobab',lnprobab(x))
+# print('modles_3p lnlike',-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+# print('modles_3p Chi2=',     model(x)['Chi2_M']  +   model(x)['Chi2_L'])
+# exit(0)
+
+from PYmodule.MLF4p_logd import *
+from PYmodule.models_logd import *
+# best fits: M0r8f* 5000 steps
+t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703; f_seed = 0.01
+# t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
+# t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
+
+# t_life, logd_fit, l_cut, a = 18.76,  -1.26,   0.87,  0.2; f_seed = 0.01
+t_life, logd_fit, l_cut, a = 100, -2.,  1., 0.2; f_seed = 0.01
+for t_life in [50,100,150]:
+    x = (t_life, logd_fit, l_cut, a)
+    like = lnlike(x); prob = lnprobab(x)
+    print('f_seed:', f_seed, 't_life',t_life)
+    # print('MLF4p_logd lnlike',like)
+    # print('MLF4p_logd lnprobab',prob)
+    # print('modles_logd lnlike',-.5*model(x)['Chi2_M'] - .5*model(x)['Chi2_L'])
+    print('like, prob',  -2*like, -2*prob)
+
+
+exit(0)
 # np.logical_and: only 2 array as input
 a = np.arange(10)
 b = np.arange(10)*2

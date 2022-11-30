@@ -54,14 +54,20 @@ t_life, logd_fit, l_cut, a = 18.7555167,  -1.2574505,   0.87372563,  0.20389703;
 # t_life, logd_fit, l_cut, a = 20.07157851, -2.98140382,  0.89453609,  0.12195823; f_seed = 0.1
 # t_life, logd_fit, l_cut, a = 23.12675104, -2.97342483,  0.95753445, -0.06535641; f_seed = 1
 
-t_life = 14
+logd_fit, l_cut, a = -2.1950384,   0.97846296,  0.26561549; f_seed = 0.01
+t_life = 10
+
+logd_fit, l_cut, a = -2.,   1.,  0.3; f_seed = 0.01
+t_life = 5
 # tests for t_life=1Myr, not matching
 # t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .4; f_seed = 1
 # t_life, logd_fit, l_cut, a = 1, -.3,  1.5, .0; f_seed = 1
 
+t_life, logd_fit, l_cut, a = 100, -2.,  1., 0.2; f_seed = 0.01
+
 x0 = lambda_0/l_cut
 I_toinf = integral_toinf(a,x0)
-
+# print('I_toinf',I_toinf); exit(0)
 d_fit = pow(10.,logd_fit)
 print('t_life, d_fit, l_cut, a,  f_seed, x0, logM0 = ', 
 t_life,', ',d_fit,', ', l_cut,', ',a,', ', f_seed,', ', x0,', ', logM0,', ')
@@ -70,6 +76,10 @@ t_life *= Myr
 T = Ts[0][0]
 f_bsm = 1.
 n_base = n_base[0]
+T_stay = T[:-int(f_seed*len(T))]
+# add seed M_BHs 
+hist_seed, bin_edges = np.histogram(T_stay['Mstar0'],bins=abin_mf,density=False)
+dn_seed = hist_seed*n_base*f_bsm/len(T)
 
 print(np.median(T['z_col']))
 print('mean t_seed:',np.mean(T['t_col'])/Myr)
@@ -115,13 +125,36 @@ consv_ratio = np.nansum(dn_MBH)/(n_base*f_seed)
 # if consv_ratio<.9:
 #     print('conserved fraction=%.10f'%consv_ratio)
 
+print('consv_ratio',consv_ratio)
+
+PhiM_growth  =   dn_MBH/dlog10M
+
+# # total BHMF
+# # average every n values
+# n = 5
+# M_BH         =    ave_over( M_BH,n); 
+# PhiM_growth  =    ave_over( PhiM_growth, n)
+# PhiM_tot     =    ave_over( (dn_MBH+dn_seed)/dlog10M, n)
+# dn_MBH       =    ave_over( dn_MBH,n); 
+
+# T_tot = Table(
+#     [M_BH, PhiM_growth, PhiM_tot, MF(M_BH,6)],
+#     names=('M_BH','PhiM_growth','PhiM_tot','PhiM_obs')
+# )
+# MFname = './totBHMFz{:d}'.format(z)
+# ascii.write(T_tot,
+#             MFname,
+#             formats={'M_BH':'4.2e','y_growth':'4.2e','y_tot':'4.2e','y_obs':'4.2e'},
+#             overwrite=True)
+# exit(0)
+
 T = Table(
-    [M_BH, dn_MBH/dlog10M, MF(M_BH)],
+    [M_BH, PhiM_growth, MF(M_BH)],
     names=('M_BH','Phi','W10_MF')
 )
 
 MFname = z6datapre+'f{0:d}Phi_easyMF_z{1:d}'.format(int(abs(np.log10(f_seed))),z)
-MFname = z6datapre+'f{:d}Phi_easyMFt{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
+MFname = z6datapre+'f{:d}Phi_easyMF3pt{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
 ascii.write( Table([np.log10(T['M_BH']), T['Phi'], T['W10_MF']],
             names=['M_BH','Phi','W10_MF']),
             MFname,
@@ -136,7 +169,7 @@ off_M = np.max(abs(np.log(T['Phi']/T['W10_MF'])[index]))
 # 10 N_M in 1e7-1e10 range, plus 12 N_L
 index = np.where(np.logical_and(1e7<M_BH,M_BH<1e10))
 xs = M_BH[index][::len(index[0])//10]
-ys = np.log10( MF(xs)  ) # Willott 2010 30 points as data
+ys = np.log10( MF(xs)  ) # Willott 2010 as data
 y_model = np.log10( (dn_MBH/dlog10M)[index][::len(index[0])//10] )
 y_err = pow(np.log10(xs)-8.5,2)/3. + .2 # from 0.2 to 0.95
 Chi2_M =  np.sum( pow((ys - y_model)/y_err, 2))
@@ -166,7 +199,7 @@ T = Table(
 )
 
 LFname = z6datapre+'f{0:d}Phi_easyLFdot_z{1:d}'.format(int(abs(np.log10(f_seed))),z)
-LFname = z6datapre+'f{:d}Phi_easyLFdot_t{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
+LFname = z6datapre+'f{:d}Phi_easyLF3pdot_t{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
 ascii.write(T, LFname,
             formats={'bin_cen':'6.2f','Phi_obs':'4.2e','Phi_DO':'4.2e','Phi':'4.2e','Chi2':'4.2e'},
             overwrite=True)
@@ -187,7 +220,8 @@ T = Table(
     [M1450,Phi,Phi/corr_U14D20(M1450),Phi/corr_M14D20(M1450)],
     names=('M1450','Phi','Phi_U','Phi_M')
 )
-LFname = z6datapre+'f{:d}Phi_easyLFt{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
+LFname = z6datapre+'f{:d}Phi_easyLF3pt{:d}'.format(int(abs(np.log10(f_seed))),int(t_life/Myr))
+# LFname = './f{:d}Phi_easyLF_z{:d}'.format(int(abs(np.log10(f_seed))),z)
 ascii.write(T, LFname,
             formats={'M1450':'6.2f','Phi':'4.2e','Phi_U':'4.2e','Phi_M':'4.2e'},
             overwrite=True)
@@ -199,7 +233,8 @@ if np.nanmin([Chi2, Chi2_min]) == Chi2:
     LFname_min = LFname
 
 # print('Chi2_M=',Chi2_M,'Chi2_L=',Chi2)
-print('log_prob=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
+print('ln_like=',-.5*(Chi2_min*(len(Phi_obs)-1)+Chi2_M))
 #, LFname_min,'Chi2_min',Chi2_min, 'Chi2_M',Chi2_M, 'off_L',off_L, 'off_M',off_M)
 
-# print('time=',time.time()-t1)
+print(z)
+print('time=',time.time()-t1)

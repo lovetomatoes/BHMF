@@ -112,6 +112,18 @@ def lnprior(theta):
     else:
         return -np.inf
 
+# allow any t_life
+def lnprior_anytau(theta):
+    t_life, logd_fit, l_cut, a = theta
+    if -4<=logd_fit<=-.3 and l_cut>0.1:
+        # return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2 #- 0.5*((logd_fit+3.)/.1)**2
+        if logd_fit< -3.:
+            return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2 - 0.5*((logd_fit+3.)/.1)**2
+        else:
+            return 0.0 - 0.5*((l_cut-l_mean)/sigma_l)**2 - 0.5*((a-a_mean)/sigma_a)**2
+    else:
+        return -np.inf
+
 def lnprobab(theta):
     lp = lnprior(theta)
     # print('theta',theta)
